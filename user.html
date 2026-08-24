@@ -71,7 +71,6 @@
         <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
     </div>
 
-    <!-- แถบเมนู -->
     <div class="tabs print-hide">
         <button class="tab-btn active" onclick="switchTab('single', this)">🎟️ สร้าง QR (เพิ่มคน)</button>
         <button class="tab-btn" onclick="switchTab('bulk', this)">📊 สร้างจาก Excel</button>
@@ -82,12 +81,12 @@
 
     <div class="container">
         
-        <!-- แท็บ 1: สร้าง QR เดี่ยว (เพิ่มแขก Walk-in) -->
+        <!-- แท็บ 1: สร้าง QR เดี่ยว -->
         <div id="tab-single" class="tab-content active">
             <h2 style="color: var(--primary); text-align: center;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #666; margin-top: -10px;">สร้าง QR Code ใหม่ พร้อมบวกยอดจำนวนคนในสถิติ</p>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354 หรือเว้นว่างไว้)">
+            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (ตามที่ต้องการ)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
             <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
             <button class="action-btn" onclick="generateSingleQR()">✨ สร้างคิวอาร์โค้ด และเพิ่มเข้าระบบ</button>
@@ -99,7 +98,7 @@
             </div>
         </div>
 
-        <!-- แท็บ 2: สร้าง QR จาก Excel -->
+        <!-- แท็บ 2: สร้างจาก Excel -->
         <div id="tab-bulk" class="tab-content">
             <div class="print-hide">
                 <h2 style="color: var(--primary); text-align: center;">พิมพ์ QR Code จาก Excel</h2>
@@ -124,7 +123,7 @@
             </ul>
         </div>
 
-        <!-- แท็บ 4: จุดสแกนเข้างาน -->
+        <!-- แท็บ 4: สแกนเข้างาน -->
         <div id="tab-scanner" class="tab-content">
             <h2 style="color: var(--primary); text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
             
@@ -179,16 +178,6 @@
         let statsInterval; 
         const scannedGuests = new Set(); 
         let isProcessing = false;
-
-        // จัดรูปแบบรหัสพนักงานให้เป็น 6 หลักคงเลข 0 ด้านหน้า
-        function formatEmpId(val) {
-            if (!val || val === "-") return "-";
-            let str = val.toString().replace(/\uFFFD/g, '').trim();
-            if (/^\d+$/.test(str) && str.length < 6) {
-                str = str.padStart(6, '0');
-            }
-            return str;
-        }
 
         window.addEventListener('DOMContentLoaded', () => {
             const pass = prompt("🔐 กรุณาใส่รหัสผ่านผู้ดูแลระบบ (Admin Password):");
@@ -279,14 +268,10 @@
             }
         }
 
-        // ==========================================
-        // 🌟 1. สร้าง QR เดี่ยว + เพิ่มข้อมูลหน้างาน (Walk-in)
-        // ==========================================
         function generateSingleQR() {
-            const rawId = document.getElementById("s_empId").value || "-";
-            const id = formatEmpId(rawId);
-            const name = document.getElementById("s_empName").value;
-            const branch = document.getElementById("s_empBranch").value || "-";
+            const id = (document.getElementById("s_empId").value || "-").trim();
+            const name = document.getElementById("s_empName").value.trim();
+            const branch = (document.getElementById("s_empBranch").value || "-").trim();
             if(!name) { alert("กรุณาใส่ชื่อพนักงาน"); return; }
             
             const qrContainer = document.getElementById("single-qrcode");
@@ -331,9 +316,6 @@
             }, 500);
         }
 
-        // ==========================================
-        // 🌟 2. ระบบจัดการ Excel
-        // ==========================================
         function renderExcelData(json) {
             const container = document.getElementById("qrContainer");
             container.innerHTML = ""; 
@@ -343,9 +325,9 @@
             json.forEach((row, index) => {
                 if (index === 0 || !row || row.length === 0) return; 
                 
-                const empId = formatEmpId(row[0]);
-                const empName = row[1] ? row[1].toString().replace(/\uFFFD/g, '').trim() : "-";
-                const empBranch = row[2] ? row[2].toString().replace(/\uFFFD/g, '').trim() : "ไม่ระบุสาขา"; 
+                const empId = row[0] ? row[0].toString().trim() : "-";
+                const empName = row[1] ? row[1].toString().trim() : "-";
+                const empBranch = row[2] ? row[2].toString().trim() : "ไม่ระบุสาขา"; 
 
                 if (empId !== "-" || empName !== "-") {
                     if (!groupedByBranch[empBranch]) groupedByBranch[empBranch] = [];
@@ -389,6 +371,7 @@
             return validGuestCount;
         }
 
+        // อ่าน Excel โดยดึงค่า Text ที่แสดงผลจริง (cell.w) เพื่อคงเลข 0 หน้าสุด
         document.getElementById('excelFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -397,16 +380,30 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array', raw: false});
-                let json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1, raw: false});
+                const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array', cellText: true, cellDates: true});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 
-                // จัดรูปแบบรหัสพนักงานให้คงเลข 0 ทุกแถว
-                json = json.map((row, index) => {
-                    if (index > 0 && row && row[0]) {
-                        row[0] = formatEmpId(row[0]);
+                // แปลง Sheet เป็น Array โดยใช้ค่า Formatted Text (w)
+                const range = XLSX.utils.decode_range(firstSheet['!ref']);
+                let json = [];
+                
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    let row = [];
+                    for (let C = range.s.c; C <= range.e.c; ++C) {
+                        const cellAddress = {c: C, r: R};
+                        const cellRef = XLSX.utils.encode_cell(cellAddress);
+                        const cell = firstSheet[cellRef];
+                        
+                        if (cell) {
+                            // ให้ความสำคัญกับ cell.w (ข้อความที่เห็นใน Excel) ก่อนเสมอเพื่อเก็บเลข 0
+                            let val = (cell.w !== undefined) ? cell.w : (cell.v !== undefined ? cell.v : "");
+                            row.push(val.toString().trim());
+                        } else {
+                            row.push("");
+                        }
                     }
-                    return row;
-                });
+                    if (row.some(x => x !== "")) json.push(row);
+                }
 
                 localStorage.setItem('partyExcelData', JSON.stringify(json));
                 const count = renderExcelData(json);
@@ -438,9 +435,6 @@
             }
         }
 
-        // ==========================================
-        // 🌟 ค้นหาชื่อ และ เช็คอินมือ (Manual Check-in)
-        // ==========================================
         function searchAttendee() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
             const list = document.getElementById('searchResults');
@@ -463,9 +457,9 @@
             json.forEach((row, index) => {
                 if (index === 0 || !row || row.length === 0) return; 
                 
-                const empId = formatEmpId(row[0]);
-                const empName = row[1] ? row[1].toString().replace(/\uFFFD/g, '').trim() : "-";
-                const empBranch = row[2] ? row[2].toString().replace(/\uFFFD/g, '').trim() : "ไม่ระบุสาขา"; 
+                const empId = row[0] ? row[0].toString().trim() : "-";
+                const empName = row[1] ? row[1].toString().trim() : "-";
+                const empBranch = row[2] ? row[2].toString().trim() : "ไม่ระบุสาขา"; 
 
                 if (empId.toLowerCase().includes(query) || empName.toLowerCase().includes(query)) {
                     matches.push({ id: empId, name: empName, branch: empBranch });
@@ -505,7 +499,7 @@
 
         function manualCheckIn(empId, empName, empBranch) {
             if (isProcessing) return;
-            empId = formatEmpId(empId);
+            empId = empId.trim();
             
             if (scannedGuests.has(empId)) {
                 alert(`⚠️ ข้อมูลซ้ำ! ${empName} สแกนเข้างานไปแล้ว`);
@@ -576,7 +570,7 @@
             }
 
             const dataParts = decodedString.split("|");
-            const empId = formatEmpId(dataParts[0]);
+            const empId = dataParts[0] ? dataParts[0].trim() : "-";
             const empName = dataParts[1] ? dataParts[1].trim() : "-";
             const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
 
