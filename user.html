@@ -3,687 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Party Connect - ระบบต้อนรับหน้างาน</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>การ์ดเชิญงานเลี้ยงสังสรรค์ 2569</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-
+    
     <style>
-        :root { --primary: #4A00E0; }
-        body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%); color: #333; margin: 0; padding: 0; min-height: 100vh; }
-        .header { text-align: center; padding: 30px 10px 10px; color: white; position: relative; }
-        .header h1 { margin: 0; font-size: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-        .back-home { position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.2); color: white; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-size: 14px; border: 1px solid rgba(255,255,255,0.4); transition: 0.3s; }
-        .back-home:hover { background: rgba(255,255,255,0.4); }
-        
-        .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px; }
-        .tab-btn { background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; padding: 12px 25px; border-radius: 30px; cursor: pointer; font-size: 16px; font-family: 'Prompt', sans-serif; font-weight: 600; transition: 0.3s; }
-        .tab-btn:hover { background: rgba(255, 255, 255, 0.4); }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .container { max-width: 900px; margin: 0 auto 40px; padding: 0 20px; }
-        
-        .tab-content { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; animation: fadeIn 0.4s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0 20px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; font-family: 'Prompt', sans-serif; box-sizing: border-box; }
-        .action-btn { background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; font-weight: bold; font-family: 'Prompt', sans-serif; width: 100%; transition: 0.3s; display: block; box-sizing: border-box; }
-        .action-btn.print-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); margin-bottom: 10px; }
-        .action-btn.danger-btn { background: #ff4444; }
-        
-        .mode-btn { width: auto; font-size: 16px; padding: 10px 20px; flex: 1; min-width: 200px; }
-        .mode-btn.dark { background: #333; }
-        
-        #reader { width: 100%; max-width: 450px; margin: 0 auto 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border:none; background: #fff;}
-        .scanner-box { background: #f0f4f8; padding: 20px; border-radius: 15px; text-align: center; border: 2px dashed var(--primary); }
-        #hardwareInput { font-size: 18px; text-align: center; font-weight: bold; padding: 15px; border: 2px solid #8E2DE2; background: white; color: #333; outline: none; margin-bottom: 0; width: 100%; box-sizing: border-box;}
-        #hardwareInput:focus { border-color: #00C851; box-shadow: 0 0 10px rgba(0,200,81,0.3); }
-        #result { margin-top: 20px; font-size: 22px; font-weight: bold; padding: 20px; border-radius: 10px; background: #eee; text-align: center; transition: all 0.3s; }
-        
-        .branch-section { margin-top: 30px; padding: 20px; background: white; border-radius: 15px; }
-        .qr-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; justify-content: center; }
-        .qr-card { padding: 15px; border: 1px dashed #ccc; border-radius: 10px; text-align: center; width: 190px; background: white; } 
-        .info-text { margin-top: 10px; font-size: 13px; text-align: left; line-height: 1.4; }
-        
-        .stat-grid { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
-        .stat-box { background: white; border-radius: 15px; padding: 20px; text-align: center; border: 2px solid #eee; flex: 1; min-width: 140px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .stat-box h3 { margin: 0 0 10px; font-size: 16px; color: #666; display: flex; justify-content: center; align-items: center; gap: 5px; }
-        .stat-number { font-size: 45px; font-weight: bold; margin: 0; line-height: 1; }
-        .text-blue { color: #007bff; }
-        .text-green { color: #00C851; }
-        .text-red { color: #ff4444; }
-        
-        .recent-list { list-style: none; padding: 0; margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; max-height: 350px; overflow-y: auto; }
-        .recent-list li { background: white; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #00C851; }
-        .edit-btn { background: #eee; border: none; border-radius: 5px; cursor: pointer; padding: 2px 8px; font-size: 12px; font-family: 'Prompt'; transition: 0.2s;}
-        .edit-btn:hover { background: #ddd; }
-
-        @media print { body { background: white; } .header, .tabs, .print-hide { display: none !important; } .tab-content { box-shadow: none; padding: 0; background: transparent; } .branch-section { page-break-after: always; padding: 0; } .branch-section:last-child { page-break-after: auto; } .qr-card { break-inside: avoid; border: 1px solid #ddd; } }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0;
+            background: url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden; font-family: 'Prompt', sans-serif;
+        }
+        body::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.55); z-index: -1; }
+        .envelope-wrapper { position: relative; width: 90%; max-width: 360px; height: 240px; cursor: pointer; }
+        .envelope-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #d8c8af; box-shadow: 0 15px 35px rgba(0,0,0,0.6); z-index: 1; }
+        .paper-texture { background: linear-gradient(135deg, #f9f5ec 0%, #eaddc4 100%); }
+        .letter {
+            position: absolute; top: -110px; left: 2.5%; width: 95%; height: 440px;
+            background: #fffdf7; box-shadow: 0 15px 40px rgba(0,0,0,0.5); z-index: 0;
+            padding: 20px; box-sizing: border-box; text-align: center; color: #333; border-radius: 6px;
+            opacity: 0; transform: scale(0.5); pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .flap-left { position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 50% 50%, 0 100%); z-index: 3; pointer-events: none; }
+        .flap-right { position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(100% 0, 50% 50%, 100% 100%); z-index: 3; pointer-events: none; }
+        .flap-bottom { position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 100%, 50% 45%, 100% 100%); z-index: 4; pointer-events: none; }
+        .bottom-text { position: absolute; bottom: 25px; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-style: italic; font-size: 11px; color: #7b1113; z-index: 5; pointer-events: none; }
+        .flap-top { position: absolute; top: 0; left: 0; width: 100%; height: 100%; clip-path: polygon(0 0, 100% 0, 50% 60%); z-index: 6; transform-origin: top; transition: transform 0.5s ease-in-out; }
+        .top-text { padding-top: 30px; text-align: center; }
+        .envelope-title { font-family: 'Cinzel', serif; font-size: 20px; color: #7b1113; font-weight: 700; margin-bottom: 2px; }
+        .wax-seal { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: radial-gradient(circle, #aa1318 0%, #5e080b 100%); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #5a070c; font-size: 24px; z-index: 7; }
+        .tap-hint { position: absolute; bottom: -35px; width: 100%; text-align: center; color: #fff; font-size: 13px; }
+        .letter h2 { font-family: 'Cinzel', serif; color: #7b1113; margin: 0 0 5px 0; border-bottom: 1px solid #eaddc4; padding-bottom: 5px; font-size: 16px; }
+        input[type="text"] { width: 100%; padding: 8px; margin: 5px 0 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: 'Prompt', sans-serif; box-sizing: border-box; }
+        .btn-action { display: block; background: #7b1113; color: #fffdf7; padding: 10px 0; border-radius: 4px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; border: none; width: 100%; }
+        .envelope-wrapper.open .flap-top { transform: rotateX(180deg); z-index: 1; }
+        .envelope-wrapper.open .wax-seal { opacity: 0; }
+        .envelope-wrapper.open .letter { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
+        .envelope-wrapper.open .tap-hint { display: none; }
+        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center; }
+        .qr-modal-content { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; }
     </style>
 </head>
 <body>
 
-    <div class="header print-hide">
-        <a href="index.html" class="back-home">⬅️ กลับหน้าการ์ดเชิญ</a>
-        <h1>✨ VIP Party Connect</h1>
-        <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
+    <div class="envelope-wrapper" onclick="this.classList.toggle('open')">
+        <div class="envelope-back"></div>
+        <div class="flap-left paper-texture"></div>
+        <div class="flap-right paper-texture"></div>
+        <div class="flap-bottom paper-texture"></div>
+        <div class="bottom-text">"A night to remember, a celebration to share."</div>
+
+        <div class="flap-top paper-texture">
+            <div class="top-text">
+                <div class="envelope-title">งานเลี้ยงสังสรรค์</div>
+                <div style="font-size:11px; color:#7b1113;">28 พฤศจิกายน 2569</div>
+            </div>
+        </div>
+
+        <div class="wax-seal">♥</div>
+
+        <div class="letter" onclick="event.stopPropagation();">
+            <h2>งานเลี้ยงสังสรรค์ ประจำปี 2569</h2>
+            <div style="font-size:12px; text-align:left; color:#444;">
+                เรียน <strong>พนักงาน CLT</strong>,<br>
+                กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:<br>
+                <input type="text" id="checkId" placeholder="รหัสพนักงาน (เช่น 083354)">
+            </div>
+            <div>
+                <button class="btn-action" onclick="showMyQRCode()">🎟️ แสดง QR Code ของฉัน</button>
+            </div>
+        </div>
+
+        <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- แถบเมนู -->
-    <div class="tabs print-hide">
-        <button class="tab-btn active" onclick="switchTab('single', this)">🎟️ สร้าง QR (เพิ่มคน)</button>
-        <button class="tab-btn" onclick="switchTab('bulk', this)">📊 สร้างจาก Excel</button>
-        <button class="tab-btn" onclick="switchTab('search', this)">🔍 ค้นหา (ไม่มี QR)</button>
-        <button class="tab-btn" onclick="switchTab('scanner', this)">📸 จุดสแกนเข้างาน</button>
-        <button class="tab-btn" onclick="switchTab('dashboard', this)">📈 สถิติเข้างาน</button>
-    </div>
-
-    <div class="container">
-        
-        <!-- แท็บ 1: สร้าง QR เดี่ยว (เพิ่มแขก Walk-in) -->
-        <div id="tab-single" class="tab-content active">
-            <h2 style="color: var(--primary); text-align: center;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
-            <p style="text-align: center; color: #666; margin-top: -10px;">สร้าง QR Code ใหม่ พร้อมบวกยอดจำนวนคนในสถิติ</p>
-            
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น EMP99 หรือเว้นว่างไว้)">
-            <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
-            <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
-            <button class="action-btn" onclick="generateSingleQR()">✨ สร้างคิวอาร์โค้ด และเพิ่มเข้าระบบ</button>
-            <div id="single-qr-output" style="margin-top: 30px; display: flex; justify-content: center; display:none;">
-                <div class="qr-card" style="width: 280px;">
-                    <div id="single-qrcode" style="position: relative; width: 250px; height: 250px; margin: 0 auto;"></div>
-                    <div class="info-text" id="single-info" style="font-size:15px; margin-top:15px; text-align:center;"></div>
-                </div>
-            </div>
+    <div id="qr-modal">
+        <div class="qr-modal-content">
+            <h3 id="modal-title" style="color: #7b1113; margin-top: 0;">🎟️ บัตรเข้างานของคุณ</h3>
+            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 15px 0;"></div>
+            <div id="personal-info" style="font-size: 14px; color: #333; margin-bottom: 15px;"></div>
+            <button class="btn-action" onclick="closeModal()" style="background: #666;">ปิดหน้าต่าง</button>
         </div>
-
-        <!-- แท็บ 2: สร้าง QR จาก Excel -->
-        <div id="tab-bulk" class="tab-content">
-            <div class="print-hide">
-                <h2 style="color: var(--primary); text-align: center;">พิมพ์ QR Code จาก Excel</h2>
-                <input type="file" id="excelFile" accept=".xlsx, .xls">
-                <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -10px 0 15px 0; color: var(--primary);"></div>
-                <button class="action-btn print-btn" onclick="window.print()">🖨️ สั่งปริ้นแยกสาขา</button>
-                <button class="action-btn danger-btn" onclick="clearExcelData()">🗑️ ล้างข้อมูล Excel ที่จำไว้</button>
-            </div>
-            <div id="qrContainer"></div>
-        </div>
-
-        <!-- แท็บ 3: ค้นหาและเช็คอินมือ -->
-        <div id="tab-search" class="tab-content">
-            <h2 style="color: var(--primary); text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
-            <p style="text-align: center; color: #666; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
-            
-            <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." onkeyup="searchAttendee()">
-            <div id="search-alert" style="text-align: center; font-weight: bold; margin-bottom: 10px; min-height: 25px;"></div>
-            
-            <ul class="recent-list" id="searchResults">
-                <li style="text-align: center; color: #999; border-left: 5px solid #ccc;">กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>
-            </ul>
-        </div>
-
-        <!-- แท็บ 4: จุดสแกนเข้างาน -->
-        <div id="tab-scanner" class="tab-content">
-            <h2 style="color: var(--primary); text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
-            
-            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-                <button class="action-btn mode-btn" onclick="chooseScannerMode('camera')">📸 สแกนด้วยกล้องมือถือ</button>
-                <button class="action-btn mode-btn dark" onclick="chooseScannerMode('hardware')">🔫 ใช้เครื่องยิงบาร์โค้ด</button>
-            </div>
-            
-            <div id="camera-section" style="display: none;">
-                <div id="reader"></div>
-            </div>
-            
-            <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
-                <p style="color: #555; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:red;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
-                <input type="text" id="hardwareInput" placeholder="[ สแกนคิวอาร์โค้ดที่นี่ ]" autocomplete="off">
-            </div>
-            
-            <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
-        </div>
-
-        <!-- แท็บ 5: Dashboard -->
-        <div id="tab-dashboard" class="tab-content">
-            <h2 style="color: var(--primary); text-align: center; margin-bottom: 30px;">สถิติผู้เข้างาน (Real-time)</h2>
-            
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <h3>จำนวนรวมทั้งหมด <button class="edit-btn" onclick="setTotalManually()">✏️ แก้ไข</button></h3>
-                    <p class="stat-number text-blue" id="stat-total">0</p>
-                </div>
-                <div class="stat-box">
-                    <h3>สแกนเข้างานแล้ว</h3>
-                    <p class="stat-number text-green" id="stat-checked">0</p>
-                </div>
-                <div class="stat-box">
-                    <h3>ยังไม่มา</h3>
-                    <p class="stat-number text-red" id="stat-absent">0</p>
-                </div>
-            </div>
-
-            <h4 style="text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; max-width: 500px; margin: 30px auto 0;">รายชื่อผู้เข้างานล่าสุด</h4>
-            <ul class="recent-list" id="recent-scans">
-                <li style="border-left: 5px solid #ccc; color: #999; text-align: center;">กำลังโหลดข้อมูล...</li>
-            </ul>
-        </div>
-
     </div>
 
     <script>
-        // ==========================================
-        // 🛑 นำ URL จาก Google Apps Script ของคุณมาวางตรงนี้
-        // ==========================================
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbxwf4GF2ebnkN_qg6T8C3pfF9k0PTqUDLFAHWywGHhRm1OQffUMtHIEsKBu0Qci9yv_Zg/exec"; 
-        
-        let cameraInitialized = false;
-        let statsInterval; 
-        const scannedGuests = new Set(); 
-        let isProcessing = false;
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbxwf4GF2ebnkN_qg6T8C3pfF9k0PTqUDLFAHWywGHhRm1OQffUMtHIEsKBu0Qci9yv_Zg/exec";
+        let cachedGuests = [];
 
-        // ระบบตรวจสอบรหัสผ่านแอดมินทันทีที่เปิดหน้าเว็บ
+        // ฟังก์ชันจัดรูปแบบรหัส: ถ้าเป็นตัวเลขล้วนให้เติม 0 ข้างหน้าให้ครบ 6 หลัก
+        function formatEmpId(val) {
+            if (!val) return "";
+            let str = val.toString().trim();
+            if (/^\d+$/.test(str) && str.length < 6) {
+                str = str.padStart(6, '0');
+            }
+            return str;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
-            const pass = prompt("🔐 กรุณาใส่รหัสผ่านผู้ดูแลระบบ (Admin Password):");
-            if (pass !== "9999") {
-                alert("รหัสผ่านไม่ถูกต้อง! กำลังพากลับหน้าการ์ดเชิญ");
-                window.location.href = "index.html";
-                return;
-            }
-
-            const storedExcel = localStorage.getItem('partyExcelData');
-            if (storedExcel) {
-                try { renderExcelData(JSON.parse(storedExcel)); } catch(e) {}
-            }
-        });
-
-        function encodeThaiToBase64(id, name, branch) {
-            const rawText = `${id}|${name}|${branch}`;
-            return btoa(unescape(encodeURIComponent(rawText)));
-        }
-        function decodeBase64ToThai(base64Text) {
-            try { return decodeURIComponent(escape(atob(base64Text))); } catch (e) { return null; }
-        }
-
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            
-            const targetTab = document.getElementById('tab-' + tabId);
-            if(targetTab) targetTab.classList.add('active');
-            if(btnElement) btnElement.classList.add('active');
-            
-            clearInterval(statsInterval);
-
-            if (tabId === 'scanner') {
-                document.getElementById('camera-section').style.display = 'none';
-                document.getElementById('hardware-section').style.display = 'none';
-                resetResult("🟢 กรุณาเลือกโหมดสแกนด้านบน...");
-            } else if (tabId === 'dashboard') {
-                fetchStats(); 
-                statsInterval = setInterval(fetchStats, 5000); 
-            } else if (tabId === 'search') {
-                document.getElementById('searchInput').value = "";
-                document.getElementById('searchResults').innerHTML = "<li style='text-align: center; color: #999; border-left: 5px solid #ccc;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
-                document.getElementById('search-alert').innerHTML = "";
-            }
-        }
-
-        function fetchStats() {
-            fetch(scriptUrl + "?action=getStats&t=" + new Date().getTime())
-                .then(res => res.json())
-                .then(data => {
-                    if(data.status === 'success') {
-                        const serverTotal = data.total ? parseInt(data.total) : 0;
-                        const localTotal = parseInt(localStorage.getItem('partyTotalGuests')) || 0;
-                        const total = serverTotal > 0 ? serverTotal : localTotal;
-                        
-                        const checked = data.checkedIn ? parseInt(data.checkedIn) : 0;
-                        let absent = total - checked;
-                        if (absent < 0 || total === 0) absent = 0;
-
-                        document.getElementById('stat-total').innerText = total;
-                        document.getElementById('stat-checked').innerText = checked;
-                        document.getElementById('stat-absent').innerText = absent;
-
-                        const list = document.getElementById('recent-scans');
-                        list.innerHTML = "";
-                        if (!data.recent || data.recent.length === 0) {
-                            list.innerHTML = "<li style='border-left: 5px solid #ccc; color: #999; text-align: center;'>ยังไม่มีคนสแกนเข้างาน</li>";
-                        } else {
-                            data.recent.forEach(emp => {
-                                const li = document.createElement('li');
-                                li.innerHTML = `<b>${emp.name}</b> <span style="color:#666; font-size:14px;">(${emp.branch})</span>`;
-                                list.appendChild(li);
+            // โหลดจาก LocalStorage สำรอง
+            const stored = localStorage.getItem('partyExcelData');
+            if (stored) {
+                try {
+                    const json = JSON.parse(stored);
+                    for (let i = 1; i < json.length; i++) {
+                        if (json[i] && json[i][0]) {
+                            cachedGuests.push({
+                                id: formatEmpId(json[i][0]),
+                                name: json[i][1] ? json[i][1].toString().trim() : "",
+                                branch: json[i][2] ? json[i][2].toString().trim() : ""
                             });
                         }
                     }
-                })
-                .catch(err => console.log("โหลดข้อมูลสถิติไม่สำเร็จ", err));
-        }
-
-        function setTotalManually() {
-            const currentTotal = localStorage.getItem('partyTotalGuests') || 0;
-            const newTotal = prompt("ระบุจำนวนผู้เข้าร่วมทั้งหมดที่ต้องการ:", currentTotal);
-            if(newTotal !== null && !isNaN(newTotal) && newTotal !== "") {
-                localStorage.setItem('partyTotalGuests', parseInt(newTotal));
-                fetch(`${scriptUrl}?action=setTotal&total=${newTotal}`)
-                    .then(() => { alert("อัปเดตยอดรวมสำเร็จ!"); fetchStats(); });
+                } catch(e) {}
             }
-        }
 
-        // ==========================================
-        // 🌟 1. สร้าง QR เดี่ยว + เพิ่มข้อมูลหน้างาน (Walk-in)
-        // ==========================================
-        function generateSingleQR() {
-            const id = document.getElementById("s_empId").value || "-";
-            const name = document.getElementById("s_empName").value;
-            const branch = document.getElementById("s_empBranch").value || "-";
-            if(!name) { alert("กรุณาใส่ชื่อพนักงาน"); return; }
-            
-            const qrContainer = document.getElementById("single-qrcode");
-            qrContainer.innerHTML = ""; 
-            
-            const encodedData = encodeThaiToBase64(id, name, branch);
-            
-            new QRCode(qrContainer, { 
-                text: `VIPPARTY|${encodedData}`, 
-                width: 250, 
-                height: 250,
-                correctLevel : QRCode.CorrectLevel.H 
-            });
-
-            const logo = document.createElement("img");
-            logo.src = "logo CLT (1)-01.png";
-            logo.style.position = "absolute";
-            logo.style.top = "50%";
-            logo.style.left = "50%";
-            logo.style.transform = "translate(-50%, -50%)";
-            logo.style.width = "50px"; 
-            logo.style.height = "50px";
-            logo.style.backgroundColor = "white"; 
-            logo.style.padding = "4px";
-            logo.style.borderRadius = "50%"; 
-            qrContainer.appendChild(logo);
-
-            document.getElementById("single-info").innerHTML = `<b>${id}</b><br>${name}<br>${branch}`;
-            document.getElementById("single-qr-output").style.display = "flex";
-
-            setTimeout(() => {
-                if(confirm(`ต้องการเพิ่ม "${name}" เป็นผู้เข้าร่วมใหม่\n(บวกยอดรวมสถิติ + เพิ่มในระบบค้นหา) ด้วยหรือไม่?`)) {
-                    let currentTotal = parseInt(localStorage.getItem('partyTotalGuests')) || 0;
-                    currentTotal += 1;
-                    localStorage.setItem('partyTotalGuests', currentTotal);
-                    
-                    fetch(`${scriptUrl}?action=setTotal&total=${currentTotal}`)
-                        .then(() => console.log('อัปเดตยอดรวมเรียบร้อย'));
-
-                    let storedExcel = localStorage.getItem('partyExcelData');
-                    let json = [];
-                    if (storedExcel) {
-                        json = JSON.parse(storedExcel);
-                    } else {
-                        json = [["รหัสพนักงาน", "ชื่อพนักงาน", "สาขา"]];
-                    }
-                    json.push([id, name, branch]);
-                    localStorage.setItem('partyExcelData', JSON.stringify(json));
-
-                    alert(`✅ เพิ่ม "${name}" เข้าระบบเรียบร้อยแล้ว!\nจำนวนผู้ร่วมงานทั้งหมดปรับเป็น ${currentTotal} คน`);
-                    
-                    document.getElementById("s_empId").value = "";
-                    document.getElementById("s_empName").value = "";
-                    document.getElementById("s_empBranch").value = "";
-                }
-            }, 500);
-        }
-
-        // ==========================================
-        // 🌟 2. ระบบจัดการ Excel
-        // ==========================================
-        function renderExcelData(json) {
-            const container = document.getElementById("qrContainer");
-            container.innerHTML = ""; 
-            const groupedByBranch = {};
-            let validGuestCount = 0; 
-
-            json.forEach((row, index) => {
-                if (index === 0) return; 
-                if (!row || row.length === 0) return; 
-                
-                const empId = row[0] ? row[0].toString().replace(/\uFFFD/g, '').trim() : "-";
-                const empName = row[1] ? row[1].toString().replace(/\uFFFD/g, '').trim() : "-";
-                const empBranch = row[2] ? row[2].toString().replace(/\uFFFD/g, '').trim() : "ไม่ระบุสาขา"; 
-
-                if (empId !== "-" || empName !== "-") {
-                    if (!groupedByBranch[empBranch]) groupedByBranch[empBranch] = [];
-                    groupedByBranch[empBranch].push({ id: empId, name: empName, branch: empBranch });
-                    validGuestCount++; 
-                }
-            });
-
-            for (const branch in groupedByBranch) {
-                const sec = document.createElement("div"); sec.className = "branch-section";
-                sec.innerHTML = `<h3 style="border-bottom: 2px solid var(--primary); color:var(--primary);">📍 สาขา: ${branch}</h3>`;
-                const grid = document.createElement("div"); grid.className = "qr-grid";
-
-                groupedByBranch[branch].forEach(emp => {
-                    const card = document.createElement("div"); card.className = "qr-card";
-                    
-                    const qrDiv = document.createElement("div"); 
-                    qrDiv.style.position = "relative";
-                    qrDiv.style.width = "150px";
-                    qrDiv.style.height = "150px";
-                    qrDiv.style.margin = "0 auto";
-
-                    const infoDiv = document.createElement("div"); infoDiv.className = "info-text";
-                    infoDiv.innerHTML = `<b>${emp.id}</b><br>${emp.name}<br>${emp.branch}`;
-
-                    card.appendChild(qrDiv);
-                    card.appendChild(infoDiv);
-                    grid.appendChild(card);
-                    
-                    const encodedData = encodeThaiToBase64(emp.id, emp.name, emp.branch);
-                    
-                    new QRCode(qrDiv, { 
-                        text: `VIPPARTY|${encodedData}`, 
-                        width: 150, 
-                        height: 150,
-                        correctLevel : QRCode.CorrectLevel.H 
-                    });
-
-                    const logo = document.createElement("img");
-                    logo.src = "logo CLT (1)-01.png";
-                    logo.style.position = "absolute";
-                    logo.style.top = "50%";
-                    logo.style.left = "50%";
-                    logo.style.transform = "translate(-50%, -50%)";
-                    logo.style.width = "30px"; 
-                    logo.style.height = "30px";
-                    logo.style.backgroundColor = "white"; 
-                    logo.style.padding = "2px";
-                    logo.style.borderRadius = "50%"; 
-                    qrDiv.appendChild(logo);
-                });
-                sec.appendChild(grid); container.appendChild(sec);
-            }
-            return validGuestCount;
-        }
-
-        document.getElementById('excelFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const statusDiv = document.getElementById('uploadStatus');
-            statusDiv.innerHTML = "⏳ กำลังส่งข้อมูลไปยัง Google Sheets...";
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-                
-                localStorage.setItem('partyExcelData', JSON.stringify(json));
-                const count = renderExcelData(json);
-                localStorage.setItem('partyTotalGuests', count);
-
-                // ส่งข้อมูลขึ้น Google Sheets ผ่าน Cloud
-                fetch(scriptUrl, {
-                    method: "POST",
-                    body: JSON.stringify({ guests: json })
-                })
+            // ดึงข้อมูลจาก Google Sheets
+            fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
-                    statusDiv.innerHTML = `✅ บันทึกข้อมูลขึ้น Google Sheets สำเร็จ (${count} คน)`;
-                    alert(`อัปโหลดสำเร็จ! ส่งข้อมูลรายชื่อ ${count} คน ขึ้นระบบกลางเรียบร้อยแล้ว`);
+                    if (data.status === "success" && data.guests.length > 0) {
+                        cachedGuests = data.guests.map(g => ({
+                            id: formatEmpId(g.id),
+                            name: g.name,
+                            branch: g.branch
+                        }));
+                    }
                 })
-                .catch(() => {
-                    statusDiv.innerHTML = `⚠️ บันทึกข้อมูลในเครื่องเรียบร้อย (${count} คน)`;
-                });
-            };
-            reader.readAsArrayBuffer(file);
+                .catch(err => console.log("โหลดรายชื่อออนไลน์ไม่สำเร็จ ใช้ข้อมูลในเครื่อง"));
         });
 
-        function clearExcelData() {
-            if(confirm("ต้องการล้างรายชื่อ QR Code ที่ค้างอยู่บนหน้าจอใช่หรือไม่?")) {
-                localStorage.removeItem('partyExcelData');
-                localStorage.removeItem('partyTotalGuests');
-                document.getElementById("qrContainer").innerHTML = "";
-                document.getElementById('excelFile').value = ""; 
-                document.getElementById('uploadStatus').innerHTML = "";
-            }
-        }
-
-        // ==========================================
-        // 🌟 ค้นหาชื่อ และ เช็คอินมือ (Manual Check-in)
-        // ==========================================
-        function searchAttendee() {
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
-            const list = document.getElementById('searchResults');
-            list.innerHTML = "";
-
-            if (query.length < 1) {
-                list.innerHTML = "<li style='text-align: center; color: #999; border-left: 5px solid #ccc;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
-                return;
-            }
-
-            const storedExcel = localStorage.getItem('partyExcelData');
-            if (!storedExcel) {
-                list.innerHTML = "<li style='text-align: center; color: red; border-left: 5px solid red;'>⚠️ ไม่พบฐานข้อมูล กรุณาไปอัปโหลดไฟล์ Excel ในแท็บ 'สร้างจาก Excel' ก่อนครับ</li>";
-                return;
-            }
-
-            const json = JSON.parse(storedExcel);
-            let matches = [];
-
-            json.forEach((row, index) => {
-                if (index === 0) return; 
-                if (!row || row.length === 0) return; 
-                
-                const empId = row[0] ? row[0].toString().replace(/\uFFFD/g, '').trim() : "-";
-                const empName = row[1] ? row[1].toString().replace(/\uFFFD/g, '').trim() : "-";
-                const empBranch = row[2] ? row[2].toString().replace(/\uFFFD/g, '').trim() : "ไม่ระบุสาขา"; 
-
-                if (empId.toLowerCase().includes(query) || empName.toLowerCase().includes(query)) {
-                    matches.push({ id: empId, name: empName, branch: empBranch });
-                }
-            });
-
-            if (matches.length === 0) {
-                list.innerHTML = "<li style='text-align: center; color: #999; border-left: 5px solid #ccc;'>❌ ไม่พบชื่อ หรือ รหัสพนักงานที่ค้นหา</li>";
-                return;
-            }
-
-            matches.forEach(emp => {
-                const li = document.createElement('li');
-                li.style.display = 'flex';
-                li.style.justifyContent = 'space-between';
-                li.style.alignItems = 'center';
-                
-                const isCheckedIn = scannedGuests.has(emp.id);
-                
-                let btnHtml = "";
-                if (isCheckedIn) {
-                    btnHtml = `<span style="color: #ff9800; font-weight: bold;">✅ สแกนแล้ว</span>`;
-                } else {
-                    btnHtml = `<button class="action-btn" style="width: auto; padding: 8px 20px; font-size: 14px; margin: 0;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">เข้างาน</button>`;
-                }
-
-                li.innerHTML = `
-                    <div style="line-height: 1.4;">
-                        <b>${emp.name}</b> <span style="color:#666; font-size:14px;">(${emp.branch})</span><br>
-                        <small style="color:#999;">รหัส: ${emp.id}</small>
-                    </div>
-                    <div>${btnHtml}</div>
-                `;
-                list.appendChild(li);
-            });
-        }
-
-        function manualCheckIn(empId, empName, empBranch) {
-            if (isProcessing) return;
-            
-            if (scannedGuests.has(empId)) {
-                alert(`⚠️ ข้อมูลซ้ำ! ${empName} สแกนเข้างานไปแล้ว`);
-                searchAttendee(); 
-                return;
-            }
-
-            const alertBox = document.getElementById('search-alert');
-            alertBox.innerHTML = `⏳ กำลังบันทึก: <span style="color:#4A00E0">${empName}</span>...`;
-            isProcessing = true;
-
-            const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}`;
-
-            fetch(fetchUrl)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.status === "success") {
-                        scannedGuests.add(empId); 
-                        alertBox.innerHTML = `✅ บันทึก <span style="color:#00C851">${empName}</span> เข้างานสำเร็จ!`;
-                        searchAttendee(); 
-                    } 
-                    else if (data.status === "duplicate") { 
-                        scannedGuests.add(empId); 
-                        alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5722">${empName}</span> เข้างานไปแล้ว`;
-                        searchAttendee();
-                    }
-                })
-                .catch(err => {
-                    alertBox.innerHTML = "❌ การเชื่อมต่อล้มเหลว กรุณาลองใหม่";
-                })
-                .finally(() => {
-                    setTimeout(() => { isProcessing = false; alertBox.innerHTML = ""; }, 4000); 
-                });
-        }
-
-        function chooseScannerMode(mode) {
-            document.getElementById('camera-section').style.display = 'none';
-            document.getElementById('hardware-section').style.display = 'none';
-
-            if (mode === 'camera') {
-                document.getElementById('camera-section').style.display = 'block';
-                if (!cameraInitialized) { initCameraScanner(); cameraInitialized = true; }
-                resetResult("🟢 ระบบกล้องพร้อมสแกน...");
-            } else if (mode === 'hardware') {
-                document.getElementById('hardware-section').style.display = 'block';
-                document.getElementById('hardwareInput').focus();
-                resetResult("🟢 เครื่องยิงพร้อมทำงาน...");
-            }
-        }
-
-        function processQRCode(decodedText) {
-            if (isProcessing) return; 
-            if (!decodedText) return;
-
-            decodedText = decodedText.replace(/\uFFFD/g, '').trim();
-            const resultDiv = document.getElementById('result');
-
-            if (!decodedText.startsWith("VIPPARTY|")) {
-                showError("❌ ข้อมูลไม่ถูกต้อง<br><small>(ไม่ใช่ QR ของระบบนี้ หรือแป้นพิมพ์ไม่ได้เป็นภาษาอังกฤษ)</small>");
-                return;
-            }
-
-            const base64Data = decodedText.split("|")[1];
-            const decodedString = decodeBase64ToThai(base64Data);
-
-            if (!decodedString) {
-                showError("❌ ไม่สามารถอ่านคิวอาร์โค้ดได้<br><small>กรุณาสร้างคิวอาร์โค้ดใหม่</small>");
-                return;
-            }
-
-            const dataParts = decodedString.split("|");
-            const empId = dataParts[0] ? dataParts[0].trim() : "-";
-            const empName = dataParts[1] ? dataParts[1].trim() : "-";
-            const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
-
-            if (scannedGuests.has(empId)) {
-                showDuplicateAlert(empId, empName);
+        function showMyQRCode() {
+            const rawEmpId = document.getElementById('checkId').value.trim();
+            if(!rawEmpId) { 
+                alert("กรุณากรอกรหัสพนักงานก่อนครับ"); 
                 return; 
             }
 
-            isProcessing = true;
-            resultDiv.innerHTML = `⏳ กำลังตรวจสอบและบันทึก: <b>${empName}</b>...`;
-            resultDiv.style.backgroundColor = "#ffc107"; resultDiv.style.color = "black";
-            
-            const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}`;
+            const searchId = formatEmpId(rawEmpId); // จัดรูปแบบให้คงเลข 0 เช่น 083354
 
-            fetch(fetchUrl)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.status === "success") {
-                        scannedGuests.add(empId); 
-                        resultDiv.innerHTML = `✅ ยินดีต้อนรับ!<br><span style="font-size:30px;">${empName}</span><br><small>${empBranch} (${empId})</small>`;
-                        resultDiv.style.backgroundColor = "#00C851"; resultDiv.style.color = "white";
-                    } 
-                    else if (data.status === "duplicate") { 
-                        scannedGuests.add(empId); 
-                        showDuplicateAlert(empId, empName);
-                    }
-                })
-                .catch(err => {
-                    showError("❌ การเชื่อมต่อล้มเหลว กรุณาสแกนใหม่");
-                })
-                .finally(() => {
-                    setTimeout(() => { isProcessing = false; restoreFocus(); }, 5000); 
+            const qrContainer = document.getElementById("personal-qrcode");
+            const infoContainer = document.getElementById("personal-info");
+            const modalTitle = document.getElementById("modal-title");
+            qrContainer.innerHTML = "";
+
+            // ค้นหารหัสพนักงานที่ตรงกัน
+            const guest = cachedGuests.find(g => formatEmpId(g.id).toLowerCase() === searchId.toLowerCase());
+
+            if (!guest) {
+                modalTitle.innerText = "❌ ไม่พบข้อมูล";
+                infoContainer.innerHTML = `ไม่พบรหัสพนักงาน <b>"${searchId}"</b> ในระบบ<br><br><span style="color: red; font-weight: bold;">กรุณาติดต่อเจ้าหน้าที่</span>`;
+            } else {
+                modalTitle.innerText = "🎟️ บัตรเข้างานของคุณ";
+                const displayId = formatEmpId(guest.id);
+                const encodedData = btoa(unescape(encodeURIComponent(`${displayId}|${guest.name}|${guest.branch}`)));
+                
+                new QRCode(qrContainer, { 
+                    text: `VIPPARTY|${encodedData}`, 
+                    width: 180, height: 180, 
+                    correctLevel : QRCode.CorrectLevel.H 
                 });
-        }
 
-        function showError(msg) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = msg;
-            resultDiv.style.backgroundColor = "#ff4d4d"; resultDiv.style.color = "white";
-            isProcessing = true;
-            setTimeout(() => { isProcessing = false; restoreFocus(); }, 5000); 
-        }
-
-        function showDuplicateAlert(id, name) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `⚠️ <b style="font-size:26px;">ข้อมูลซ้ำ!</b> ⚠️<br>รหัส <b>${id}</b> ได้สแกนเข้างานไปแล้ว<br><small>(${name})</small>`;
-            resultDiv.style.backgroundColor = "#ff5722"; 
-            resultDiv.style.color = "white";
-            isProcessing = true;
-            setTimeout(() => { isProcessing = false; restoreFocus(); }, 5000); 
-        }
-
-        let scannerTimer;
-        const hwInput = document.getElementById('hardwareInput');
-        hwInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault(); clearTimeout(scannerTimer);
-                const text = this.value.trim(); this.value = ''; processQRCode(text);
+                infoContainer.innerHTML = `<b>รหัส:</b> ${displayId}<br><b>ชื่อ:</b> ${guest.name}<br><b>สาขา:</b> ${guest.branch}`;
             }
-        });
-        hwInput.addEventListener('input', function (e) {
-            clearTimeout(scannerTimer);
-            scannerTimer = setTimeout(() => {
-                const text = this.value.trim();
-                if (text.length > 5) { this.value = ''; processQRCode(text); }
-            }, 300); 
-        });
 
-        function initCameraScanner() {
-            const html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 250 } },
-                function(decodedText) { processQRCode(decodedText); }, function(error) { }
-            ).catch(err => {
-                showError("❌ ไม่สามารถเปิดกล้องได้");
-            });
+            document.getElementById("qr-modal").style.display = "flex";
         }
 
-        function restoreFocus() {
-            if (document.getElementById('camera-section').style.display === 'block') { resetResult("🟢 ระบบกล้องพร้อมสแกน..."); } 
-            else if (document.getElementById('hardware-section').style.display === 'block') {
-                resetResult("🟢 เครื่องยิงพร้อมทำงาน..."); document.getElementById('hardwareInput').focus();
-            }
+        function closeModal() {
+            document.getElementById("qr-modal").style.display = "none";
         }
-
-        function resetResult(msg = "🟢 ระบบพร้อมสแกน (คิวต่อไป)...") {
-            const resultDiv = document.getElementById('result'); resultDiv.innerText = msg;
-            resultDiv.style.backgroundColor = "#eee"; resultDiv.style.color = "#333";
-        }
-
-        document.addEventListener('click', function() {
-            if (document.getElementById('hardware-section').style.display === 'block') { document.getElementById('hardwareInput').focus(); }
-        });
     </script>
 </body>
 </html>
