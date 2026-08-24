@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>การ์ดเชิญงานเลี้ยงสังสรรค์ 2569</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- โหลดไลบรารีสร้าง QR Code -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -90,7 +89,6 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
-        /* ป๊อปอัปแจ้งเตือน / แสดง QR Code */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center;
@@ -120,7 +118,6 @@
 
         <div class="wax-seal">♥</div>
 
-        <!-- หน้ากระดาษเมื่อเปิดซอง -->
         <div class="letter" onclick="event.stopPropagation();">
             <h2>งานเลี้ยงสังสรรค์ ประจำปี 2569</h2>
             <div class="letter-content">
@@ -136,7 +133,6 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- หน้าต่างป๊อปอัป -->
     <div id="qr-modal">
         <div class="qr-modal-content">
             <h3 id="modal-title" style="color: #7b1113; margin-top: 0;">🎟️ บัตรเข้างานของคุณ</h3>
@@ -164,7 +160,6 @@
             let empName = "";
             let empBranch = "";
 
-            // ตรวจสอบว่ามีข้อมูลใน Excel หรือไม่ และรหัสตรงกันไหม
             if (storedExcel) {
                 const json = JSON.parse(storedExcel);
                 for (let i = 1; i < json.length; i++) {
@@ -184,12 +179,10 @@
             qrContainer.innerHTML = "";
 
             if (!found) {
-                // กรณีไม่พบข้อมูลใน Excel
                 modalTitle.innerText = "❌ ไม่พบข้อมูล";
                 qrContainer.innerHTML = "";
                 infoContainer.innerHTML = `ไม่พบรหัสพนักงาน <b>"${empId}"</b> ในระบบ<br><br><span style="color: red; font-weight: bold;">กรุณาติดต่อเจ้าหน้าที่</span>`;
             } else {
-                // กรณีพบข้อมูล แสดง QR Code ปกติ
                 modalTitle.innerText = "🎟️ บัตรเข้างานของคุณ";
                 const encodedData = encodeThaiToBase64(empId, empName, empBranch);
                 

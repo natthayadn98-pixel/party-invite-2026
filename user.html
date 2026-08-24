@@ -13,8 +13,11 @@
     <style>
         :root { --primary: #4A00E0; }
         body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%); color: #333; margin: 0; padding: 0; min-height: 100vh; }
-        .header { text-align: center; padding: 30px 10px 10px; color: white; }
+        .header { text-align: center; padding: 30px 10px 10px; color: white; position: relative; }
         .header h1 { margin: 0; font-size: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .back-home { position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.2); color: white; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-size: 14px; border: 1px solid rgba(255,255,255,0.4); }
+        .back-home:hover { background: rgba(255,255,255,0.4); }
+        
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px; }
         .tab-btn { background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; padding: 12px 25px; border-radius: 30px; cursor: pointer; font-size: 16px; font-family: 'Prompt', sans-serif; font-weight: 600; transition: 0.3s; }
         .tab-btn:hover { background: rgba(255, 255, 255, 0.4); }
@@ -63,8 +66,9 @@
 <body>
 
     <div class="header print-hide">
+        <a href="index.html" class="back-home">⬅️ กลับหน้าการ์ดเชิญ</a>
         <h1>✨ VIP Party Connect</h1>
-        <p>ระบบต้อนรับและลงทะเบียนเข้างาน</p>
+        <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
     </div>
 
     <!-- แถบเมนู -->
@@ -178,6 +182,21 @@
         const scannedGuests = new Set(); 
         let isProcessing = false;
 
+        // ระบบตรวจสอบรหัสผ่านแอดมินทันทีที่เปิดหน้า user.html
+        window.addEventListener('DOMContentLoaded', () => {
+            const pass = prompt("🔐 กรุณาใส่รหัสผ่านผู้ดูแลระบบ (Admin Password):");
+            if (pass !== "9999") {
+                alert("รหัสผ่านไม่ถูกต้อง! กำลังพากลับหน้าการ์ดเชิญ");
+                window.location.href = "index.html";
+                return;
+            }
+
+            const storedExcel = localStorage.getItem('partyExcelData');
+            if (storedExcel) {
+                try { renderExcelData(JSON.parse(storedExcel)); } catch(e) {}
+            }
+        });
+
         function encodeThaiToBase64(id, name, branch) {
             const rawText = `${id}|${name}|${branch}`;
             return btoa(unescape(encodeURIComponent(rawText)));
@@ -187,11 +206,6 @@
         }
 
         function switchTab(tabId, btnElement) {
-            if (tabId === 'scanner' || tabId === 'search') {
-                const pass = prompt("ระบบสำหรับเจ้าหน้าที่: กรุณาใส่รหัสผ่าน");
-                if (pass !== "9999") { alert("รหัสผ่านไม่ถูกต้อง!"); return; }
-            }
-
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             
@@ -295,40 +309,32 @@
             document.getElementById("single-info").innerHTML = `<b>${id}</b><br>${name}<br>${branch}`;
             document.getElementById("single-qr-output").style.display = "flex";
 
-            // 💡 ถามว่าจะให้บวกจำนวนคนเพิ่มเข้าไปในสถิติและระบบค้นหาด้วยไหม?
             setTimeout(() => {
                 if(confirm(`ต้องการเพิ่ม "${name}" เป็นผู้เข้าร่วมใหม่\n(บวกยอดรวมสถิติ + เพิ่มในระบบค้นหา) ด้วยหรือไม่?`)) {
-                    
-                    // 1. บวกยอดสถิติเพิ่ม 1 คน
                     let currentTotal = parseInt(localStorage.getItem('partyTotalGuests')) || 0;
                     currentTotal += 1;
                     localStorage.setItem('partyTotalGuests', currentTotal);
                     
-                    // 2. อัปเดตไปยังระบบหลังบ้าน Google Sheets
                     fetch(`${scriptUrl}?action=setTotal&total=${currentTotal}`)
                         .then(() => console.log('อัปเดตยอดรวมเรียบร้อย'));
 
-                    // 3. เพิ่มรายชื่อเข้าไปในความจำหน้าเว็บ เพื่อให้เสิร์ชค้นหาเจอได้
                     let storedExcel = localStorage.getItem('partyExcelData');
                     let json = [];
                     if (storedExcel) {
                         json = JSON.parse(storedExcel);
                     } else {
-                        // ถ้าไม่เคยโหลด Excel มาก่อน ให้สร้างโครงสร้างมารองรับ
                         json = [["รหัสพนักงาน", "ชื่อพนักงาน", "สาขา"]];
                     }
-                    // เพิ่มคนใหม่เข้าไป
                     json.push([id, name, branch]);
                     localStorage.setItem('partyExcelData', JSON.stringify(json));
 
                     alert(`✅ เพิ่ม "${name}" เข้าระบบเรียบร้อยแล้ว!\nจำนวนผู้ร่วมงานทั้งหมดปรับเป็น ${currentTotal} คน`);
                     
-                    // เคลียร์ช่องพิมพ์เตรียมรับคนต่อไป
                     document.getElementById("s_empId").value = "";
                     document.getElementById("s_empName").value = "";
                     document.getElementById("s_empBranch").value = "";
                 }
-            }, 500); // ดีเลย์ให้กล่อง QR แสดงขึ้นมาก่อน ค่อยเด้งถาม
+            }, 500);
         }
 
         // ==========================================
@@ -420,13 +426,6 @@
                     .catch(() => alert(`อัปโหลดสำเร็จ (ระบบออฟไลน์จำข้อมูลในเครื่อง ${count} คน)`));
             };
             reader.readAsArrayBuffer(file);
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const storedExcel = localStorage.getItem('partyExcelData');
-            if (storedExcel) {
-                try { renderExcelData(JSON.parse(storedExcel)); } catch(e) {}
-            }
         });
 
         function clearExcelData() {
