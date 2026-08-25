@@ -26,7 +26,6 @@
             min-height: 100vh;
             position: relative;
         }
-        /* แก้ไขให้ฟิลเตอร์สีม่วงคลุมเต็มหน้าจอแบบถาวร ไม่หลุดขอบเวลาเลื่อนดูข้อมูล */
         body::before {
             content: ''; 
             position: fixed; 
@@ -113,7 +112,6 @@
         .recent-list li { background: #18122B; padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #ffd700; color: #ddd; font-size: 14px; }
         .edit-btn { background: #33264d; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; cursor: pointer; padding: 2px 6px; font-size: 11px; }
 
-        /* ปรับขอบเขตสำหรับหน้าจอมือถือ (Responsive Media Query) */
         @media (min-width: 600px) {
             .container { padding: 0 20px; }
             .tab-content { padding: 30px; }
@@ -155,7 +153,7 @@
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 012345)">
+            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
             <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
             
@@ -230,7 +228,7 @@
             
             <div class="stat-grid">
                 <div class="stat-box">
-                    <h3>จำนวนรวมทั้งหมด <button class="edit-btn" onclick="setTotalManually()">✏️ แก้ไข</button></h3>
+                    <h3>จำนวนทั้งหมด <button class="edit-btn" onclick="setTotalManually()">✏️ แก้ไข</button></h3>
                     <p class="stat-number text-blue" id="stat-total">0</p>
                 </div>
                 <div class="stat-box">
@@ -366,7 +364,6 @@
                 return; 
             }
 
-            // บวกยอดรวมอัตโนมัติ +1 และจำไว้ใน LocalStorage
             let currentTotal = parseInt(localStorage.getItem('partyTotalGuests')) || 0;
             currentTotal += 1;
             localStorage.setItem('partyTotalGuests', currentTotal);
@@ -395,21 +392,30 @@
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
+                // แทรกโลโก้พร้อมวงกลมสีขาวรองพื้นหลัง (Clear Zone) เพื่อให้เครื่องยิงบาร์โค้ดอ่านง่าย 100%
                 setTimeout(() => {
+                    const logoWrapper = document.createElement("div");
+                    logoWrapper.style.position = "absolute";
+                    logoWrapper.style.top = "50%";
+                    logoWrapper.style.left = "50%";
+                    logoWrapper.style.transform = "translate(-50%, -50%)";
+                    logoWrapper.style.width = "48px";
+                    logoWrapper.style.height = "48px";
+                    logoWrapper.style.backgroundColor = "white";
+                    logoWrapper.style.borderRadius = "50%";
+                    logoWrapper.style.display = "flex";
+                    logoWrapper.style.justifyContent = "center";
+                    logoWrapper.style.alignItems = "center";
+                    logoWrapper.style.boxShadow = "0 0 6px rgba(0,0,0,0.2)";
+
                     const logoImg = document.createElement("img");
                     logoImg.src = "logo CLT (1)-01.png";
-                    logoImg.style.position = "absolute";
-                    logoImg.style.top = "50%";
-                    logoImg.style.left = "50%";
-                    logoImg.style.transform = "translate(-50%, -50%)";
-                    logoImg.style.width = "50px";
-                    logoImg.style.height = "50px";
-                    logoImg.style.backgroundColor = "white";
-                    logoImg.style.padding = "4px";
-                    logoImg.style.borderRadius = "50%";
-                    logoImg.style.boxShadow = "0 0 4px rgba(0,0,0,0.3)";
+                    logoImg.style.width = "34px";
+                    logoImg.style.height = "34px";
                     logoImg.style.objectFit = "contain";
-                    qrContainer.appendChild(logoImg);
+                    
+                    logoWrapper.appendChild(logoImg);
+                    qrContainer.appendChild(logoWrapper);
                 }, 100);
 
                 document.getElementById("single-info").innerHTML = `<b>${id}</b><br>${name}<br>${branch}`;
@@ -496,20 +502,28 @@
                     });
 
                     setTimeout(() => {
+                        const logoWrapper = document.createElement("div");
+                        logoWrapper.style.position = "absolute";
+                        logoWrapper.style.top = "50%";
+                        logoWrapper.style.left = "50%";
+                        logoWrapper.style.transform = "translate(-50%, -50%)";
+                        logoWrapper.style.width = "32px";
+                        logoWrapper.style.height = "32px";
+                        logoWrapper.style.backgroundColor = "white";
+                        logoWrapper.style.borderRadius = "50%";
+                        logoWrapper.style.display = "flex";
+                        logoWrapper.style.justifyContent = "center";
+                        logoWrapper.style.alignItems = "center";
+                        logoWrapper.style.boxShadow = "0 0 4px rgba(0,0,0,0.2)";
+
                         const logoImg = document.createElement("img");
                         logoImg.src = "logo CLT (1)-01.png";
-                        logoImg.style.position = "absolute";
-                        logoImg.style.top = "50%";
-                        logoImg.style.left = "50%";
-                        logoImg.style.transform = "translate(-50%, -50%)";
-                        logoImg.style.width = "30px";
-                        logoImg.style.height = "30px";
-                        logoImg.style.backgroundColor = "white";
-                        logoImg.style.padding = "2px";
-                        logoImg.style.borderRadius = "50%";
-                        logoImg.style.boxShadow = "0 0 4px rgba(0,0,0,0.3)";
+                        logoImg.style.width = "22px";
+                        logoImg.style.height = "22px";
                         logoImg.style.objectFit = "contain";
-                        qrDiv.appendChild(logoImg);
+
+                        logoWrapper.appendChild(logoImg);
+                        qrDiv.appendChild(logoWrapper);
                     }, 100);
                 });
                 sec.appendChild(grid); container.appendChild(sec);
