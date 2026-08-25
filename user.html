@@ -34,7 +34,7 @@
             z-index: -1;
         }
 
-        /* ปรับแต่งส่วน Header เพื่อรองรับหน้าจอมือถือ ไม่ให้ปุ่มทับกับหัวข้อ */
+        /* ปรับแต่งส่วน Header ไม่ให้ปุ่มทับหัวข้อ */
         .header { 
             text-align: center; 
             padding: 20px 15px 10px; 
@@ -45,11 +45,7 @@
             align-items: center;
             gap: 12px;
         }
-        
-        .header-text {
-            width: 100%;
-        }
-
+        .header-text { width: 100%; }
         .header h1 { 
             margin: 0; 
             font-size: 24px; 
@@ -58,12 +54,7 @@
             font-weight: 700; 
             line-height: 1.3;
         }
-        
-        .header p { 
-            color: #ddd; 
-            font-size: 13px; 
-            margin: 5px 0 0 0;
-        }
+        .header p { color: #ddd; font-size: 13px; margin: 5px 0 0 0; }
 
         .back-home { 
             display: inline-flex;
@@ -76,29 +67,15 @@
             font-size: 13px; 
             border: 1px solid rgba(255,215,0,0.3); 
             transition: 0.3s; 
-            align-self: flex-start; /* บนมือถือให้อยู่ชิดซ้ายแยกแถวชัดเจน */
+            align-self: flex-start;
         }
-        .back-home:hover { 
-            background: rgba(255,215,0,0.2); 
-        }
+        .back-home:hover { background: rgba(255,215,0,0.2); }
 
-        /* สำหรับหน้าจอแท็บเล็ตและคอมพิวเตอร์ (หน้าจอกว้าง 600px ขึ้นไป) */
         @media (min-width: 600px) {
-            .header {
-                display: block;
-                padding: 25px 15px 10px;
-            }
-            .header h1 { 
-                font-size: 32px; 
-            }
-            .header p { 
-                font-size: 14px; 
-            }
-            .back-home { 
-                position: absolute; 
-                left: 20px; 
-                top: 25px; 
-            }
+            .header { display: block; padding: 25px 15px 10px; }
+            .header h1 { font-size: 32px; }
+            .header p { font-size: 14px; }
+            .back-home { position: absolute; left: 20px; top: 25px; }
         }
         
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 15px 10px; }
@@ -119,6 +96,7 @@
         .action-btn:hover { opacity: 0.9; }
         .action-btn.checkin-btn { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); color: white; }
         .action-btn.print-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; margin-bottom: 10px; }
+        .action-btn.sync-btn { background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); color: #fff; margin-bottom: 10px; }
         .action-btn.danger-btn { background: #ff4444; color: white; }
         
         .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
@@ -127,58 +105,13 @@
         .mode-btn { width: auto; font-size: 15px; padding: 10px 15px; flex: 1; min-width: 140px; color: white; }
         .mode-btn.dark { background: #222; border: 1px solid #444; }
         
-        /* สไตล์ปุ่มเลือกรอบในหน้าแดชบอร์ด */
-        .round-toggle-container {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        .round-btn {
-            background: rgba(255, 255, 255, 0.08);
-            color: #ccc;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 13px;
-            font-family: 'Anakotmai', sans-serif;
-            font-weight: 700;
-            transition: 0.3s;
-        }
-        .round-btn.active {
-            background: #ffd700;
-            color: #1a0b2e;
-            border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255,215,0,0.5);
-        }
+        .round-toggle-container { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; flex-wrap: wrap; }
+        .round-btn { background: rgba(255, 255, 255, 0.08); color: #ccc; border: 1px solid rgba(255, 215, 0, 0.3); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
+        .round-btn.active { background: #ffd700; color: #1a0b2e; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.5); }
 
-        /* กรอบเล็งสแกนมือถือ */
-        .scanner-viewfinder {
-            position: relative;
-            width: 100%;
-            max-width: 280px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 3px solid #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-            background: #000;
-        }
-        .scan-line {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 3px;
-            background: #ffd700;
-            box-shadow: 0 0 10px #ffd700;
-            animation: scanAnim 2s infinite linear;
-            z-index: 10;
-        }
-        @keyframes scanAnim {
-            0% { top: 0%; }
-            50% { top: 98%; }
-            100% { top: 0%; }
-        }
+        .scanner-viewfinder { position: relative; width: 100%; max-width: 280px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 3px solid #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); background: #000; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #ffd700; box-shadow: 0 0 10px #ffd700; animation: scanAnim 2s infinite linear; z-index: 10; }
+        @keyframes scanAnim { 0% { top: 0%; } 50% { top: 98%; } 100% { top: 0%; } }
 
         #reader { width: 100%; border: none; background: #000; }
         .scanner-box { background: #1a1528; padding: 15px; border-radius: 15px; text-align: center; border: 2px dashed #ffd700; }
@@ -229,7 +162,7 @@
 
     <div class="tabs print-hide">
         <button class="tab-btn active" onclick="switchTab('single', this)">🎟️ สร้าง QR (เพิ่มคน)</button>
-        <button class="tab-btn" onclick="switchTab('bulk', this)">📊 สร้างจาก Excel</button>
+        <button class="tab-btn" onclick="switchTab('bulk', this)">📊 รายชื่อ & QR จาก Cloud</button>
         <button class="tab-btn" onclick="switchTab('search', this)">🔍 ค้นหา (ไม่มี QR)</button>
         <button class="tab-btn" onclick="switchTab('scanner', this)">📸 จุดสแกนเข้างาน</button>
         <button class="tab-btn" onclick="switchTab('dashboard', this)">📈 สถิติเข้างาน</button>
@@ -242,9 +175,9 @@
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 012345)">
+            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
-            <input type="text" id="s_empBranch" placeholder="สาขา">
+            <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
             
             <div class="btn-group">
                 <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
@@ -261,14 +194,18 @@
             </div>
         </div>
 
-        <!-- แท็บ 2: สร้างจาก Excel -->
+        <!-- แท็บ 2: ซิงค์และพิมพ์ QR Code จาก Cloud -->
         <div id="tab-bulk" class="tab-content">
             <div class="print-hide">
-                <h2 style="color: #ffd700; text-align: center;">พิมพ์ QR Code จาก Excel</h2>
+                <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">จัดการรายชื่อและพิมพ์บัตร QR Code</h2>
+                <p style="text-align: center; color: #bbb; font-size: 13px; margin-top: 0; margin-bottom: 15px;">ข้อมูลนี้ดึงตรงมาจาก Google Sheets ทำให้ทุกเครื่องเห็นตรงกัน</p>
+                
                 <input type="file" id="excelFile" accept=".xlsx, .xls">
-                <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -10px 0 15px 0; color: #ffd700;"></div>
+                <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -5px 0 15px 0; color: #ffd700;"></div>
+                
+                <button class="action-btn sync-btn" onclick="fetchGuestsFromCloud(true)">🔄 รีเฟรชดึงข้อมูลล่าสุดจาก Cloud</button>
                 <button class="action-btn print-btn" onclick="window.print()">🖨️ สั่งปริ้นแยกสาขา</button>
-                <button class="action-btn danger-btn" onclick="clearExcelData()">🗑️ ล้างข้อมูล Excel ที่จำไว้</button>
+                <button class="action-btn danger-btn" onclick="clearExcelData()">🗑️ ล้างหน้าจอแสดงผล</button>
             </div>
             <div id="qrContainer"></div>
         </div>
@@ -316,11 +253,10 @@
             <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
         </div>
 
-        <!-- แท็บ 5: Dashboard (ปุ่มสลับรอบเช้า / รอบเย็น / ทั้งหมด) -->
+        <!-- แท็บ 5: Dashboard -->
         <div id="tab-dashboard" class="tab-content">
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
             
-            <!-- ปุ่มสลับเลือกรอบ -->
             <div class="round-toggle-container">
                 <button class="round-btn active" id="btn-round-morning" onclick="switchDashboardRound('morning')">☀️ รอบเช้า</button>
                 <button class="round-btn" id="btn-round-evening" onclick="switchDashboardRound('evening')">🌙 รอบเย็น</button>
@@ -357,7 +293,8 @@
         let statsInterval; 
         const scannedGuests = new Set(); 
         let isProcessing = false;
-        let currentDashboardRound = 'morning'; // ค่าเริ่มต้นแสดงรอบเช้า
+        let currentDashboardRound = 'morning';
+        let allGuestsList = []; // รายชื่อกลางที่ซิงค์กับ Cloud
 
         window.addEventListener('DOMContentLoaded', () => {
             let pass = "";
@@ -370,10 +307,8 @@
                 }
             }
 
-            const storedExcel = localStorage.getItem('partyExcelData');
-            if (storedExcel) {
-                try { renderExcelData(JSON.parse(storedExcel)); } catch(e) {}
-            }
+            // ดึงข้อมูลตรงจาก Cloud ทันทีเมื่อเปิดเว็บ
+            fetchGuestsFromCloud(false);
         });
 
         function encodeThaiToBase64(id, name, branch) {
@@ -382,6 +317,26 @@
         }
         function decodeBase64ToThai(base64Text) {
             try { return decodeURIComponent(escape(atob(base64Text))); } catch (e) { return null; }
+        }
+
+        // ฟังก์ชันดึงรายชื่อจาก Cloud (Google Sheets) ให้ทุกเครื่องเห็นตรงกัน
+        function fetchGuestsFromCloud(showAlert = false) {
+            const statusDiv = document.getElementById('uploadStatus');
+            if(statusDiv) statusDiv.innerHTML = "⏳ กำลังดึงข้อมูลล่าสุดจาก Cloud...";
+
+            fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success' && data.guests) {
+                        allGuestsList = data.guests;
+                        renderGuestCards(allGuestsList);
+                        if(statusDiv) statusDiv.innerHTML = `✅ ซิงค์ข้อมูลกับ Cloud สำเร็จ (${allGuestsList.length} คน)`;
+                        if(showAlert) alert(`ซิงค์ข้อมูลสำเร็จ! รายชื่อพนักงาน ${allGuestsList.length} คน พร้อมใช้งาน`);
+                    }
+                })
+                .catch(err => {
+                    if(statusDiv) statusDiv.innerHTML = "⚠️ ไม่สามารถเชื่อมต่อ Cloud ได้";
+                });
         }
 
         function switchTab(tabId, btnElement) {
@@ -409,7 +364,6 @@
             }
         }
 
-        // ฟังก์ชันสลับรอบในหน้า Dashboard
         function switchDashboardRound(round) {
             currentDashboardRound = round;
             document.getElementById('btn-round-morning').classList.remove('active');
@@ -436,9 +390,8 @@
                     if(data.status === 'success') {
                         const localTotal = parseInt(localStorage.getItem('partyTotalGuests')) || 0;
                         const serverTotal = data.total ? parseInt(data.total) : 0;
-                        const total = Math.max(localTotal, serverTotal);
+                        const total = Math.max(localTotal, serverTotal, allGuestsList.length);
                         
-                        // ดึงข้อมูลสถิติตามปุ่มที่กดเลือก (morning, evening, หรือ all)
                         const roundData = data[currentDashboardRound] || { checkedIn: 0, recent: [] };
                         
                         const checked = roundData.checkedIn ? parseInt(roundData.checkedIn) : 0;
@@ -466,7 +419,7 @@
         }
 
         function setTotalManually() {
-            const currentTotal = localStorage.getItem('partyTotalGuests') || 0;
+            const currentTotal = localStorage.getItem('partyTotalGuests') || allGuestsList.length;
             const newTotal = prompt("ระบุจำนวนผู้เข้าร่วมทั้งหมดที่ต้องการ:", currentTotal);
             if(newTotal !== null && !isNaN(newTotal) && newTotal !== "") {
                 const parsedTotal = parseInt(newTotal);
@@ -488,20 +441,7 @@
                 return; 
             }
 
-            let currentTotal = parseInt(localStorage.getItem('partyTotalGuests')) || 0;
-            currentTotal += 1;
-            localStorage.setItem('partyTotalGuests', currentTotal);
-            fetch(`${scriptUrl}?action=setTotal&total=${currentTotal}`);
-
-            let storedExcel = localStorage.getItem('partyExcelData');
-            let json = [];
-            if (storedExcel) {
-                json = JSON.parse(storedExcel);
-            } else {
-                json = [["รหัสพนักงาน", "ชื่อพนักงาน", "สาขา"]];
-            }
-            json.push([id, name, branch]);
-            localStorage.setItem('partyExcelData', JSON.stringify(json));
+            allGuestsList.push({ id: id, name: name, branch: branch });
 
             fetch(`${scriptUrl}?action=addGuest&id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}&branch=${encodeURIComponent(branch)}`);
 
@@ -543,7 +483,7 @@
 
                 document.getElementById("single-info").innerHTML = `<b>${id}</b><br>${name}<br>${branch}`;
                 document.getElementById("single-qr-output").style.display = "flex";
-                alertBox.innerHTML = `✅ เพิ่ม "${name}" เข้าระบบสำเร็จ! สามารถเปิดดู QR จากหน้า index.html ได้แล้ว`;
+                alertBox.innerHTML = `✅ เพิ่ม "${name}" เข้าระบบสำเร็จ!`;
                 alertBox.style.color = "#ffd700";
             } 
             else if (mode === 'instantCheckIn') {
@@ -571,24 +511,15 @@
             document.getElementById("s_empBranch").value = "";
         }
 
-        function renderExcelData(json) {
+        function renderGuestCards(guests) {
             const container = document.getElementById("qrContainer");
             container.innerHTML = ""; 
             const groupedByBranch = {};
-            let validGuestCount = 0; 
 
-            json.forEach((row, index) => {
-                if (index === 0 || !row || row.length === 0) return; 
-                
-                const empId = row[0] ? row[0].toString().trim() : "-";
-                const empName = row[1] ? row[1].toString().trim() : "-";
-                const empBranch = row[2] ? row[2].toString().trim() : "ไม่ระบุสาขา"; 
-
-                if (empId !== "-" || empName !== "-") {
-                    if (!groupedByBranch[empBranch]) groupedByBranch[empBranch] = [];
-                    groupedByBranch[empBranch].push({ id: empId, name: empName, branch: empBranch });
-                    validGuestCount++; 
-                }
+            guests.forEach(emp => {
+                const branch = emp.branch || "ไม่ระบุสาขา";
+                if (!groupedByBranch[branch]) groupedByBranch[branch] = [];
+                groupedByBranch[branch].push(emp);
             });
 
             for (const branch in groupedByBranch) {
@@ -651,20 +582,18 @@
                 });
                 sec.appendChild(grid); container.appendChild(sec);
             }
-            return validGuestCount;
         }
 
         document.getElementById('excelFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             const statusDiv = document.getElementById('uploadStatus');
-            statusDiv.innerHTML = "⏳ กำลังประมวลผลและส่งข้อมูลไปยัง Google Sheets...";
+            statusDiv.innerHTML = "⏳ กำลังอัปโหลดข้อมูลขึ้น Cloud (Google Sheets)...";
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array', cellText: true, cellDates: true});
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                
                 const range = XLSX.utils.decode_range(firstSheet['!ref']);
                 let json = [];
                 
@@ -674,20 +603,10 @@
                         const cellAddress = {c: C, r: R};
                         const cellRef = XLSX.utils.encode_cell(cellAddress);
                         const cell = firstSheet[cellRef];
-                        
-                        if (cell) {
-                            let val = (cell.w !== undefined) ? cell.w : (cell.v !== undefined ? cell.v : "");
-                            row.push(val.toString().trim());
-                        } else {
-                            row.push("");
-                        }
+                        row.push(cell ? ((cell.w !== undefined) ? cell.w : cell.v).toString().trim() : "");
                     }
                     if (row.some(x => x !== "")) json.push(row);
                 }
-
-                localStorage.setItem('partyExcelData', JSON.stringify(json));
-                const count = renderExcelData(json);
-                localStorage.setItem('partyTotalGuests', count);
 
                 fetch(scriptUrl, {
                     method: "POST",
@@ -695,24 +614,21 @@
                 })
                 .then(res => res.json())
                 .then(data => {
-                    statusDiv.innerHTML = `✅ บันทึกข้อมูลขึ้น Google Sheets สำเร็จ (${count} คน)`;
-                    alert(`อัปโหลดสำเร็จ! ส่งข้อมูลรายชื่อ ${count} คน ขึ้นระบบกลางเรียบร้อยแล้ว`);
+                    statusDiv.innerHTML = `✅ อัปโหลดขึ้น Cloud สำเร็จ!`;
+                    alert(`อัปโหลดสำเร็จ! ทุกเครื่องสามารถดึงข้อมูลชุดนี้ได้ทันที`);
+                    fetchGuestsFromCloud(false);
                 })
                 .catch(() => {
-                    statusDiv.innerHTML = `⚠️ บันทึกข้อมูลในเครื่องเรียบร้อย (${count} คน)`;
+                    statusDiv.innerHTML = `⚠️ อัปโหลดไปยัง Cloud ไม่สำเร็จ`;
                 });
             };
             reader.readAsArrayBuffer(file);
         });
 
         function clearExcelData() {
-            if(confirm("ต้องการล้างรายชื่อ QR Code ที่ค้างอยู่บนหน้าจอใช่หรือไม่?")) {
-                localStorage.removeItem('partyExcelData');
-                localStorage.removeItem('partyTotalGuests');
-                document.getElementById("qrContainer").innerHTML = "";
-                document.getElementById('excelFile').value = ""; 
-                document.getElementById('uploadStatus').innerHTML = "";
-            }
+            document.getElementById("qrContainer").innerHTML = "";
+            document.getElementById('excelFile').value = ""; 
+            document.getElementById('uploadStatus').innerHTML = "";
         }
 
         function searchAttendee() {
@@ -725,26 +641,9 @@
                 return;
             }
 
-            const storedExcel = localStorage.getItem('partyExcelData');
-            if (!storedExcel) {
-                list.innerHTML = "<li style='text-align: center; color: #ff5252; border-left: 5px solid #ff5252;'>⚠️ ไม่พบฐานข้อมูล กรุณาไปอัปโหลดไฟล์ Excel ในแท็บ 'สร้างจาก Excel' ก่อนครับ</li>";
-                return;
-            }
-
-            const json = JSON.parse(storedExcel);
-            let matches = [];
-
-            json.forEach((row, index) => {
-                if (index === 0 || !row || row.length === 0) return; 
-                
-                const empId = row[0] ? row[0].toString().trim() : "-";
-                const empName = row[1] ? row[1].toString().trim() : "-";
-                const empBranch = row[2] ? row[2].toString().trim() : "ไม่ระบุสาขา"; 
-
-                if (empId.toLowerCase().includes(query) || empName.toLowerCase().includes(query)) {
-                    matches.push({ id: empId, name: empName, branch: empBranch });
-                }
-            });
+            let matches = allGuestsList.filter(emp => 
+                emp.id.toLowerCase().includes(query) || emp.name.toLowerCase().includes(query)
+            );
 
             if (matches.length === 0) {
                 list.innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444;'>❌ ไม่พบชื่อ หรือ รหัสพนักงานที่ค้นหา</li>";
