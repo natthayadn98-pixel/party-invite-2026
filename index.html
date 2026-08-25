@@ -15,11 +15,10 @@
             background: url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover; 
             min-height: 100vh;
-            min-height: 100dvh; /* ปรับให้พอดีกับหน้าจอมือถือจริง */
+            min-height: 100dvh;
             display: flex; justify-content: center; align-items: center;
             overflow-x: hidden; font-family: 'Anakotmai', sans-serif;
         }
-        /* แก้ไขให้ฟิลเตอร์สีดำคลุมเต็มจอแบบ fixed เสมอ ไม่ให้มีช่องว่างขอบล่างมือถือ */
         body::before { 
             content: ''; 
             position: fixed; 
@@ -68,8 +67,8 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
-        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; justify-content: center; align-items: center; font-family: 'Anakotmai', sans-serif; }
-        .qr-modal-content { background: #18122B; border: 1px solid rgba(255,215,0,0.4); padding: 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 300px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 999; justify-content: center; align-items: center; font-family: 'Anakotmai', sans-serif; }
+        .qr-modal-content { background: #18122B; border: 1px solid rgba(255,215,0,0.4); padding: 20px; border-radius: 15px; text-align: center; width: 92%; max-width: 340px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         #welcome-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -118,7 +117,7 @@
                 </div>
 
                 กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:<br>
-                <input type="text" id="checkId" placeholder="รหัสพนักงาน (เช่น 012345)">
+                <input type="text" id="checkId" placeholder="รหัสพนักงาน (เช่น 083354)">
             </div>
             <div>
                 <button class="btn-action" onclick="showMyQRCode()">🎟️ แสดง QR Code ของฉัน</button>
@@ -128,11 +127,19 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- หน้าต่างแสดง QR Code ส่วนตัว -->
+    <!-- หน้าต่างแสดง QR Code ส่วนตัว (ขยายขนาด QR ให้ใหญ่ขึ้น + คำแนะนำระยะสแกน) -->
     <div id="qr-modal">
         <div class="qr-modal-content">
             <h3 id="modal-title" style="color: #ffd700; margin-top: 0; font-size: 18px;">🎟️ บัตรเข้างานของคุณ</h3>
-            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 12px 0; background: white; padding: 8px; border-radius: 8px; position: relative; width: 160px; height: 160px; margin-left: auto; margin-right: auto;"></div>
+            
+            <!-- ขยายขนาด QR Code เป็น 260x260 พิกเซล -->
+            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 10px auto; background: white; padding: 10px; border-radius: 10px; position: relative; width: 260px; height: 260px;"></div>
+            
+            <!-- เพิ่มคำแนะนำการขยับระยะใกล้-ไกลสำหรับเครื่องสแกน 2D -->
+            <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 6px; border-radius: 6px; font-size: 11px; color: #ffeb3b; margin-bottom: 10px;">
+                💡 <b>คำแนะนำสำหรับเครื่องยิง:</b> หากสแกนไม่ติด ให้<b>ขยับมือถือเข้าหรือออกห่าง</b>จากเครื่องยิง (ระยะที่เหมาะสมประมาณ 15-20 ซม.)
+            </div>
+
             <div id="personal-info" style="font-size: 13px; color: #ddd; margin-bottom: 12px; line-height: 1.4;"></div>
             <button class="btn-action" onclick="closeModal()" style="background: #4a3b6c; color: white;">ปิดหน้าต่าง</button>
         </div>
@@ -219,27 +226,37 @@
                 modalTitle.innerText = "🎟️ บัตรเข้างานของคุณ";
                 const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
                 
+                // สร้าง QR ขนาดใหญ่ขึ้น (240x240 พิกเซล) เพื่อให้เครื่องยิง 2D อ่านเส้นได้ชัดเจน
                 new QRCode(qrContainer, { 
                     text: `VIPPARTY|${encodedData}`, 
-                    width: 160, height: 160, 
+                    width: 240, height: 240, 
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
+                // แทรกโลโก้ขนาดใหญ่ขึ้นตามสัดส่วน (52px) พร้อมวงกลมสีขาวรองพื้นหลัง
                 setTimeout(() => {
+                    const logoWrapper = document.createElement("div");
+                    logoWrapper.style.position = "absolute";
+                    logoWrapper.style.top = "50%";
+                    logoWrapper.style.left = "50%";
+                    logoWrapper.style.transform = "translate(-50%, -50%)";
+                    logoWrapper.style.width = "54px";
+                    logoWrapper.style.height = "54px";
+                    logoWrapper.style.backgroundColor = "white";
+                    logoWrapper.style.borderRadius = "50%";
+                    logoWrapper.style.display = "flex";
+                    logoWrapper.style.justifyContent = "center";
+                    logoWrapper.style.alignItems = "center";
+                    logoWrapper.style.boxShadow = "0 0 6px rgba(0,0,0,0.25)";
+
                     const logoImg = document.createElement("img");
                     logoImg.src = "logo CLT (1)-01.png";
-                    logoImg.style.position = "absolute";
-                    logoImg.style.top = "50%";
-                    logoImg.style.left = "50%";
-                    logoImg.style.transform = "translate(-50%, -50%)";
-                    logoImg.style.width = "32px";
-                    logoImg.style.height = "32px";
-                    logoImg.style.backgroundColor = "white";
-                    logoImg.style.padding = "2px";
-                    logoImg.style.borderRadius = "50%";
-                    logoImg.style.boxShadow = "0 0 4px rgba(0,0,0,0.3)";
+                    logoImg.style.width = "38px";
+                    logoImg.style.height = "38px";
                     logoImg.style.objectFit = "contain";
-                    qrContainer.appendChild(logoImg);
+                    
+                    logoWrapper.appendChild(logoImg);
+                    qrContainer.appendChild(logoWrapper);
                 }, 100);
 
                 infoContainer.innerHTML = `<b>รหัส:</b> ${guest.id}<br><b>ชื่อ:</b> ${guest.name}<br><b>สาขา:</b> ${guest.branch}`;
