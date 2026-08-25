@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>การ์ดเชิญงานเลี้ยงสังสรรค์ 2569</title>
+    <!-- โหลดฟอนต์ Anakotmai -->
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
@@ -95,10 +96,10 @@
                 ขอเรียนเชิญร่วมงานเลี้ยงสังสรรค์ประจำปีตามกำหนดการดังนี้:
                 
                 <div style="margin: 8px 0; background: #fdfbf7; padding: 8px 10px; border-radius: 6px; border-left: 3px solid #7b1113;">
-                    <p style="margin: 2px 0;"><span>📅 วันที่:</span> 12 กันยายน 2026</p>
-                    <p style="margin: 2px 0;"><span>⏰ เวลา:</span> 08:30 - 16:00 น.</p>
-                    <p style="margin: 2px 0;"><span>📍 สถานที่:</span> สนามกีฬาเมนสเตเดียม</p>
-                    <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> เสื้อกีฬาสีประจำทีม</p>
+                    <p style="margin: 2px 0;"><span>📅 วันที่:</span> 28 พฤศจิกายน 2569</p>
+                    <p style="margin: 2px 0;"><span>⏰ เวลา:</span> 17:00-23:00 น.</p>
+                    <p style="margin: 2px 0;"><span>📍 สถานที่:</span> รอยัล ฮิลล์ กอล์ฟ รีสอร์ท แอนด์ สปา จ.นครนายก</p>
+                    <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> ชุดกีฬา</p>
                 </div>
 
                 กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:<br>
@@ -115,7 +116,6 @@
     <div id="qr-modal">
         <div class="qr-modal-content">
             <h3 id="modal-title" style="color: #ffd700; margin-top: 0;">🎟️ บัตรเข้างานของคุณ</h3>
-            <!-- ใส่โลโก้ตรงกลาง QR Code -->
             <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 15px 0; background: white; padding: 10px; border-radius: 8px; position: relative; width: 180px; height: 180px; margin-left: auto; margin-right: auto;"></div>
             <div id="personal-info" style="font-size: 14px; color: #ddd; margin-bottom: 15px; line-height: 1.5;"></div>
             <button class="btn-action" onclick="closeModal()" style="background: #4a3b6c; color: white;">ปิดหน้าต่าง</button>
@@ -202,14 +202,13 @@
                 modalTitle.innerText = "🎟️ บัตรเข้างานของคุณ";
                 const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
                 
-                // สร้าง QR Code ระดับ Correction High เพื่อให้ใส่โลโก้ตรงกลางแล้วยังสแกนติดง่าย
                 new QRCode(qrContainer, { 
                     text: `VIPPARTY|${encodedData}`, 
                     width: 180, height: 180, 
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
-                // แทรกโลโก้บริษัทตรงกลาง QR Code
+                // แทรกโลโก้ขนาดพอดี สแกนติดง่าย
                 setTimeout(() => {
                     const logoImg = document.createElement("img");
                     logoImg.src = "logo CLT (1)-01.png";
@@ -217,11 +216,12 @@
                     logoImg.style.top = "50%";
                     logoImg.style.left = "50%";
                     logoImg.style.transform = "translate(-50%, -50%)";
-                    logoImg.style.width = "40px";
-                    logoImg.style.height = "40px";
+                    logoImg.style.width = "35px";
+                    logoImg.style.height = "35px";
                     logoImg.style.backgroundColor = "white";
-                    logoImg.style.padding = "3px";
+                    logoImg.style.padding = "2px";
                     logoImg.style.borderRadius = "50%";
+                    logoImg.style.boxShadow = "0 0 4px rgba(0,0,0,0.3)";
                     logoImg.style.objectFit = "contain";
                     qrContainer.appendChild(logoImg);
                 }, 100);

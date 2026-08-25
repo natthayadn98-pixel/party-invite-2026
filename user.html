@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party Connect - ระบบต้อนรับหน้างาน</title>
+    <!-- โหลดฟอนต์ Anakotmai -->
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -60,7 +61,33 @@
         .mode-btn { width: auto; font-size: 16px; padding: 10px 20px; flex: 1; min-width: 200px; color: white; font-family: 'Anakotmai', sans-serif; }
         .mode-btn.dark { background: #222; border: 1px solid #444; }
         
-        #reader { width: 100%; max-width: 450px; margin: 0 auto 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border:none; background: #fff;}
+        /* กรอบเล็งสแกนมือถือ (Viewfinder) */
+        .scanner-viewfinder {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            background: #000;
+        }
+        .scan-line {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: #ffd700;
+            box-shadow: 0 0 10px #ffd700;
+            animation: scanAnim 2s infinite linear;
+            z-index: 10;
+        }
+        @keyframes scanAnim {
+            0% { top: 0%; }
+            50% { top: 98%; }
+            100% { top: 0%; }
+        }
+
+        #reader { width: 100%; border: none; background: #000; }
         .scanner-box { background: #1a1528; padding: 20px; border-radius: 15px; text-align: center; border: 2px dashed #ffd700; font-family: 'Anakotmai', sans-serif; }
         #hardwareInput { font-size: 18px; text-align: center; font-weight: bold; padding: 15px; border: 2px solid #ffd700; background: #110E1B; color: #ffd700; outline: none; margin-bottom: 0; width: 100%; box-sizing: border-box; font-family: 'Anakotmai', sans-serif;}
         #hardwareInput:focus { box-shadow: 0 0 10px rgba(255,215,0,0.5); }
@@ -164,8 +191,12 @@
                 <button class="action-btn mode-btn dark" onclick="chooseScannerMode('hardware')">🔫 ใช้เครื่องยิงบาร์โค้ด</button>
             </div>
             
-            <div id="camera-section" style="display: none;">
-                <div id="reader"></div>
+            <div id="camera-section" style="display: none; text-align: center;">
+                <p style="color: #ffd700; font-size: 14px; margin-bottom: 8px;">📱 เล็ง QR Code ให้อยู่ในกรอบด้านล่าง</p>
+                <div class="scanner-viewfinder">
+                    <div class="scan-line"></div>
+                    <div id="reader"></div>
+                </div>
             </div>
             
             <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
@@ -206,11 +237,12 @@
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbxwf4GF2ebnkN_qg6T8C3pfF9k0PTqUDLFAHWywGHhRm1OQffUMtHIEsKBu0Qci9yv_Zg/exec"; 
         
-        let cameraInitialized = false;
+        let html5QrCode = null;
         let statsInterval; 
         const scannedGuests = new Set(); 
         let isProcessing = false;
 
+        // วนลูปถามรหัสผ่าน (9999) จนกว่าจะถูกต้อง
         window.addEventListener('DOMContentLoaded', () => {
             let pass = "";
             while (pass !== "9999") {
@@ -245,6 +277,7 @@
             if(btnElement) btnElement.classList.add('active');
             
             clearInterval(statsInterval);
+            stopCameraScanner();
 
             if (tabId === 'scanner') {
                 document.getElementById('camera-section').style.display = 'none';
@@ -626,12 +659,13 @@
         }
 
         function chooseScannerMode(mode) {
+            stopCameraScanner();
             document.getElementById('camera-section').style.display = 'none';
             document.getElementById('hardware-section').style.display = 'none';
 
             if (mode === 'camera') {
                 document.getElementById('camera-section').style.display = 'block';
-                if (!cameraInitialized) { initCameraScanner(); cameraInitialized = true; }
+                initCameraScanner();
                 resetResult("🟢 ระบบกล้องพร้อมสแกน...");
             } else if (mode === 'hardware') {
                 document.getElementById('hardware-section').style.display = 'block';
@@ -697,12 +731,33 @@
         }
 
         function initCameraScanner() {
-            const html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 30, qrbox: { width: 300, height: 300 } },
-                function(decodedText) { processQRCode(decodedText); }, function(error) { }
+            if (html5QrCode) {
+                stopCameraScanner();
+            }
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { 
+                    fps: 35, 
+                    qrbox: { width: 220, height: 220 },
+                    aspectRatio: 1.0
+                },
+                function(decodedText) { processQRCode(decodedText); }, 
+                function(error) { }
             ).catch(err => {
                 showError("❌ ไม่สามารถเปิดกล้องได้");
             });
+        }
+
+        function stopCameraScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    html5QrCode = null;
+                }).catch(err => {
+                    html5QrCode = null;
+                });
+            }
         }
 
         function showError(msg) {
