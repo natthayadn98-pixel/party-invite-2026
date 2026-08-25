@@ -34,7 +34,7 @@
             z-index: -1;
         }
 
-        /* ปรับแต่งส่วน Header ไม่ให้ปุ่มทับหัวข้อ */
+        /* ปรับแต่งส่วน Header บนมือถือ */
         .header { 
             text-align: center; 
             padding: 20px 15px 10px; 
@@ -175,9 +175,9 @@
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 01234)">
+            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
-            <input type="text" id="s_empBranch" placeholder="สาขา">
+            <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
             
             <div class="btn-group">
                 <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
@@ -194,7 +194,7 @@
             </div>
         </div>
 
-        <!-- แท็บ 2: ซิงค์และพิมพ์ QR Code จาก Cloud -->
+        <!-- แท็บ 2: จัดการและพิมพ์ QR Code จาก Cloud -->
         <div id="tab-bulk" class="tab-content">
             <div class="print-hide">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">จัดการรายชื่อและพิมพ์บัตร QR Code</h2>
@@ -294,7 +294,7 @@
         const scannedGuests = new Set(); 
         let isProcessing = false;
         let currentDashboardRound = 'morning';
-        let allGuestsList = []; // รายชื่อกลางที่ซิงค์กับ Cloud
+        let allGuestsList = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             let pass = "";
@@ -307,7 +307,6 @@
                 }
             }
 
-            // ดึงข้อมูลตรงจาก Cloud ทันทีเมื่อเปิดเว็บ
             fetchGuestsFromCloud(false);
         });
 
@@ -319,7 +318,6 @@
             try { return decodeURIComponent(escape(atob(base64Text))); } catch (e) { return null; }
         }
 
-        // ฟังก์ชันดึงรายชื่อจาก Cloud (Google Sheets) ให้ทุกเครื่องเห็นตรงกัน
         function fetchGuestsFromCloud(showAlert = false) {
             const statusDiv = document.getElementById('uploadStatus');
             if(statusDiv) statusDiv.innerHTML = "⏳ กำลังดึงข้อมูลล่าสุดจาก Cloud...";
@@ -584,6 +582,7 @@
             }
         }
 
+        // อัปเดตการอ่าน Excel ให้คงเลข 0 ด้านหน้าไว้เสมอ
         document.getElementById('excelFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -592,30 +591,31 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array', cellText: true, cellDates: true});
+                const workbook = XLSX.read(new Uint8Array(e.target.result), {
+                    type: 'array', 
+                    cellText: true, 
+                    raw: false,
+                    cellDates: true
+                });
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const range = XLSX.utils.decode_range(firstSheet['!ref']);
-                let json = [];
-                
-                for (let R = range.s.r; R <= range.e.r; ++R) {
-                    let row = [];
-                    for (let C = range.s.c; C <= range.e.c; ++C) {
-                        const cellAddress = {c: C, r: R};
-                        const cellRef = XLSX.utils.encode_cell(cellAddress);
-                        const cell = firstSheet[cellRef];
-                        row.push(cell ? ((cell.w !== undefined) ? cell.w : cell.v).toString().trim() : "");
-                    }
-                    if (row.some(x => x !== "")) json.push(row);
-                }
+                const json = XLSX.utils.sheet_to_json(firstSheet, { 
+                    header: 1, 
+                    raw: false,
+                    defval: "" 
+                });
+
+                const cleanJson = json.map(row => {
+                    return row.map(cell => (cell !== undefined && cell !== null) ? cell.toString().trim() : "");
+                }).filter(row => row.some(cell => cell !== ""));
 
                 fetch(scriptUrl, {
                     method: "POST",
-                    body: JSON.stringify({ guests: json })
+                    body: JSON.stringify({ guests: cleanJson })
                 })
                 .then(res => res.json())
                 .then(data => {
                     statusDiv.innerHTML = `✅ อัปโหลดขึ้น Cloud สำเร็จ!`;
-                    alert(`อัปโหลดสำเร็จ! ทุกเครื่องสามารถดึงข้อมูลชุดนี้ได้ทันที`);
+                    alert(`อัปโหลดสำเร็จ! ทุกเครื่องสามารถดึงข้อมูลชุดนี้ได้ทันที (คงเลข 0 ครบถ้วน)`);
                     fetchGuestsFromCloud(false);
                 })
                 .catch(() => {
