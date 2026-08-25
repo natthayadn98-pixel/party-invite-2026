@@ -4,67 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party Connect - ระบบต้อนรับหน้างาน</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        :root { --primary: #4A00E0; }
-        body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%); color: #333; margin: 0; padding: 0; min-height: 100vh; }
-        .header { text-align: center; padding: 30px 10px 10px; color: white; position: relative; }
-        .header h1 { margin: 0; font-size: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-        .back-home { position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.2); color: white; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-size: 14px; border: 1px solid rgba(255,255,255,0.4); transition: 0.3s; }
-        .back-home:hover { background: rgba(255,255,255,0.4); }
+        :root { 
+            --primary: #ffd700; 
+            --bg-dark: #0f051d;
+            --card-bg: rgba(25, 18, 43, 0.9);
+        }
+        body { 
+            font-family: 'Anakotmai', sans-serif; 
+            background: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover; 
+            color: #f3f3f3; 
+            margin: 0; padding: 0; min-height: 100vh; 
+        }
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(15, 5, 29, 0.9) 0%, rgba(45, 10, 68, 0.85) 100%);
+            z-index: -1;
+        }
+
+        .header { text-align: center; padding: 30px 10px 10px; color: white; position: relative; font-family: 'Anakotmai', sans-serif; }
+        .header h1 { margin: 0; font-size: 32px; text-shadow: 0 0 10px rgba(255,215,0,0.5); color: #ffd700; font-weight: 700; }
+        .header p { color: #ddd; }
+        .back-home { position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.1); color: white; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-size: 14px; border: 1px solid rgba(255,215,0,0.3); transition: 0.3s; font-family: 'Anakotmai', sans-serif; }
+        .back-home:hover { background: rgba(255,215,0,0.2); }
         
-        .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px; }
-        .tab-btn { background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; padding: 12px 25px; border-radius: 30px; cursor: pointer; font-size: 16px; font-family: 'Prompt', sans-serif; font-weight: 600; transition: 0.3s; }
-        .tab-btn:hover { background: rgba(255, 255, 255, 0.4); }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .container { max-width: 900px; margin: 0 auto 40px; padding: 0 20px; }
+        .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px; font-family: 'Anakotmai', sans-serif; }
+        .tab-btn { background: rgba(255, 255, 255, 0.1); color: #ddd; border: 2px solid rgba(255,215,0,0.3); padding: 12px 25px; border-radius: 30px; cursor: pointer; font-size: 16px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
+        .tab-btn:hover { background: rgba(255, 215, 0, 0.2); color: #fff; }
+        .tab-btn.active { background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%); color: #1a0b2e; border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.4); }
+        .container { max-width: 900px; margin: 0 auto 40px; padding: 0 20px; font-family: 'Anakotmai', sans-serif; }
         
-        .tab-content { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; animation: fadeIn 0.4s ease; }
+        .tab-content { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; animation: fadeIn 0.4s ease; color: #fff; font-family: 'Anakotmai', sans-serif; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; font-family: 'Prompt', sans-serif; box-sizing: border-box; }
-        .action-btn { background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; font-family: 'Prompt', sans-serif; width: 100%; transition: 0.3s; display: block; box-sizing: border-box; }
-        .action-btn.checkin-btn { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
-        .action-btn.print-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); margin-bottom: 10px; }
-        .action-btn.danger-btn { background: #ff4444; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 12px; margin: 10px 0 15px; border: 2px solid #4a3b6c; background: #1a1528; color: white; border-radius: 10px; font-size: 16px; font-family: 'Anakotmai', sans-serif; box-sizing: border-box; }
+        input[type="text"]:focus { border-color: #ffd700; outline: none; box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+
+        .action-btn { background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%); color: #1a0b2e; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: bold; font-family: 'Anakotmai', sans-serif; width: 100%; transition: 0.3s; display: block; box-sizing: border-box; box-shadow: 0 4px 15px rgba(255,165,0,0.3); }
+        .action-btn:hover { opacity: 0.9; }
+        .action-btn.checkin-btn { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); color: white; }
+        .action-btn.print-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; margin-bottom: 10px; }
+        .action-btn.danger-btn { background: #ff4444; color: white; }
         
         .btn-group { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
         .btn-group button { flex: 1; min-width: 240px; }
 
-        .mode-btn { width: auto; font-size: 16px; padding: 10px 20px; flex: 1; min-width: 200px; }
-        .mode-btn.dark { background: #333; }
+        .mode-btn { width: auto; font-size: 16px; padding: 10px 20px; flex: 1; min-width: 200px; color: white; font-family: 'Anakotmai', sans-serif; }
+        .mode-btn.dark { background: #222; border: 1px solid #444; }
         
-        #reader { width: 100%; max-width: 450px; margin: 0 auto 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border:none; background: #fff;}
-        .scanner-box { background: #f0f4f8; padding: 20px; border-radius: 15px; text-align: center; border: 2px dashed var(--primary); }
-        #hardwareInput { font-size: 18px; text-align: center; font-weight: bold; padding: 15px; border: 2px solid #8E2DE2; background: white; color: #333; outline: none; margin-bottom: 0; width: 100%; box-sizing: border-box;}
-        #hardwareInput:focus { border-color: #00C851; box-shadow: 0 0 10px rgba(0,200,81,0.3); }
-        #result { margin-top: 20px; font-size: 22px; font-weight: bold; padding: 20px; border-radius: 10px; background: #eee; text-align: center; transition: all 0.3s; }
+        #reader { width: 100%; max-width: 450px; margin: 0 auto 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border:none; background: #fff;}
+        .scanner-box { background: #1a1528; padding: 20px; border-radius: 15px; text-align: center; border: 2px dashed #ffd700; font-family: 'Anakotmai', sans-serif; }
+        #hardwareInput { font-size: 18px; text-align: center; font-weight: bold; padding: 15px; border: 2px solid #ffd700; background: #110E1B; color: #ffd700; outline: none; margin-bottom: 0; width: 100%; box-sizing: border-box; font-family: 'Anakotmai', sans-serif;}
+        #hardwareInput:focus { box-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        #result { margin-top: 20px; font-size: 22px; font-weight: bold; padding: 20px; border-radius: 10px; background: #1a1528; color: #fff; border: 1px solid rgba(255,215,0,0.3); text-align: center; transition: all 0.3s; font-family: 'Anakotmai', sans-serif; }
         
-        .branch-section { margin-top: 30px; padding: 20px; background: white; border-radius: 15px; }
+        .branch-section { margin-top: 30px; padding: 20px; background: #18122B; border: 1px solid rgba(255,215,0,0.2); border-radius: 15px; font-family: 'Anakotmai', sans-serif; }
+        .branch-section h3 { color: #ffd700 !important; }
         .qr-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; justify-content: center; }
-        .qr-card { padding: 15px; border: 1px dashed #ccc; border-radius: 10px; text-align: center; width: 190px; background: white; } 
-        .info-text { margin-top: 10px; font-size: 13px; text-align: left; line-height: 1.4; }
+        .qr-card { padding: 15px; border: 1px dashed rgba(255,215,0,0.4); border-radius: 10px; text-align: center; width: 190px; background: #110E1B; color: #fff; font-family: 'Anakotmai', sans-serif; } 
+        .info-text { margin-top: 10px; font-size: 13px; text-align: left; line-height: 1.4; color: #ddd; font-family: 'Anakotmai', sans-serif; }
         
         .stat-grid { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
-        .stat-box { background: white; border-radius: 15px; padding: 20px; text-align: center; border: 2px solid #eee; flex: 1; min-width: 140px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .stat-box h3 { margin: 0 0 10px; font-size: 16px; color: #666; display: flex; justify-content: center; align-items: center; gap: 5px; }
-        .stat-number { font-size: 45px; font-weight: bold; margin: 0; line-height: 1; }
-        .text-blue { color: #007bff; }
-        .text-green { color: #00C851; }
-        .text-red { color: #ff4444; }
+        .stat-box { background: #18122B; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid rgba(255,215,0,0.3); flex: 1; min-width: 140px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: 'Anakotmai', sans-serif; }
+        .stat-box h3 { margin: 0 0 10px; font-size: 16px; color: #bbb; display: flex; justify-content: center; align-items: center; gap: 5px; font-weight: 500; }
+        .stat-number { font-size: 45px; font-weight: bold; margin: 0; line-height: 1; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        .text-blue { color: #4da6ff !important; }
+        .text-green { color: #00C851 !important; }
+        .text-red { color: #ff5252 !important; }
         
-        .recent-list { list-style: none; padding: 0; margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; max-height: 350px; overflow-y: auto; }
-        .recent-list li { background: white; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #00C851; }
-        .edit-btn { background: #eee; border: none; border-radius: 5px; cursor: pointer; padding: 2px 8px; font-size: 12px; font-family: 'Prompt'; transition: 0.2s;}
-        .edit-btn:hover { background: #ddd; }
+        .recent-list { list-style: none; padding: 0; margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; max-height: 350px; overflow-y: auto; font-family: 'Anakotmai', sans-serif; }
+        .recent-list li { background: #18122B; padding: 12px 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); border-left: 5px solid #ffd700; color: #ddd; }
+        .edit-btn { background: #33264d; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; cursor: pointer; padding: 2px 8px; font-size: 12px; font-family: 'Anakotmai', sans-serif; transition: 0.2s;}
+        .edit-btn:hover { background: #ffd700; color: #1a0b2e; }
 
-        @media print { body { background: white; } .header, .tabs, .print-hide { display: none !important; } .tab-content { box-shadow: none; padding: 0; background: transparent; } .branch-section { page-break-after: always; padding: 0; } .branch-section:last-child { page-break-after: auto; } .qr-card { break-inside: avoid; border: 1px solid #ddd; } }
+        @media print { body { background: white !important; color: #333 !important; } .header, .tabs, .print-hide { display: none !important; } .tab-content { box-shadow: none; padding: 0; background: transparent; color: #333; } .branch-section { page-break-after: always; padding: 0; background: white; border: none; } .qr-card { break-inside: avoid; border: 1px solid #ddd; background: white; color: #333; } }
     </style>
 </head>
 <body>
@@ -87,8 +108,8 @@
         
         <!-- แท็บ 1: เพิ่มคนใหม่ -->
         <div id="tab-single" class="tab-content active">
-            <h2 style="color: var(--primary); text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
-            <p style="text-align: center; color: #666; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
+            <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
+            <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
             
             <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
@@ -102,9 +123,9 @@
             <div id="single-status-alert" style="text-align: center; font-weight: bold; margin-top: 15px; min-height: 25px;"></div>
 
             <div id="single-qr-output" style="margin-top: 25px; display: flex; justify-content: center; display: none;">
-                <div class="qr-card" style="width: 280px;">
+                <div class="qr-card" style="width: 280px; background: #fff; color: #333;">
                     <div id="single-qrcode" style="position: relative; width: 250px; height: 250px; margin: 0 auto;"></div>
-                    <div class="info-text" id="single-info" style="font-size:15px; margin-top:15px; text-align:center;"></div>
+                    <div class="info-text" id="single-info" style="font-size:15px; margin-top:15px; text-align:center; color:#333;"></div>
                 </div>
             </div>
         </div>
@@ -112,9 +133,9 @@
         <!-- แท็บ 2: สร้างจาก Excel -->
         <div id="tab-bulk" class="tab-content">
             <div class="print-hide">
-                <h2 style="color: var(--primary); text-align: center;">พิมพ์ QR Code จาก Excel</h2>
+                <h2 style="color: #ffd700; text-align: center;">พิมพ์ QR Code จาก Excel</h2>
                 <input type="file" id="excelFile" accept=".xlsx, .xls">
-                <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -10px 0 15px 0; color: var(--primary);"></div>
+                <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -10px 0 15px 0; color: #ffd700;"></div>
                 <button class="action-btn print-btn" onclick="window.print()">🖨️ สั่งปริ้นแยกสาขา</button>
                 <button class="action-btn danger-btn" onclick="clearExcelData()">🗑️ ล้างข้อมูล Excel ที่จำไว้</button>
             </div>
@@ -123,20 +144,20 @@
 
         <!-- แท็บ 3: ค้นหาและเช็คอินมือ -->
         <div id="tab-search" class="tab-content">
-            <h2 style="color: var(--primary); text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
-            <p style="text-align: center; color: #666; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
+            <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
+            <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
             
             <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." onkeyup="searchAttendee()">
             <div id="search-alert" style="text-align: center; font-weight: bold; margin-bottom: 10px; min-height: 25px;"></div>
             
             <ul class="recent-list" id="searchResults">
-                <li style="text-align: center; color: #999; border-left: 5px solid #ccc;">กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>
+                <li style="text-align: center; color: #777; border-left: 5px solid #444;">กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>
             </ul>
         </div>
 
         <!-- แท็บ 4: สแกนเข้างาน -->
         <div id="tab-scanner" class="tab-content">
-            <h2 style="color: var(--primary); text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
+            <h2 style="color: #ffd700; text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
             
             <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
                 <button class="action-btn mode-btn" onclick="chooseScannerMode('camera')">📸 สแกนด้วยกล้องมือถือ</button>
@@ -148,7 +169,7 @@
             </div>
             
             <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
-                <p style="color: #555; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:red;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
+                <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#ff6b6b;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
                 <input type="text" id="hardwareInput" placeholder="[ สแกนคิวอาร์โค้ดที่นี่ ]" autocomplete="off">
             </div>
             
@@ -157,7 +178,7 @@
 
         <!-- แท็บ 5: Dashboard -->
         <div id="tab-dashboard" class="tab-content">
-            <h2 style="color: var(--primary); text-align: center; margin-bottom: 30px;">สถิติผู้เข้างาน (Real-time)</h2>
+            <h2 style="color: #ffd700; text-align: center; margin-bottom: 30px;">สถิติผู้เข้างาน (Real-time)</h2>
             
             <div class="stat-grid">
                 <div class="stat-box">
@@ -174,9 +195,9 @@
                 </div>
             </div>
 
-            <h4 style="text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; max-width: 500px; margin: 30px auto 0;">รายชื่อผู้เข้างานล่าสุด</h4>
+            <h4 style="text-align: center; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 10px; max-width: 500px; margin: 30px auto 0; color: #ffd700;">รายชื่อผู้เข้างานล่าสุด</h4>
             <ul class="recent-list" id="recent-scans">
-                <li style="border-left: 5px solid #ccc; color: #999; text-align: center;">กำลังโหลดข้อมูล...</li>
+                <li style="border-left: 5px solid #444; color: #777; text-align: center;">กำลังโหลดข้อมูล...</li>
             </ul>
         </div>
 
@@ -190,7 +211,6 @@
         const scannedGuests = new Set(); 
         let isProcessing = false;
 
-        // วนลูปถามรหัสผ่านจนกว่าจะถูกต้อง (ไม่เด้งหนีไปหน้าอื่น)
         window.addEventListener('DOMContentLoaded', () => {
             let pass = "";
             while (pass !== "9999") {
@@ -235,7 +255,7 @@
                 statsInterval = setInterval(fetchStats, 5000); 
             } else if (tabId === 'search') {
                 document.getElementById('searchInput').value = "";
-                document.getElementById('searchResults').innerHTML = "<li style='text-align: center; color: #999; border-left: 5px solid #ccc;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
+                document.getElementById('searchResults').innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
                 document.getElementById('search-alert').innerHTML = "";
             }
         }
@@ -260,11 +280,11 @@
                         const list = document.getElementById('recent-scans');
                         list.innerHTML = "";
                         if (!data.recent || data.recent.length === 0) {
-                            list.innerHTML = "<li style='border-left: 5px solid #ccc; color: #999; text-align: center;'>ยังไม่มีคนสแกนเข้างาน</li>";
+                            list.innerHTML = "<li style='border-left: 5px solid #444; color: #777; text-align: center;'>ยังไม่มีคนสแกนเข้างาน</li>";
                         } else {
                             data.recent.forEach(emp => {
                                 const li = document.createElement('li');
-                                li.innerHTML = `<b>${emp.name}</b> <span style="color:#666; font-size:14px;">(${emp.branch})</span>`;
+                                li.innerHTML = `<b>${emp.name}</b> <span style="color:#aaa; font-size:14px;">(${emp.branch})</span>`;
                                 list.appendChild(li);
                             });
                         }
@@ -322,15 +342,32 @@
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
+                // แทรกโลโก้ตรงกลาง
+                setTimeout(() => {
+                    const logoImg = document.createElement("img");
+                    logoImg.src = "logo CLT (1)-01.png";
+                    logoImg.style.position = "absolute";
+                    logoImg.style.top = "50%";
+                    logoImg.style.left = "50%";
+                    logoImg.style.transform = "translate(-50%, -50%)";
+                    logoImg.style.width = "50px";
+                    logoImg.style.height = "50px";
+                    logoImg.style.backgroundColor = "white";
+                    logoImg.style.padding = "4px";
+                    logoImg.style.borderRadius = "50%";
+                    logoImg.style.objectFit = "contain";
+                    qrContainer.appendChild(logoImg);
+                }, 100);
+
                 document.getElementById("single-info").innerHTML = `<b>${id}</b><br>${name}<br>${branch}`;
                 document.getElementById("single-qr-output").style.display = "flex";
                 alertBox.innerHTML = `✅ เพิ่ม "${name}" เข้าระบบสำเร็จ! สามารถเปิดดู QR จากหน้า index.html ได้แล้ว`;
-                alertBox.style.color = "#4A00E0";
+                alertBox.style.color = "#ffd700";
             } 
             else if (mode === 'instantCheckIn') {
                 document.getElementById("single-qr-output").style.display = "none";
                 alertBox.innerHTML = `⏳ กำลังบันทึกการเข้างานของ "${name}"...`;
-                alertBox.style.color = "#ff9800";
+                alertBox.style.color = "#ffa500";
 
                 const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}&branch=${encodeURIComponent(branch)}`;
                 fetch(fetchUrl)
@@ -343,7 +380,7 @@
                     })
                     .catch(err => {
                         alertBox.innerHTML = `⚠️ เพิ่มรายชื่อแล้ว แต่การส่งสถิติเข้างานขัดข้อง`;
-                        alertBox.style.color = "red";
+                        alertBox.style.color = "#ff5252";
                     });
             }
 
@@ -374,7 +411,7 @@
 
             for (const branch in groupedByBranch) {
                 const sec = document.createElement("div"); sec.className = "branch-section";
-                sec.innerHTML = `<h3 style="border-bottom: 2px solid var(--primary); color:var(--primary);">📍 สาขา: ${branch}</h3>`;
+                sec.innerHTML = `<h3 style="border-bottom: 2px solid rgba(255,215,0,0.3); color:#ffd700; padding-bottom: 8px;">📍 สาขา: ${branch}</h3>`;
                 const grid = document.createElement("div"); grid.className = "qr-grid";
 
                 groupedByBranch[branch].forEach(emp => {
@@ -385,9 +422,12 @@
                     qrDiv.style.width = "150px";
                     qrDiv.style.height = "150px";
                     qrDiv.style.margin = "0 auto";
+                    qrDiv.style.background = "#fff";
+                    qrDiv.style.padding = "5px";
+                    qrDiv.style.borderRadius = "6px";
 
                     const infoDiv = document.createElement("div"); infoDiv.className = "info-text";
-                    infoDiv.innerHTML = `<b>${emp.id}</b><br>${emp.name}<br>${emp.branch}`;
+                    infoDiv.innerHTML = `<b style="color:#ffd700;">${emp.id}</b><br>${emp.name}<br>${emp.branch}`;
 
                     card.appendChild(qrDiv);
                     card.appendChild(infoDiv);
@@ -401,6 +441,23 @@
                         height: 150,
                         correctLevel : QRCode.CorrectLevel.H 
                     });
+
+                    // แทรกโลโก้ตรงกลางสำหรับบัตรพิมพ์ Excel
+                    setTimeout(() => {
+                        const logoImg = document.createElement("img");
+                        logoImg.src = "logo CLT (1)-01.png";
+                        logoImg.style.position = "absolute";
+                        logoImg.style.top = "50%";
+                        logoImg.style.left = "50%";
+                        logoImg.style.transform = "translate(-50%, -50%)";
+                        logoImg.style.width = "30px";
+                        logoImg.style.height = "30px";
+                        logoImg.style.backgroundColor = "white";
+                        logoImg.style.padding = "2px";
+                        logoImg.style.borderRadius = "50%";
+                        logoImg.style.objectFit = "contain";
+                        qrDiv.appendChild(logoImg);
+                    }, 100);
                 });
                 sec.appendChild(grid); container.appendChild(sec);
             }
@@ -474,13 +531,13 @@
             list.innerHTML = "";
 
             if (query.length < 1) {
-                list.innerHTML = "<li style='text-align: center; color: #999; border-left: 5px solid #ccc;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
+                list.innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
                 return;
             }
 
             const storedExcel = localStorage.getItem('partyExcelData');
             if (!storedExcel) {
-                list.innerHTML = "<li style='text-align: center; color: red; border-left: 5px solid red;'>⚠️ ไม่พบฐานข้อมูล กรุณาไปอัปโหลดไฟล์ Excel ในแท็บ 'สร้างจาก Excel' ก่อนครับ</li>";
+                list.innerHTML = "<li style='text-align: center; color: #ff5252; border-left: 5px solid #ff5252;'>⚠️ ไม่พบฐานข้อมูล กรุณาไปอัปโหลดไฟล์ Excel ในแท็บ 'สร้างจาก Excel' ก่อนครับ</li>";
                 return;
             }
 
@@ -500,7 +557,7 @@
             });
 
             if (matches.length === 0) {
-                list.innerHTML = "<li style='text-align: center; color: #999; border-left: 5px solid #ccc;'>❌ ไม่พบชื่อ หรือ รหัสพนักงานที่ค้นหา</li>";
+                list.innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444;'>❌ ไม่พบชื่อ หรือ รหัสพนักงานที่ค้นหา</li>";
                 return;
             }
 
@@ -514,15 +571,15 @@
                 
                 let btnHtml = "";
                 if (isCheckedIn) {
-                    btnHtml = `<span style="color: #ff9800; font-weight: bold;">✅ สแกนแล้ว</span>`;
+                    btnHtml = `<span style="color: #ffa500; font-weight: bold;">✅ สแกนแล้ว</span>`;
                 } else {
                     btnHtml = `<button class="action-btn" style="width: auto; padding: 8px 20px; font-size: 14px; margin: 0;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">เข้างาน</button>`;
                 }
 
                 li.innerHTML = `
                     <div style="line-height: 1.4;">
-                        <b>${emp.name}</b> <span style="color:#666; font-size:14px;">(${emp.branch})</span><br>
-                        <small style="color:#999;">รหัส: ${emp.id}</small>
+                        <b style="color:#ffd700;">${emp.name}</b> <span style="color:#aaa; font-size:14px;">(${emp.branch})</span><br>
+                        <small style="color:#888;">รหัส: ${emp.id}</small>
                     </div>
                     <div>${btnHtml}</div>
                 `;
@@ -541,7 +598,7 @@
             }
 
             const alertBox = document.getElementById('search-alert');
-            alertBox.innerHTML = `⏳ กำลังบันทึก: <span style="color:#4A00E0">${empName}</span>...`;
+            alertBox.innerHTML = `⏳ กำลังบันทึก: <span style="color:#ffd700">${empName}</span>...`;
             isProcessing = true;
 
             const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}`;
@@ -556,7 +613,7 @@
                     } 
                     else if (data.status === "duplicate") { 
                         scannedGuests.add(empId); 
-                        alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5722">${empName}</span> เข้างานไปแล้ว`;
+                        alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5252">${empName}</span> เข้างานไปแล้ว`;
                         searchAttendee();
                     }
                 })
@@ -635,25 +692,36 @@
                     showError("❌ การเชื่อมต่อล้มเหลว กรุณาสแกนใหม่");
                 })
                 .finally(() => {
-                        setTimeout(() => { isProcessing = false; restoreFocus(); }, 1500); // ลดเหลือ 1.5 วินาที ไวขึ้นเยอะ
-                 });
+                    // ปรับความเร็วหน่วงเวลาหลังสแกนสำเร็จเหลือ 1.5 วินาที เพื่อให้สแกนคิวต่อไปได้ไวยิ่งขึ้น
+                    setTimeout(() => { isProcessing = false; restoreFocus(); }, 1500); 
+                });
+        }
+
+        // เร่งสปีดกล้องสแกนให้ไวขึ้นด้วย fps: 30 และขยายกรอบสแกน
+        function initCameraScanner() {
+            const html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 30, qrbox: { width: 300, height: 300 } },
+                function(decodedText) { processQRCode(decodedText); }, function(error) { }
+            ).catch(err => {
+                showError("❌ ไม่สามารถเปิดกล้องได้");
+            });
         }
 
         function showError(msg) {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = msg;
-            resultDiv.style.backgroundColor = "#ff4d4d"; resultDiv.style.color = "white";
+            resultDiv.style.backgroundColor = "#ff5252"; resultDiv.style.color = "white";
             isProcessing = true;
-            setTimeout(() => { isProcessing = false; restoreFocus(); }, 5000); 
+            setTimeout(() => { isProcessing = false; restoreFocus(); }, 3000); 
         }
 
         function showDuplicateAlert(id, name) {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = `⚠️ <b style="font-size:26px;">ข้อมูลซ้ำ!</b> ⚠️<br>รหัส <b>${id}</b> ได้สแกนเข้างานไปแล้ว<br><small>(${name})</small>`;
-            resultDiv.style.backgroundColor = "#ff5722"; 
-            resultDiv.style.color = "white";
+            resultDiv.style.backgroundColor = "#ffa500"; 
+            resultDiv.style.color = "#1a0b2e";
             isProcessing = true;
-            setTimeout(() => { isProcessing = false; restoreFocus(); }, 5000); 
+            setTimeout(() => { isProcessing = false; restoreFocus(); }, 3000); 
         }
 
         let scannerTimer;
@@ -672,23 +740,6 @@
             }, 300); 
         });
 
-        function initCameraScanner() {
-    const html5QrCode = new Html5Qrcode("reader");
-    
-    // ปรับ fps เป็น 30 (เพิ่มความถี่ในการจับภาพ) และปรับขนาด qrbox ให้พอดี
-    html5QrCode.start(
-        { facingMode: "environment" }, 
-        { 
-            fps: 30,             // จากเดิม 15 เพิ่มเป็น 30 เพื่อให้กล้องจับภาพลื่นและไวขึ้น
-            qrbox: { width: 300, height: 300 } // ขยายกรอบสแกนให้กว้างขึ้น เล็งง่ายขึ้น
-        },
-        function(decodedText) { processQRCode(decodedText); }, 
-        function(error) { }
-    ).catch(err => {
-        showError("❌ ไม่สามารถเปิดกล้องได้");
-    });
-}
-
         function restoreFocus() {
             if (document.getElementById('camera-section').style.display === 'block') { resetResult("🟢 ระบบกล้องพร้อมสแกน..."); } 
             else if (document.getElementById('hardware-section').style.display === 'block') {
@@ -698,7 +749,8 @@
 
         function resetResult(msg = "🟢 ระบบพร้อมสแกน (คิวต่อไป)...") {
             const resultDiv = document.getElementById('result'); resultDiv.innerText = msg;
-            resultDiv.style.backgroundColor = "#eee"; resultDiv.style.color = "#333";
+            resultDiv.style.backgroundColor = "#1a1528"; resultDiv.style.color = "#ffd700";
+            resultDiv.style.border = "1px solid rgba(255,215,0,0.3)";
         }
 
         document.addEventListener('click', function() {
