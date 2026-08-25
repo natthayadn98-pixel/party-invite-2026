@@ -17,6 +17,7 @@
             overflow-x: hidden; font-family: 'Prompt', sans-serif;
         }
         body::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.55); z-index: -1; }
+        
         .envelope-wrapper { position: relative; width: 90%; max-width: 360px; height: 240px; cursor: pointer; }
         .envelope-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #d8c8af; box-shadow: 0 15px 35px rgba(0,0,0,0.6); z-index: 1; }
         .paper-texture { background: linear-gradient(135deg, #f9f5ec 0%, #eaddc4 100%); }
@@ -39,17 +40,35 @@
         .tap-hint { position: absolute; bottom: -35px; width: 100%; text-align: center; color: #fff; font-size: 13px; }
         .letter h2 { font-family: 'Cinzel', serif; color: #7b1113; margin: 0 0 5px 0; border-bottom: 1px solid #eaddc4; padding-bottom: 5px; font-size: 16px; }
         input[type="text"] { width: 100%; padding: 8px; margin: 5px 0 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: 'Prompt', sans-serif; box-sizing: border-box; }
-        .btn-action { display: block; background: #7b1113; color: #fffdf7; padding: 10px 0; border-radius: 4px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; border: none; width: 100%; }
+        .btn-action { display: block; background: #7b1113; color: #fffdf7; padding: 10px 0; border-radius: 4px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; border: none; width: 100%; transition: background 0.3s; }
+        .btn-action:hover { background: #5e080b; }
         .envelope-wrapper.open .flap-top { transform: rotateX(180deg); z-index: 1; }
         .envelope-wrapper.open .wax-seal { opacity: 0; }
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
+
+        /* หน้าต่างป๊อปอัป QR Code */
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center; }
         .qr-modal-content { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; }
+
+        /* หน้าจอต้อนรับเข้าสู้งานเลี้ยง (Welcome Screen) */
+        #welcome-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #7b1113 0%, #3e0507 100%);
+            z-index: 9999; justify-content: center; align-items: center; color: white; text-align: center; padding: 20px;
+        }
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2); padding: 30px; border-radius: 20px;
+            max-width: 400px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
+    <!-- หน้าซองจดหมายการ์ดเชิญปกติ -->
     <div class="envelope-wrapper" onclick="this.classList.toggle('open')">
         <div class="envelope-back"></div>
         <div class="flap-left paper-texture"></div>
@@ -68,27 +87,29 @@
 
         <div class="letter" onclick="event.stopPropagation();">
             <h2>งานเลี้ยงสังสรรค์ ประจำปี 2569</h2>
-            <div style="font-size: 12px; text-align: left; color: #444; line-height: 1.6;">
+            <div style="font-size:12px; text-align:left; color:#444; line-height: 1.6;">
                 เรียน <strong>พนักงาน CLT</strong>,<br>
                 ขอเรียนเชิญร่วมงานเลี้ยงสังสรรค์ประจำปีตามกำหนดการดังนี้:
                 
                 <div style="margin: 8px 0; background: #fdfbf7; padding: 8px 10px; border-radius: 6px; border-left: 3px solid #7b1113;">
-                    <p style="margin: 2px 0;"><span>📅 วันที่:</span> 28 พฤศจิกายน 2559</p>
-                    <p style="margin: 2px 0;"><span>⏰ เวลา:</span> 17:00 น. เป็นต้นไป</p>
-                    <p style="margin: 2px 0;"><span>📍 สถานที่:</span> รอยัล ฮิลล์ กอล์ฟ รีสอร์ท แอนด์ สปา จังหวัดนครนายก</p>
-                    <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> ชุดกีฬา</p>
+                    <p style="margin: 2px 0;"><span>📅 วันที่:</span> 12 กันยายน 2026</p>
+                    <p style="margin: 2px 0;"><span>⏰ เวลา:</span> 08:30 - 16:00 น.</p>
+                    <p style="margin: 2px 0;"><span>📍 สถานที่:</span> สนามกีฬาเมนสเตเดียม</p>
+                    <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> เสื้อกีฬาสีประจำทีม</p>
                 </div>
 
                 กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:<br>
-                <input type="text" id="checkId" placeholder="รหัสพนักงาน (เช่น 012345)">
+                <input type="text" id="checkId" placeholder="รหัสพนักงาน (เช่น 083354)">
             </div>
-        <div>
+            <div>
                 <button class="btn-action" onclick="showMyQRCode()">🎟️ แสดง QR Code ของฉัน</button>
             </div>
         </div>
+
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
+    <!-- หน้าต่างแสดง QR Code ส่วนตัว -->
     <div id="qr-modal">
         <div class="qr-modal-content">
             <h3 id="modal-title" style="color: #7b1113; margin-top: 0;">🎟️ บัตรเข้างานของคุณ</h3>
@@ -98,22 +119,39 @@
         </div>
     </div>
 
+    <!-- หน้าจอต้อนรับเข้าสู้งานเลี้ยง (แสดงขึ้นมาเมื่อมีการสแกนสำเร็จ) -->
+    <div id="welcome-screen">
+        <div class="welcome-card">
+            <h1 style="font-family: 'Cinzel', serif; color: #ffd700; margin-top: 0; font-size: 28px;">✨ Welcome ✨</h1>
+            <p style="font-size: 18px; margin: 10px 0; font-weight: 600;">ยินดีต้อนรับเข้าสู้งานเลี้ยงสังสรรค์</p>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
+            <div id="welcome-guest-info" style="font-size: 16px; line-height: 1.5; margin-bottom: 20px;"></div>
+            <button class="btn-action" onclick="hideWelcomeScreen()" style="background: #ffd700; color: #3e0507; font-weight: bold;">🎉 เข้าสู่งานเลี้ยง</button>
+        </div>
+    </div>
+
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbxwf4GF2ebnkN_qg6T8C3pfF9k0PTqUDLFAHWywGHhRm1OQffUMtHIEsKBu0Qci9yv_Zg/exec";
         let cachedGuests = [];
 
-        // ฟังก์ชันจัดรูปแบบรหัส: ถ้าเป็นตัวเลขล้วนให้เติม 0 ข้างหน้าให้ครบ 6 หลัก
-        function formatEmpId(val) {
-            if (!val) return "";
-            let str = val.toString().trim();
-            if (/^\d+$/.test(str) && str.length < 6) {
-                str = str.padStart(6, '0');
-            }
-            return str;
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
-            // โหลดจาก LocalStorage สำรอง
+            // ตรวจสอบว่ามีค่าพารามิเตอร์ส่งกลับมาหลังสแกนหรือไม่ เช่น ?checkin=EMP01 หรือ ?name=สมชาย
+            const urlParams = new URLSearchParams(window.location.search);
+            const checkinName = urlParams.get('name');
+            const checkinBranch = urlParams.get('branch');
+            const checkinId = urlParams.get('id');
+
+            if (checkinName) {
+                // แสดงหน้าจอต้อนรับทันที
+                document.getElementById("welcome-guest-info").innerHTML = `
+                    <b>ชื่อ:</b> ${decodeURIComponent(checkinName)}<br>
+                    <b>สาขา:</b> ${decodeURIComponent(checkinBranch || 'ไม่ระบุ')}<br>
+                    <b>รหัส:</b> ${checkinId || '-'}`
+                ;
+                document.getElementById("welcome-screen").style.display = "flex";
+            }
+
+            // โหลดข้อมูลสำรองจาก LocalStorage
             const stored = localStorage.getItem('partyExcelData');
             if (stored) {
                 try {
@@ -121,7 +159,7 @@
                     for (let i = 1; i < json.length; i++) {
                         if (json[i] && json[i][0]) {
                             cachedGuests.push({
-                                id: formatEmpId(json[i][0]),
+                                id: json[i][0].toString().trim(),
                                 name: json[i][1] ? json[i][1].toString().trim() : "",
                                 branch: json[i][2] ? json[i][2].toString().trim() : ""
                             });
@@ -130,19 +168,19 @@
                 } catch(e) {}
             }
 
-            // ดึงข้อมูลจาก Google Sheets
+            // โหลดข้อมูลจาก Google Sheets
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "success" && data.guests.length > 0) {
                         cachedGuests = data.guests.map(g => ({
-                            id: formatEmpId(g.id),
-                            name: g.name,
-                            branch: g.branch
+                            id: g.id.toString().trim(),
+                            name: g.name.toString().trim(),
+                            branch: g.branch.toString().trim()
                         }));
                     }
                 })
-                .catch(err => console.log("โหลดรายชื่อออนไลน์ไม่สำเร็จ ใช้ข้อมูลในเครื่อง"));
+                .catch(err => console.log("โหลดรายชื่อออนไลน์ไม่สำเร็จ"));
         });
 
         function showMyQRCode() {
@@ -152,23 +190,19 @@
                 return; 
             }
 
-            const searchId = formatEmpId(rawEmpId); // จัดรูปแบบให้คงเลข 0 เช่น 083354
-
             const qrContainer = document.getElementById("personal-qrcode");
             const infoContainer = document.getElementById("personal-info");
             const modalTitle = document.getElementById("modal-title");
             qrContainer.innerHTML = "";
 
-            // ค้นหารหัสพนักงานที่ตรงกัน
-            const guest = cachedGuests.find(g => formatEmpId(g.id).toLowerCase() === searchId.toLowerCase());
+            const guest = cachedGuests.find(g => g.id.toLowerCase() === rawEmpId.toLowerCase());
 
             if (!guest) {
                 modalTitle.innerText = "❌ ไม่พบข้อมูล";
-                infoContainer.innerHTML = `ไม่พบรหัสพนักงาน <b>"${searchId}"</b> ในระบบ<br><br><span style="color: red; font-weight: bold;">กรุณาติดต่อเจ้าหน้าที่</span>`;
+                infoContainer.innerHTML = `ไม่พบรหัสพนักงาน <b>"${rawEmpId}"</b> ในระบบ<br><br><span style="color: red; font-weight: bold;">กรุณาติดต่อเจ้าหน้าที่</span>`;
             } else {
                 modalTitle.innerText = "🎟️ บัตรเข้างานของคุณ";
-                const displayId = formatEmpId(guest.id);
-                const encodedData = btoa(unescape(encodeURIComponent(`${displayId}|${guest.name}|${guest.branch}`)));
+                const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
                 
                 new QRCode(qrContainer, { 
                     text: `VIPPARTY|${encodedData}`, 
@@ -176,7 +210,7 @@
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
-                infoContainer.innerHTML = `<b>รหัส:</b> ${displayId}<br><b>ชื่อ:</b> ${guest.name}<br><b>สาขา:</b> ${guest.branch}`;
+                infoContainer.innerHTML = `<b>รหัส:</b> ${guest.id}<br><b>ชื่อ:</b> ${guest.name}<br><b>สาขา:</b> ${guest.branch}`;
             }
 
             document.getElementById("qr-modal").style.display = "flex";
@@ -184,6 +218,12 @@
 
         function closeModal() {
             document.getElementById("qr-modal").style.display = "none";
+        }
+
+        function hideWelcomeScreen() {
+            document.getElementById("welcome-screen").style.display = "none";
+            // ล้าง URL parameter ออกเพื่อให้หน้าจอกลับมาเป็นปกติเวลาพนักงานกดรีเฟรช
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
     </script>
 </body>
