@@ -34,11 +34,72 @@
             z-index: -1;
         }
 
-        .header { text-align: center; padding: 25px 15px 10px; color: white; position: relative; }
-        .header h1 { margin: 0; font-size: 28px; text-shadow: 0 0 10px rgba(255,215,0,0.5); color: #ffd700; font-weight: 700; }
-        .header p { color: #ddd; font-size: 14px; }
-        .back-home { position: absolute; left: 15px; top: 15px; background: rgba(255,255,255,0.1); color: white; padding: 5px 12px; border-radius: 20px; text-decoration: none; font-size: 13px; border: 1px solid rgba(255,215,0,0.3); transition: 0.3s; }
-        .back-home:hover { background: rgba(255,215,0,0.2); }
+        /* ปรับแต่งส่วน Header เพื่อรองรับหน้าจอมือถือ ไม่ให้ปุ่มทับกับหัวข้อ */
+        .header { 
+            text-align: center; 
+            padding: 20px 15px 10px; 
+            color: white; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-text {
+            width: 100%;
+        }
+
+        .header h1 { 
+            margin: 0; 
+            font-size: 24px; 
+            text-shadow: 0 0 10px rgba(255,215,0,0.5); 
+            color: #ffd700; 
+            font-weight: 700; 
+            line-height: 1.3;
+        }
+        
+        .header p { 
+            color: #ddd; 
+            font-size: 13px; 
+            margin: 5px 0 0 0;
+        }
+
+        .back-home { 
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            text-decoration: none; 
+            font-size: 13px; 
+            border: 1px solid rgba(255,215,0,0.3); 
+            transition: 0.3s; 
+            align-self: flex-start; /* บนมือถือให้อยู่ชิดซ้ายแยกแถวชัดเจน */
+        }
+        .back-home:hover { 
+            background: rgba(255,215,0,0.2); 
+        }
+
+        /* สำหรับหน้าจอแท็บเล็ตและคอมพิวเตอร์ (หน้าจอกว้าง 600px ขึ้นไป) */
+        @media (min-width: 600px) {
+            .header {
+                display: block;
+                padding: 25px 15px 10px;
+            }
+            .header h1 { 
+                font-size: 32px; 
+            }
+            .header p { 
+                font-size: 14px; 
+            }
+            .back-home { 
+                position: absolute; 
+                left: 20px; 
+                top: 25px; 
+            }
+        }
         
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 15px 10px; }
         .tab-btn { background: rgba(255, 255, 255, 0.1); color: #ddd; border: 2px solid rgba(255,215,0,0.3); padding: 10px 18px; border-radius: 30px; cursor: pointer; font-size: 14px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
@@ -66,6 +127,33 @@
         .mode-btn { width: auto; font-size: 15px; padding: 10px 15px; flex: 1; min-width: 140px; color: white; }
         .mode-btn.dark { background: #222; border: 1px solid #444; }
         
+        /* สไตล์ปุ่มเลือกรอบในหน้าแดชบอร์ด */
+        .round-toggle-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .round-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ccc;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Anakotmai', sans-serif;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+        .round-btn.active {
+            background: #ffd700;
+            color: #1a0b2e;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255,215,0,0.5);
+        }
+
         /* กรอบเล็งสแกนมือถือ */
         .scanner-viewfinder {
             position: relative;
@@ -109,14 +197,13 @@
         .stat-number { font-size: 32px; font-weight: bold; margin: 0; line-height: 1; color: #ffd700; }
         
         .recent-list { list-style: none; padding: 0; margin-top: 15px; text-align: left; max-height: 300px; overflow-y: auto; }
-        .recent-list li { background: #18122B; padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #ffd700; color: #ddd; font-size: 14px; }
+        .recent-list li { background: #18122B; padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #ffd700; color: #ddd; font-size: 14px; line-height: 1.5; }
         .edit-btn { background: #33264d; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; cursor: pointer; padding: 2px 6px; font-size: 11px; }
 
         @media (min-width: 600px) {
             .container { padding: 0 20px; }
             .tab-content { padding: 30px; }
             .btn-group button { min-width: 240px; }
-            .header h1 { font-size: 32px; }
             .qr-card { width: 190px; }
             .stat-number { font-size: 42px; }
         }
@@ -134,8 +221,10 @@
 
     <div class="header print-hide">
         <a href="index.html" class="back-home">⬅️ กลับหน้าการ์ดเชิญ</a>
-        <h1>✨ VIP Party Connect</h1>
-        <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
+        <div class="header-text">
+            <h1>✨ VIP Party Connect</h1>
+            <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
+        </div>
     </div>
 
     <div class="tabs print-hide">
@@ -153,9 +242,9 @@
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354)">
+            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 012345)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
-            <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
+            <input type="text" id="s_empBranch" placeholder="สาขา">
             
             <div class="btn-group">
                 <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
@@ -216,15 +305,27 @@
             
             <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
                 <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#ff6b6b;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
+                
+                <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 8px; border-radius: 6px; font-size: 12px; color: #ffeb3b; margin: 10px 0;">
+                    💡 <b>คำแนะนำสำหรับเครื่องยิง:</b> หากสแกนหน้าจอมือถือไม่ติด ให้<b>ขยับมือถือเข้าหรือออกห่าง</b>จากเครื่องยิง (ระยะที่เหมาะสมประมาณ 15-20 ซม.)
+                </div>
+
                 <input type="text" id="hardwareInput" placeholder="[ สแกนคิวอาร์โค้ดที่นี่ ]" autocomplete="off">
             </div>
             
             <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
         </div>
 
-        <!-- แท็บ 5: Dashboard -->
+        <!-- แท็บ 5: Dashboard (ปุ่มสลับรอบเช้า / รอบเย็น / ทั้งหมด) -->
         <div id="tab-dashboard" class="tab-content">
-            <h2 style="color: #ffd700; text-align: center; margin-bottom: 30px;">สถิติผู้เข้างาน (Real-time)</h2>
+            <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
+            
+            <!-- ปุ่มสลับเลือกรอบ -->
+            <div class="round-toggle-container">
+                <button class="round-btn active" id="btn-round-morning" onclick="switchDashboardRound('morning')">☀️ รอบเช้า</button>
+                <button class="round-btn" id="btn-round-evening" onclick="switchDashboardRound('evening')">🌙 รอบเย็น</button>
+                <button class="round-btn" id="btn-round-all" onclick="switchDashboardRound('all')">⭐ ทั้งหมด</button>
+            </div>
             
             <div class="stat-grid">
                 <div class="stat-box">
@@ -241,7 +342,7 @@
                 </div>
             </div>
 
-            <h4 style="text-align: center; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 10px; max-width: 500px; margin: 30px auto 0; color: #ffd700;">รายชื่อผู้เข้างานล่าสุด</h4>
+            <h4 style="text-align: center; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 10px; max-width: 500px; margin: 25px auto 0; color: #ffd700;" id="recent-title">รายชื่อผู้เข้างานล่าสุด (รอบเช้า)</h4>
             <ul class="recent-list" id="recent-scans">
                 <li style="border-left: 5px solid #444; color: #777; text-align: center;">กำลังโหลดข้อมูล...</li>
             </ul>
@@ -256,8 +357,8 @@
         let statsInterval; 
         const scannedGuests = new Set(); 
         let isProcessing = false;
+        let currentDashboardRound = 'morning'; // ค่าเริ่มต้นแสดงรอบเช้า
 
-        // วนลูปถามรหัสผ่าน (9999) จนกว่าจะถูกต้อง
         window.addEventListener('DOMContentLoaded', () => {
             let pass = "";
             while (pass !== "9999") {
@@ -308,6 +409,26 @@
             }
         }
 
+        // ฟังก์ชันสลับรอบในหน้า Dashboard
+        function switchDashboardRound(round) {
+            currentDashboardRound = round;
+            document.getElementById('btn-round-morning').classList.remove('active');
+            document.getElementById('btn-round-evening').classList.remove('active');
+            document.getElementById('btn-round-all').classList.remove('active');
+
+            if (round === 'morning') {
+                document.getElementById('btn-round-morning').classList.add('active');
+                document.getElementById('recent-title').innerText = "รายชื่อผู้เข้างานล่าสุด (รอบเช้า)";
+            } else if (round === 'evening') {
+                document.getElementById('btn-round-evening').classList.add('active');
+                document.getElementById('recent-title').innerText = "รายชื่อผู้เข้างานล่าสุด (รอบเย็น)";
+            } else if (round === 'all') {
+                document.getElementById('btn-round-all').classList.add('active');
+                document.getElementById('recent-title').innerText = "รายชื่อผู้เข้างานทั้งหมด (ทุกรอบ)";
+            }
+            fetchStats();
+        }
+
         function fetchStats() {
             fetch(scriptUrl + "?action=getStats&t=" + new Date().getTime())
                 .then(res => res.json())
@@ -317,7 +438,10 @@
                         const serverTotal = data.total ? parseInt(data.total) : 0;
                         const total = Math.max(localTotal, serverTotal);
                         
-                        const checked = data.checkedIn ? parseInt(data.checkedIn) : 0;
+                        // ดึงข้อมูลสถิติตามปุ่มที่กดเลือก (morning, evening, หรือ all)
+                        const roundData = data[currentDashboardRound] || { checkedIn: 0, recent: [] };
+                        
+                        const checked = roundData.checkedIn ? parseInt(roundData.checkedIn) : 0;
                         let absent = total - checked;
                         if (absent < 0 || total === 0) absent = 0;
 
@@ -327,10 +451,10 @@
 
                         const list = document.getElementById('recent-scans');
                         list.innerHTML = "";
-                        if (!data.recent || data.recent.length === 0) {
-                            list.innerHTML = "<li style='border-left: 5px solid #444; color: #777; text-align: center;'>ยังไม่มีคนสแกนเข้างาน</li>";
+                        if (!roundData.recent || roundData.recent.length === 0) {
+                            list.innerHTML = `<li style='border-left: 5px solid #444; color: #777; text-align: center;'>ยังไม่มีข้อมูลการสแกน</li>`;
                         } else {
-                            data.recent.forEach(emp => {
+                            roundData.recent.forEach(emp => {
                                 const li = document.createElement('li');
                                 li.innerHTML = `<b>${emp.name}</b> <span style="color:#aaa; font-size:14px;">(${emp.branch})</span>`;
                                 list.appendChild(li);
@@ -392,7 +516,6 @@
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
-                // แทรกโลโก้พร้อมวงกลมสีขาวรองพื้นหลัง (Clear Zone) เพื่อให้เครื่องยิงบาร์โค้ดอ่านง่าย 100%
                 setTimeout(() => {
                     const logoWrapper = document.createElement("div");
                     logoWrapper.style.position = "absolute";
@@ -433,7 +556,7 @@
                     .then(res => res.json())
                     .then(data => {
                         scannedGuests.add(id);
-                        alertBox.innerHTML = `🎉 บันทึก "${name}" (รหัส: ${id}) เช็คอินเข้างานเรียบร้อยแล้ว!`;
+                        alertBox.innerHTML = `🎉 บันทึก "${name}" (${data.round}) เรียบร้อยแล้ว!`;
                         alertBox.style.color = "#00C851";
                         fetchStats();
                     })
@@ -634,14 +757,7 @@
                 li.style.justifyContent = 'space-between';
                 li.style.alignItems = 'center';
                 
-                const isCheckedIn = scannedGuests.has(emp.id);
-                
-                let btnHtml = "";
-                if (isCheckedIn) {
-                    btnHtml = `<span style="color: #ffa500; font-weight: bold;">✅ สแกนแล้ว</span>`;
-                } else {
-                    btnHtml = `<button class="action-btn" style="width: auto; padding: 8px 20px; font-size: 14px; margin: 0;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">เข้างาน</button>`;
-                }
+                let btnHtml = `<button class="action-btn" style="width: auto; padding: 8px 20px; font-size: 14px; margin: 0;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">เข้างาน</button>`;
 
                 li.innerHTML = `
                     <div style="line-height: 1.4;">
@@ -658,12 +774,6 @@
             if (isProcessing) return;
             empId = empId.trim();
             
-            if (scannedGuests.has(empId)) {
-                alert(`⚠️ ข้อมูลซ้ำ! ${empName} สแกนเข้างานไปแล้ว`);
-                searchAttendee(); 
-                return;
-            }
-
             const alertBox = document.getElementById('search-alert');
             alertBox.innerHTML = `⏳ กำลังบันทึก: <span style="color:#ffd700">${empName}</span>...`;
             isProcessing = true;
@@ -675,13 +785,16 @@
                 .then(data => {
                     if(data.status === "success") {
                         scannedGuests.add(empId); 
-                        alertBox.innerHTML = `✅ บันทึก <span style="color:#00C851">${empName}</span> เข้างานสำเร็จ!`;
+                        alertBox.innerHTML = `✅ บันทึก <span style="color:#00C851">${empName}</span> (${data.round}) สำเร็จ!`;
                         searchAttendee(); 
                     } 
                     else if (data.status === "duplicate") { 
                         scannedGuests.add(empId); 
-                        alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5252">${empName}</span> เข้างานไปแล้ว`;
+                        alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5252">${empName}</span> ได้ลงทะเบียน <b>${data.round}</b> ไปแล้ว`;
                         searchAttendee();
+                    }
+                    else if (data.status === "out_of_time") {
+                        alertBox.innerHTML = `❌ <b>อยู่นอกเวลาสแกน!</b> <small>${data.message}</small>`;
                     }
                 })
                 .catch(err => {
@@ -732,11 +845,6 @@
             const empName = dataParts[1] ? dataParts[1].trim() : "-";
             const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
 
-            if (scannedGuests.has(empId)) {
-                showDuplicateAlert(empId, empName);
-                return; 
-            }
-
             isProcessing = true;
             resultDiv.innerHTML = `⏳ กำลังตรวจสอบและบันทึก: <b>${empName}</b>...`;
             resultDiv.style.backgroundColor = "#ffc107"; resultDiv.style.color = "black";
@@ -748,19 +856,26 @@
                 .then(data => {
                     if(data.status === "success") {
                         scannedGuests.add(empId); 
-                        resultDiv.innerHTML = `✅ ยินดีต้อนรับ!<br><span style="font-size:30px;">${empName}</span><br><small>${empBranch} (${empId})</small>`;
+                        resultDiv.innerHTML = `✅ ยินดีต้อนรับ!<br><span style="font-size:28px;">${empName}</span><br><span style="color:#000; font-size:16px; background:#ffd700; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:5px;">(ลงทะเบียน<b>${data.round}</b>สำเร็จ)</span><br><small>${empBranch} (${empId})</small>`;
                         resultDiv.style.backgroundColor = "#00C851"; resultDiv.style.color = "white";
                     } 
                     else if (data.status === "duplicate") { 
                         scannedGuests.add(empId); 
-                        showDuplicateAlert(empId, empName);
+                        resultDiv.innerHTML = `⚠️ <b>ข้อมูลซ้ำ!</b><br>${empName} ได้ลงทะเบียนใน <b>${data.round}</b> ไปแล้วครับ`;
+                        resultDiv.style.backgroundColor = "#ffa500"; 
+                        resultDiv.style.color = "#1a0b2e";
+                    }
+                    else if (data.status === "out_of_time") {
+                        resultDiv.innerHTML = `❌ <b>อยู่นอกเวลาสแกน!</b><br><small>${data.message}</small>`;
+                        resultDiv.style.backgroundColor = "#ff5252"; 
+                        resultDiv.style.color = "white";
                     }
                 })
                 .catch(err => {
                     showError("❌ การเชื่อมต่อล้มเหลว กรุณาสแกนใหม่");
                 })
                 .finally(() => {
-                    setTimeout(() => { isProcessing = false; restoreFocus(); }, 1500); 
+                    setTimeout(() => { isProcessing = false; restoreFocus(); }, 2000); 
                 });
         }
 
@@ -798,15 +913,6 @@
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = msg;
             resultDiv.style.backgroundColor = "#ff5252"; resultDiv.style.color = "white";
-            isProcessing = true;
-            setTimeout(() => { isProcessing = false; restoreFocus(); }, 3000); 
-        }
-
-        function showDuplicateAlert(id, name) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `⚠️ <b style="font-size:26px;">ข้อมูลซ้ำ!</b> ⚠️<br>รหัส <b>${id}</b> ได้สแกนเข้างานไปแล้ว<br><small>(${name})</small>`;
-            resultDiv.style.backgroundColor = "#ffa500"; 
-            resultDiv.style.color = "#1a0b2e";
             isProcessing = true;
             setTimeout(() => { isProcessing = false; restoreFocus(); }, 3000); 
         }
