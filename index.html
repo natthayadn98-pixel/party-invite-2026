@@ -68,7 +68,7 @@
         .envelope-wrapper.open .tap-hint { display: none; }
 
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 999; justify-content: center; align-items: center; font-family: 'Anakotmai', sans-serif; }
-        .qr-modal-content { background: #18122B; border: 1px solid rgba(255,215,0,0.4); padding: 20px; border-radius: 15px; text-align: center; width: 92%; max-width: 340px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .qr-modal-content { background: #18122B; border: 1px solid rgba(255,215,0,0.4); padding: 25px 20px; border-radius: 15px; text-align: center; width: 92%; max-width: 340px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
         #welcome-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -109,7 +109,7 @@
                 เรียน <strong>พนักงาน CLT</strong>,<br>
                 ขอเรียนเชิญร่วมงานเลี้ยงสังสรรค์ประจำปีตามกำหนดการดังนี้:
                 
-                <div style="margin: 6px 0; background: #fdfbf7; padding: 6px 8px; border-radius: 6px; border-left: 3px solid #7b1113;">
+               <div style="margin: 6px 0; background: #fdfbf7; padding: 6px 8px; border-radius: 6px; border-left: 3px solid #7b1113;">
                     <p style="margin: 2px 0;"><span>🗓️ วันที่:</span> 28 พฤศจิกายน 2569</p>
                     <p style="margin: 2px 0;"><span>⏰ เวลา:</span> 09:00-23:00 น.</p>
                     <p style="margin: 2px 0;"><span>📍 สถานที่:</span> รอยัล ฮิลล์ กอล์ฟ รีสอร์ท แอนด์ สปา จ.นครนายก</p>
@@ -127,20 +127,14 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- หน้าต่างแสดง QR Code ส่วนตัว (ขยายขนาด QR ให้ใหญ่ขึ้น + คำแนะนำระยะสแกน) -->
+    <!-- หน้าต่างแสดง QR Code ส่วนตัว (ลบกล่องคำแนะนำออกแล้ว) -->
     <div id="qr-modal">
         <div class="qr-modal-content">
             <h3 id="modal-title" style="color: #ffd700; margin-top: 0; font-size: 18px;">🎟️ บัตรเข้างานของคุณ</h3>
             
-            <!-- ขยายขนาด QR Code เป็น 260x260 พิกเซล -->
-            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 10px auto; background: white; padding: 10px; border-radius: 10px; position: relative; width: 260px; height: 260px;"></div>
-            
-            <!-- เพิ่มคำแนะนำการขยับระยะใกล้-ไกลสำหรับเครื่องสแกน 2D -->
-            <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 6px; border-radius: 6px; font-size: 11px; color: #ffeb3b; margin-bottom: 10px;">
-                💡 <b>คำแนะนำสำหรับเครื่องยิง:</b> หากสแกนไม่ติด ให้<b>ขยับมือถือเข้าหรือออกห่าง</b>จากเครื่องยิง (ระยะที่เหมาะสมประมาณ 15-20 ซม.)
-            </div>
+            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 15px auto; background: white; padding: 10px; border-radius: 10px; position: relative; width: 260px; height: 260px;"></div>
 
-            <div id="personal-info" style="font-size: 13px; color: #ddd; margin-bottom: 12px; line-height: 1.4;"></div>
+            <div id="personal-info" style="font-size: 14px; color: #ddd; margin: 15px 0 20px; line-height: 1.6;"></div>
             <button class="btn-action" onclick="closeModal()" style="background: #4a3b6c; color: white;">ปิดหน้าต่าง</button>
         </div>
     </div>
@@ -175,22 +169,7 @@
                 document.getElementById("welcome-screen").style.display = "flex";
             }
 
-            const stored = localStorage.getItem('partyExcelData');
-            if (stored) {
-                try {
-                    const json = JSON.parse(stored);
-                    for (let i = 1; i < json.length; i++) {
-                        if (json[i] && json[i][0]) {
-                            cachedGuests.push({
-                                id: json[i][0].toString().trim(),
-                                name: json[i][1] ? json[i][1].toString().trim() : "",
-                                branch: json[i][2] ? json[i][2].toString().trim() : ""
-                            });
-                        }
-                    }
-                } catch(e) {}
-            }
-
+            // ดึงข้อมูลรายชื่อจาก Google Sheets โดยตรง
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
@@ -226,14 +205,12 @@
                 modalTitle.innerText = "🎟️ บัตรเข้างานของคุณ";
                 const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
                 
-                // สร้าง QR ขนาดใหญ่ขึ้น (240x240 พิกเซล) เพื่อให้เครื่องยิง 2D อ่านเส้นได้ชัดเจน
                 new QRCode(qrContainer, { 
                     text: `VIPPARTY|${encodedData}`, 
                     width: 240, height: 240, 
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
-                // แทรกโลโก้ขนาดใหญ่ขึ้นตามสัดส่วน (52px) พร้อมวงกลมสีขาวรองพื้นหลัง
                 setTimeout(() => {
                     const logoWrapper = document.createElement("div");
                     logoWrapper.style.position = "absolute";
