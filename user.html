@@ -6,7 +6,7 @@
     <title>Party Connect - ระบบต้อนรับหน้างาน</title>
     <!-- โหลดฟอนต์ Anakotmai -->
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="calendar.png">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -34,18 +34,25 @@
             z-index: -1;
         }
 
-        /* ปรับแต่งส่วน Header บนมือถือ */
+        /* ส่วนหัวและแถบควบคุมด้านบน */
+        .top-bar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 12px 15px 0;
+            box-sizing: border-box;
+            gap: 10px;
+        }
+
         .header { 
             text-align: center; 
-            padding: 20px 15px 10px; 
+            padding: 10px 15px 10px; 
             color: white; 
             position: relative; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
         }
-        .header-text { width: 100%; }
         .header h1 { 
             margin: 0; 
             font-size: 24px; 
@@ -54,7 +61,7 @@
             font-weight: 700; 
             line-height: 1.3;
         }
-        .header p { color: #ddd; font-size: 13px; margin: 5px 0 0 0; }
+        .header p { color: #ddd; font-size: 13px; margin: 4px 0 0 0; }
 
         .back-home { 
             display: inline-flex;
@@ -64,18 +71,66 @@
             padding: 6px 14px; 
             border-radius: 20px; 
             text-decoration: none; 
-            font-size: 13px; 
+            font-size: 12.5px; 
             border: 1px solid rgba(255,215,0,0.3); 
             transition: 0.3s; 
-            align-self: flex-start;
+            white-space: nowrap;
         }
         .back-home:hover { background: rgba(255,215,0,0.2); }
 
+        /* ปุ่มซิงค์ Google Sheets แบบ Real-time ด้านบน */
+        .sync-top-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(33, 147, 176, 0.35) 0%, rgba(109, 213, 237, 0.25) 100%);
+            border: 1px solid rgba(109, 213, 237, 0.6);
+            color: #6dd5ed;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Anakotmai', sans-serif;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(33, 147, 176, 0.25);
+        }
+        .sync-top-btn:hover {
+            background: linear-gradient(135deg, rgba(33, 147, 176, 0.6) 0%, rgba(109, 213, 237, 0.45) 100%);
+            box-shadow: 0 0 15px rgba(109, 213, 237, 0.5);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .sync-top-btn.loading .sync-icon {
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ไฟกระพริบสถานะ Live Connection */
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #00e676;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #00e676;
+            animation: pulseDot 1.8s infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
         @media (min-width: 600px) {
-            .header { display: block; padding: 25px 15px 10px; }
-            .header h1 { font-size: 32px; }
+            .header h1 { font-size: 30px; }
             .header p { font-size: 14px; }
-            .back-home { position: absolute; left: 20px; top: 25px; }
+            .sync-top-btn { font-size: 13px; padding: 7px 16px; }
+            .back-home { font-size: 13px; padding: 7px 16px; }
         }
         
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 15px 10px; }
@@ -143,7 +198,7 @@
 
         @media print { 
             body { background: white !important; color: #333 !important; } 
-            .header, .tabs, .print-hide { display: none !important; } 
+            .header, .tabs, .print-hide, .top-bar-nav { display: none !important; } 
             .tab-content { box-shadow: none; padding: 0; background: transparent; color: #333; } 
             .branch-section { page-break-after: always; padding: 0; background: white; border: none; } 
             .qr-card { break-inside: avoid; border: 1px solid #ddd; background: white; color: #333; } 
@@ -152,12 +207,21 @@
 </head>
 <body>
 
+    <!-- แถบด้านบน: ปุ่มกลับหน้าการ์ด + ปุ่มซิงค์ Real-time -->
+    <div class="top-bar-nav print-hide">
+        <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
+        
+        <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
+            <span class="live-dot"></span>
+            <span class="sync-icon">🔄</span>
+            <span id="syncStatusText">ซิงค์ Sheets</span>
+        </button>
+    </div>
+
+    <!-- ส่วนหัวข้อหลัก -->
     <div class="header print-hide">
-        <a href="index.html" class="back-home">⬅️ กลับหน้าการ์ดเชิญ</a>
-        <div class="header-text">
-            <h1>✨ VIP Party Connect</h1>
-            <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
-        </div>
+        <h1>✨ VIP Party Connect</h1>
+        <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
     </div>
 
     <div class="tabs print-hide">
@@ -175,7 +239,7 @@
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 083354)">
+            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 012345)">
             <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
             <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
             
@@ -318,11 +382,32 @@
             try { return decodeURIComponent(escape(atob(base64Text))); } catch (e) { return null; }
         }
 
+        // ฟังก์ชันกดปุ่มซิงค์ Real-time ด้านบน
+        function triggerManualSync() {
+            const topBtn = document.getElementById('topSyncBtn');
+            const textSpan = document.getElementById('syncStatusText');
+            
+            topBtn.classList.add('loading');
+            textSpan.innerText = 'กำลังซิงค์...';
+
+            Promise.all([
+                fetchGuestsFromCloud(false),
+                fetchStats()
+            ]).finally(() => {
+                setTimeout(() => {
+                    topBtn.classList.remove('loading');
+                    const now = new Date();
+                    const timeStr = now.toTimeString().split(' ')[0];
+                    textSpan.innerText = `${timeStr}`;
+                }, 600);
+            });
+        }
+
         function fetchGuestsFromCloud(showAlert = false) {
             const statusDiv = document.getElementById('uploadStatus');
             if(statusDiv) statusDiv.innerHTML = "⏳ กำลังดึงข้อมูลล่าสุดจาก Cloud...";
 
-            fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
+            return fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === 'success' && data.guests) {
@@ -382,7 +467,7 @@
         }
 
         function fetchStats() {
-            fetch(scriptUrl + "?action=getStats&t=" + new Date().getTime())
+            return fetch(scriptUrl + "?action=getStats&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
                     if(data.status === 'success') {
@@ -582,7 +667,6 @@
             }
         }
 
-        // อัปเดตการอ่าน Excel ให้คงเลข 0 ด้านหน้าไว้เสมอ
         document.getElementById('excelFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
