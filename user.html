@@ -228,7 +228,7 @@
             flex-wrap: wrap;
         }
 
-        /* ปุ่มคลิกเลือกดู มาแล้ว / ยังไม่มา ในแต่ละสาขา */
+        /* ปุ่มคลิกเลือกดู มาแล้ว / ยังไม่มา */
         .branch-btn-group {
             display: flex;
             gap: 8px;
@@ -537,7 +537,6 @@
         let allGuestsList = [];
         let latestBranchStats = {};
         
-        // เก็บสถานะการกดฟิลเตอร์ของแต่ละสาขา { "สาขา": "checked" | "absent" | null }
         const branchFilterState = {};
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -677,17 +676,16 @@
             renderBranchStats(latestBranchStats);
         }
 
-        // ฟังก์ชันกดปุ่มฟิลเตอร์ (มาแล้ว / ยังไม่มา) ในสาขา
         function setBranchFilter(branchName, filterType) {
             if (branchFilterState[branchName] === filterType) {
-                branchFilterState[branchName] = null; // แตะซ้ำเพื่อปิดการแสดงรายชื่อ
+                branchFilterState[branchName] = null;
             } else {
                 branchFilterState[branchName] = filterType;
             }
             renderBranchStats(latestBranchStats);
         }
 
-        // แสดงสถิติและรายชื่อพนักงานแยกตามสาขา พร้อมปุ่มกดแยก มาแล้ว / ยังไม่มา
+        // แสดงสถิติและรายชื่อพนักงานแยกตามสาขา (ปรับให้แสดงป้ายตรงตามรอบที่เลือก)
         function renderBranchStats(branchStats) {
             const container = document.getElementById('branch-stats-container');
             if (!container) return;
@@ -699,7 +697,6 @@
                 return;
             }
 
-            // จัดกลุ่มพนักงานตามสาขา
             const guestsByBranch = {};
             allGuestsList.forEach(g => {
                 const bName = g.branch || "ไม่ระบุสาขา";
@@ -725,7 +722,6 @@
 
                 const branchMembers = guestsByBranch[branchName] || [];
                 
-                // กรองรายชื่อตามปุ่มที่กดเลือก (มาแล้ว หรือ ยังไม่มา)
                 let filteredList = branchMembers.filter(emp => {
                     let isChecked = false;
                     if (currentDashboardRound === 'morning') isChecked = emp.hasMorning;
@@ -737,18 +733,28 @@
                     return true;
                 });
 
-                // ถ้าเลือกดู "มาแล้ว" ให้เรียงคนที่มาล่าสุด (เวลามากสุด) ขึ้นก่อน
                 if (activeFilter === 'checked') {
                     filteredList.sort((a, b) => {
-                        const timeA = Math.max(
-                            a.hasMorning && a.morningTime ? new Date(a.morningTime).getTime() : 0,
-                            a.hasEvening && a.eveningTime ? new Date(a.eveningTime).getTime() : 0
-                        );
-                        const timeB = Math.max(
-                            b.hasMorning && b.morningTime ? new Date(b.morningTime).getTime() : 0,
-                            b.hasEvening && b.eveningTime ? new Date(b.eveningTime).getTime() : 0
-                        );
-                        return timeB - timeA; // ล่าสุดขึ้นก่อน
+                        let timeA = 0;
+                        let timeB = 0;
+
+                        if (currentDashboardRound === 'morning') {
+                            timeA = a.hasMorning && a.morningTime ? new Date(a.morningTime).getTime() : 0;
+                            timeB = b.hasMorning && b.morningTime ? new Date(b.morningTime).getTime() : 0;
+                        } else if (currentDashboardRound === 'evening') {
+                            timeA = a.hasEvening && a.eveningTime ? new Date(a.eveningTime).getTime() : 0;
+                            timeB = b.hasEvening && b.eveningTime ? new Date(b.eveningTime).getTime() : 0;
+                        } else {
+                            timeA = Math.max(
+                                a.hasMorning && a.morningTime ? new Date(a.morningTime).getTime() : 0,
+                                a.hasEvening && a.eveningTime ? new Date(a.eveningTime).getTime() : 0
+                            );
+                            timeB = Math.max(
+                                b.hasMorning && b.morningTime ? new Date(b.morningTime).getTime() : 0,
+                                b.hasEvening && b.eveningTime ? new Date(b.eveningTime).getTime() : 0
+                            );
+                        }
+                        return timeB - timeA;
                     });
                 }
 
@@ -763,25 +769,41 @@
                         const hasM = emp.hasMorning;
                         const hasE = emp.hasEvening;
 
-                        let scanTimeDisplay = "";
-                        if (hasM && emp.morningTime) {
-                            scanTimeDisplay = emp.morningTime.split(' ')[1] || "";
-                        } else if (hasE && emp.eveningTime) {
-                            scanTimeDisplay = emp.eveningTime.split(' ')[1] || "";
-                        }
+                        let mTimeDisplay = (hasM && emp.morningTime) ? emp.morningTime.split(' ')[1] || "" : "";
+                        let eTimeDisplay = (hasE && emp.eveningTime) ? emp.eveningTime.split(' ')[1] || "" : "";
 
-                        if (hasM && hasE) {
-                            itemClass = "is-both";
-                            tagsHtml = `<span class="guest-status-tag tag-both">⭐ เช้า & เย็น</span>`;
-                        } else if (hasM) {
-                            itemClass = "is-morning";
-                            tagsHtml = `<span class="guest-status-tag tag-morning">☀️ เช้า ${scanTimeDisplay ? '<small class="tag-time">(' + scanTimeDisplay + ')</small>' : ''}</span>`;
-                        } else if (hasE) {
-                            itemClass = "is-evening";
-                            tagsHtml = `<span class="guest-status-tag tag-evening">🌙 เย็น ${scanTimeDisplay ? '<small class="tag-time">(' + scanTimeDisplay + ')</small>' : ''}</span>`;
+                        // เงื่อนไขแสดงป้ายตามรอบที่กำลังเลือกดู
+                        if (currentDashboardRound === 'morning') {
+                            if (hasM) {
+                                itemClass = "is-morning";
+                                tagsHtml = `<span class="guest-status-tag tag-morning">☀️ เช้า ${mTimeDisplay ? '<small class="tag-time">(' + mTimeDisplay + ')</small>' : ''}</span>`;
+                            } else {
+                                itemClass = "is-absent";
+                                tagsHtml = `<span class="guest-status-tag tag-absent">❌ ยังไม่มา</span>`;
+                            }
+                        } else if (currentDashboardRound === 'evening') {
+                            if (hasE) {
+                                itemClass = "is-evening";
+                                tagsHtml = `<span class="guest-status-tag tag-evening">🌙 เย็น ${eTimeDisplay ? '<small class="tag-time">(' + eTimeDisplay + ')</small>' : ''}</span>`;
+                            } else {
+                                itemClass = "is-absent";
+                                tagsHtml = `<span class="guest-status-tag tag-absent">❌ ยังไม่มา</span>`;
+                            }
                         } else {
-                            itemClass = "is-absent";
-                            tagsHtml = `<span class="guest-status-tag tag-absent">❌ ยังไม่มา</span>`;
+                            // หน้า ⭐ ทั้งหมด
+                            if (hasM && hasE) {
+                                itemClass = "is-both";
+                                tagsHtml = `<span class="guest-status-tag tag-both">⭐ เช้า & เย็น</span>`;
+                            } else if (hasM) {
+                                itemClass = "is-morning";
+                                tagsHtml = `<span class="guest-status-tag tag-morning">☀️ เช้า ${mTimeDisplay ? '<small class="tag-time">(' + mTimeDisplay + ')</small>' : ''}</span>`;
+                            } else if (hasE) {
+                                itemClass = "is-evening";
+                                tagsHtml = `<span class="guest-status-tag tag-evening">🌙 เย็น ${eTimeDisplay ? '<small class="tag-time">(' + eTimeDisplay + ')</small>' : ''}</span>`;
+                            } else {
+                                itemClass = "is-absent";
+                                tagsHtml = `<span class="guest-status-tag tag-absent">❌ ยังไม่มา</span>`;
+                            }
                         }
 
                         return `
@@ -809,7 +831,6 @@
                             <span class="branch-stat-badge">ทั้งหมด ${total} คน (${percent}%)</span>
                         </div>
                         
-                        <!-- ปุ่มกดดูสถิติ มาแล้ว / ยังไม่มา ของสาขา -->
                         <div class="branch-btn-group">
                             <button class="branch-filter-btn btn-checked ${activeFilter === 'checked' ? 'active' : ''}" onclick="setBranchFilter('${branchName}', 'checked')">
                                 ✅ มาแล้ว (${checkedCount}) ${activeFilter === 'checked' ? '▲' : '▼'}
@@ -824,7 +845,6 @@
                         </div>
                     </div>
                     
-                    <!-- รายชื่อพนักงานเมื่อกดปุ่ม -->
                     <div class="branch-guest-list">
                         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #ffd700; margin-bottom: 8px; font-weight: bold;">
                             <span>👥 ${activeFilter === 'checked' ? 'รายชื่อคนที่มาแล้ว (เรียงตามเวลาล่าสุด):' : 'รายชื่อคนที่ยังไม่มา:'}</span>
