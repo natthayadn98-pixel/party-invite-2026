@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party Connect - ระบบต้อนรับหน้างาน</title>
-    <!-- โหลดฟอนต์ Anakotmai -->
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -159,11 +158,25 @@
         #hardwareInput { font-size: 16px; text-align: center; font-weight: bold; padding: 12px; border: 2px solid #ffd700; background: #110E1B; color: #ffd700; outline: none; width: 100%; }
         #result { margin-top: 15px; font-size: 18px; font-weight: bold; padding: 15px; border-radius: 10px; background: #1a1528; color: #fff; border: 1px solid rgba(255,215,0,0.3); text-align: center; }
         
+        /* สไตล์การจัดวางการ์ด QR Code ให้เต็มรูปและสวยงาม */
         .branch-section { margin-top: 20px; padding: 15px; background: #18122B; border: 1px solid rgba(255,215,0,0.2); border-radius: 15px; }
         .branch-section h3 { color: #ffd700 !important; font-size: 16px; }
-        .qr-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; justify-content: center; }
-        .qr-card { padding: 12px; border: 1px dashed rgba(255,215,0,0.4); border-radius: 10px; text-align: center; width: 160px; background: #110E1B; color: #fff; } 
-        .info-text { margin-top: 8px; font-size: 12px; text-align: left; line-height: 1.4; color: #ddd; }
+        .qr-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; justify-content: center; }
+        
+        .qr-card { 
+            padding: 12px; 
+            border: 1px dashed rgba(255,215,0,0.4); 
+            border-radius: 12px; 
+            text-align: center; 
+            width: 175px; 
+            background: #110E1B; 
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        } 
+        .info-text { margin-top: 8px; font-size: 12px; text-align: left; line-height: 1.4; color: #ddd; width: 100%; }
         
         /* สถิติภาพรวม */
         .stat-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px; }
@@ -361,7 +374,7 @@
             .container { padding: 0 20px; }
             .tab-content { padding: 30px; }
             .btn-group button { min-width: 240px; }
-            .qr-card { width: 190px; }
+            .qr-card { width: 185px; }
             .stat-number { font-size: 38px; }
             .branch-stat-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
         }
@@ -377,7 +390,6 @@
 </head>
 <body>
 
-    <!-- แถบด้านบน: ปุ่มกลับหน้าการ์ด + ปุ่มซิงค์ข้อมูล -->
     <div class="top-bar-nav print-hide">
         <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
         
@@ -388,7 +400,6 @@
         </button>
     </div>
 
-    <!-- ส่วนหัวข้อหลัก -->
     <div class="header print-hide">
         <h1>✨ VIP Party Connect</h1>
         <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
@@ -404,7 +415,6 @@
 
     <div class="container">
         
-        <!-- แท็บ 1: เพิ่มคนใหม่ -->
         <div id="tab-single" class="tab-content active">
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
             <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
@@ -422,13 +432,12 @@
 
             <div id="single-qr-output" style="margin-top: 25px; display: flex; justify-content: center; display: none;">
                 <div class="qr-card" style="width: 280px; background: #fff; color: #333;">
-                    <div id="single-qrcode" style="position: relative; width: 250px; height: 250px; margin: 0 auto;"></div>
+                    <div id="single-qrcode" style="position: relative; width: 250px; height: 250px; margin: 0 auto; overflow: hidden; border-radius: 8px;"></div>
                     <div class="info-text" id="single-info" style="font-size:15px; margin-top:15px; text-align:center; color:#333;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- แท็บ 2: จัดการและพิมพ์ QR Code จาก Cloud -->
         <div id="tab-bulk" class="tab-content">
             <div class="print-hide">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">จัดการรายชื่อและพิมพ์บัตร QR Code</h2>
@@ -444,7 +453,6 @@
             <div id="qrContainer"></div>
         </div>
 
-        <!-- แท็บ 3: ค้นหาและเช็คอินมือ -->
         <div id="tab-search" class="tab-content">
             <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
             <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
@@ -457,7 +465,6 @@
             </ul>
         </div>
 
-        <!-- แท็บ 4: สแกนเข้างาน -->
         <div id="tab-scanner" class="tab-content">
             <h2 style="color: #ffd700; text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
             
@@ -487,7 +494,6 @@
             <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
         </div>
 
-        <!-- แท็บ 5: Dashboard -->
         <div id="tab-dashboard" class="tab-content">
             <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
             
@@ -497,7 +503,6 @@
                 <button class="round-btn" id="btn-round-evening" onclick="switchDashboardRound('evening')">🌙 รอบเย็น</button>
             </div>
             
-            <!-- สถิติภาพรวมใหญ่ -->
             <div class="stat-grid">
                 <div class="stat-box">
                     <h3>จำนวนทั้งหมด <button class="edit-btn" onclick="setTotalManually()">✏️ แก้ไข</button></h3>
@@ -513,7 +518,6 @@
                 </div>
             </div>
 
-            <!-- สถิติแบ่งแยกตามสาขา -->
             <h4 style="border-left: 4px solid #ffd700; padding-left: 8px; color: #ffd700; margin: 25px 0 5px; font-size: 16px;">
                 🏢 สถิติและรายชื่อแยกตามสาขา (<span id="branch-round-label">รวมทุกรอบ</span>)
             </h4>
@@ -685,7 +689,6 @@
             renderBranchStats(latestBranchStats);
         }
 
-        // แสดงสถิติและรายชื่อพนักงานแยกตามสาขา (ปรับให้แสดงป้ายตรงตามรอบที่เลือก)
         function renderBranchStats(branchStats) {
             const container = document.getElementById('branch-stats-container');
             if (!container) return;
@@ -772,7 +775,6 @@
                         let mTimeDisplay = (hasM && emp.morningTime) ? emp.morningTime.split(' ')[1] || "" : "";
                         let eTimeDisplay = (hasE && emp.eveningTime) ? emp.eveningTime.split(' ')[1] || "" : "";
 
-                        // เงื่อนไขแสดงป้ายตามรอบที่กำลังเลือกดู
                         if (currentDashboardRound === 'morning') {
                             if (hasM) {
                                 itemClass = "is-morning";
@@ -790,7 +792,6 @@
                                 tagsHtml = `<span class="guest-status-tag tag-absent">❌ ยังไม่มา</span>`;
                             }
                         } else {
-                            // หน้า ⭐ ทั้งหมด
                             if (hasM && hasE) {
                                 itemClass = "is-both";
                                 tagsHtml = `<span class="guest-status-tag tag-both">⭐ เช้า & เย็น</span>`;
@@ -950,6 +951,7 @@
             document.getElementById("s_empBranch").value = "";
         }
 
+        // ฟังก์ชันวาดการ์ด QR Code ให้เต็มกรอบรูป สวยงาม 100%
         function renderGuestCards(guests) {
             const container = document.getElementById("qrContainer");
             if (!container) return;
@@ -971,14 +973,17 @@
                 groupedByBranch[branch].forEach(emp => {
                     const card = document.createElement("div"); card.className = "qr-card";
                     
+                    // กล่อง QR Code สีขาวพอดีกรอบรูป
                     const qrDiv = document.createElement("div"); 
                     qrDiv.style.position = "relative";
                     qrDiv.style.width = "150px";
                     qrDiv.style.height = "150px";
-                    qrDiv.style.margin = "0 auto";
                     qrDiv.style.background = "#fff";
-                    qrDiv.style.padding = "5px";
-                    qrDiv.style.borderRadius = "6px";
+                    qrDiv.style.borderRadius = "8px";
+                    qrDiv.style.overflow = "hidden";
+                    qrDiv.style.display = "flex";
+                    qrDiv.style.justifyContent = "center";
+                    qrDiv.style.alignItems = "center";
 
                     const infoDiv = document.createElement("div"); infoDiv.className = "info-text";
                     infoDiv.innerHTML = `<b style="color:#ffd700;">${emp.id}</b><br>${emp.name}<br>${emp.branch}`;
@@ -989,6 +994,7 @@
                     
                     const encodedData = encodeThaiToBase64(emp.id, emp.name, emp.branch);
                     
+                    // ปรับขนาด QR Code ให้เท่ากับ 150x150 พอดีกับกรอบ
                     new QRCode(qrDiv, { 
                         text: `VIPPARTY|${encodedData}`, 
                         width: 150, 
@@ -996,30 +1002,31 @@
                         correctLevel : QRCode.CorrectLevel.H 
                     });
 
+                    // วางโลโก้ตรงกลางพร้อมกรอบขาววงกลม
                     setTimeout(() => {
                         const logoWrapper = document.createElement("div");
                         logoWrapper.style.position = "absolute";
                         logoWrapper.style.top = "50%";
                         logoWrapper.style.left = "50%";
                         logoWrapper.style.transform = "translate(-50%, -50%)";
-                        logoWrapper.style.width = "32px";
-                        logoWrapper.style.height = "32px";
+                        logoWrapper.style.width = "36px";
+                        logoWrapper.style.height = "36px";
                         logoWrapper.style.backgroundColor = "white";
                         logoWrapper.style.borderRadius = "50%";
                         logoWrapper.style.display = "flex";
                         logoWrapper.style.justifyContent = "center";
                         logoWrapper.style.alignItems = "center";
-                        logoWrapper.style.boxShadow = "0 0 4px rgba(0,0,0,0.2)";
+                        logoWrapper.style.boxShadow = "0 0 6px rgba(0,0,0,0.3)";
 
                         const logoImg = document.createElement("img");
                         logoImg.src = "logo CLT (1)-01.png";
-                        logoImg.style.width = "22px";
-                        logoImg.style.height = "22px";
+                        logoImg.style.width = "26px";
+                        logoImg.style.height = "26px";
                         logoImg.style.objectFit = "contain";
 
                         logoWrapper.appendChild(logoImg);
                         qrDiv.appendChild(logoWrapper);
-                    }, 80);
+                    }, 60);
                 });
                 sec.appendChild(grid); container.appendChild(sec);
             }
@@ -1137,7 +1144,7 @@
                     else if (data.status === "duplicate") { 
                         scannedGuests.add(empId); 
                         alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5252">${empName}</span> ได้ลงทะเบียน <b>${data.round}</b> ไปแล้ว`;
-                        searchAttendee();
+                        searchAttendee(); 
                     }
                     else if (data.status === "out_of_time") {
                         alertBox.innerHTML = `❌ <b>อยู่นอกเวลาสแกน!</b> <small>${data.message}</small>`;
