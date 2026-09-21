@@ -34,6 +34,91 @@
             z-index: -1;
         }
 
+        /* Modal เข้าสู่ระบบ Admin */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #111526;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            padding: 20px;
+        }
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .login-icon-box {
+            font-size: 52px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .login-title {
+            color: #172033;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+        }
+        .login-sub {
+            color: #717d96;
+            font-size: 14px;
+            margin: 0 0 25px 0;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px 18px;
+            font-size: 26px;
+            text-align: center;
+            letter-spacing: 8px;
+            border: 2px solid #3b82f6;
+            border-radius: 14px;
+            background: #ffffff;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .login-input:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            margin-top: 18px;
+            border: none;
+            border-radius: 12px;
+            background: #386df4;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Anakotmai', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(56, 109, 244, 0.4);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .login-btn:hover { background: #2557dc; }
+        .login-btn:active { transform: scale(0.98); }
+        .login-error {
+            color: #e53e3e;
+            font-size: 12.5px;
+            font-weight: bold;
+            min-height: 20px;
+            margin-top: 10px;
+        }
+
         /* แถบควบคุมด้านบน */
         .top-bar-nav {
             display: flex;
@@ -77,7 +162,6 @@
         }
         .back-home:hover { background: rgba(255,215,0,0.2); }
 
-        /* ปุ่มซิงค์ Real-time */
         .sync-top-btn {
             display: inline-flex;
             align-items: center;
@@ -158,7 +242,6 @@
         #hardwareInput { font-size: 16px; text-align: center; font-weight: bold; padding: 12px; border: 2px solid #ffd700; background: #110E1B; color: #ffd700; outline: none; width: 100%; }
         #result { margin-top: 15px; font-size: 18px; font-weight: bold; padding: 15px; border-radius: 10px; background: #1a1528; color: #fff; border: 1px solid rgba(255,215,0,0.3); text-align: center; }
         
-        /* สไตล์การจัดวางการ์ด QR Code ให้เต็มรูปและสวยงาม */
         .branch-section { margin-top: 20px; padding: 15px; background: #18122B; border: 1px solid rgba(255,215,0,0.2); border-radius: 15px; }
         .branch-section h3 { color: #ffd700 !important; font-size: 16px; }
         .qr-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; justify-content: center; }
@@ -178,13 +261,11 @@
         } 
         .info-text { margin-top: 8px; font-size: 12px; text-align: left; line-height: 1.4; color: #ddd; width: 100%; }
         
-        /* สถิติภาพรวม */
         .stat-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px; }
         .stat-box { background: #18122B; border-radius: 12px; padding: 15px; text-align: center; border: 1px solid rgba(255,215,0,0.3); flex: 1; min-width: 100px; }
         .stat-box h3 { margin: 0 0 8px; font-size: 13px; color: #bbb; display: flex; justify-content: center; align-items: center; gap: 4px; }
         .stat-number { font-size: 30px; font-weight: bold; margin: 0; line-height: 1; color: #ffd700; }
         
-        /* สถิติแยกตามสาขา */
         .branch-stat-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -241,7 +322,6 @@
             flex-wrap: wrap;
         }
 
-        /* ปุ่มคลิกเลือกดู มาแล้ว / ยังไม่มา */
         .branch-btn-group {
             display: flex;
             gap: 8px;
@@ -262,23 +342,15 @@
             transition: all 0.2s ease;
             text-align: center;
         }
-        .branch-filter-btn:hover {
-            transform: translateY(-1px);
-        }
-        .branch-filter-btn.btn-checked {
-            border-color: rgba(0, 230, 118, 0.4);
-            color: #00e676;
-        }
+        .branch-filter-btn:hover { transform: translateY(-1px); }
+        .branch-filter-btn.btn-checked { border-color: rgba(0, 230, 118, 0.4); color: #00e676; }
         .branch-filter-btn.btn-checked.active {
             background: rgba(0, 230, 118, 0.25);
             border-color: #00e676;
             box-shadow: 0 0 10px rgba(0,230,118,0.3);
             color: #fff;
         }
-        .branch-filter-btn.btn-absent {
-            border-color: rgba(255, 82, 82, 0.4);
-            color: #ff5252;
-        }
+        .branch-filter-btn.btn-absent { border-color: rgba(255, 82, 82, 0.4); color: #ff5252; }
         .branch-filter-btn.btn-absent.active {
             background: rgba(255, 82, 82, 0.25);
             border-color: #ff5252;
@@ -300,7 +372,6 @@
             transition: width 0.4s ease;
         }
         
-        /* รายชื่อพนักงานแยกตามสาขา */
         .branch-guest-list {
             display: none;
             margin-top: 14px;
@@ -309,9 +380,7 @@
             max-height: 320px;
             overflow-y: auto;
         }
-        .branch-stat-card.open .branch-guest-list {
-            display: block;
-        }
+        .branch-stat-card.open .branch-guest-list { display: block; }
         .branch-guest-item {
             display: flex;
             justify-content: space-between;
@@ -385,10 +454,26 @@
             .tab-content { box-shadow: none; padding: 0; background: transparent; color: #333; } 
             .branch-section { page-break-after: always; padding: 0; background: white; border: none; } 
             .qr-card { break-inside: avoid; border: 1px solid #ddd; background: white; color: #333; } 
+            .login-overlay { display: none !important; }
         }
     </style>
 </head>
 <body>
+
+    <!-- การ์ด Login เข้าสู่ระบบ Admin สไตล์ตามรูปภาพ -->
+    <div id="adminLoginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-icon-box">🔐</div>
+            <h2 class="login-title">ระบบจัดการ Admin</h2>
+            <p class="login-sub">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+            
+            <form onsubmit="handleAdminLogin(event)">
+                <input type="password" id="adminPasswordInput" class="login-input" placeholder="• • •" autofocus required>
+                <div id="adminLoginError" class="login-error"></div>
+                <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
+            </form>
+        </div>
+    </div>
 
     <div class="top-bar-nav print-hide">
         <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
@@ -543,19 +628,27 @@
         
         const branchFilterState = {};
 
+        // ระบบตรวจสอบการเข้าใช้งาน Admin
         window.addEventListener('DOMContentLoaded', () => {
-            let pass = "";
-            while (pass !== "9999") {
-                pass = prompt("🔐 กรุณาใส่รหัสผ่านผู้ดูแลระบบ (Admin Password):");
-                if (pass === "9999") {
-                    break;
-                } else {
-                    alert("❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง");
-                }
-            }
-
-            fastSync(false);
+            const passInput = document.getElementById('adminPasswordInput');
+            if (passInput) passInput.focus();
         });
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const passInput = document.getElementById('adminPasswordInput');
+            const errBox = document.getElementById('adminLoginError');
+            const overlay = document.getElementById('adminLoginOverlay');
+
+            if (passInput.value === "9999") {
+                overlay.style.display = 'none';
+                fastSync(false);
+            } else {
+                errBox.innerText = "❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง";
+                passInput.value = "";
+                passInput.focus();
+            }
+        }
 
         function encodeThaiToBase64(id, name, branch) {
             const rawText = `${id}|${name}|${branch}`;
@@ -951,7 +1044,6 @@
             document.getElementById("s_empBranch").value = "";
         }
 
-        // ฟังก์ชันวาดการ์ด QR Code ให้เต็มกรอบรูป สวยงาม 100%
         function renderGuestCards(guests) {
             const container = document.getElementById("qrContainer");
             if (!container) return;
@@ -973,7 +1065,6 @@
                 groupedByBranch[branch].forEach(emp => {
                     const card = document.createElement("div"); card.className = "qr-card";
                     
-                    // กล่อง QR Code สีขาวพอดีกรอบรูป
                     const qrDiv = document.createElement("div"); 
                     qrDiv.style.position = "relative";
                     qrDiv.style.width = "150px";
@@ -994,7 +1085,6 @@
                     
                     const encodedData = encodeThaiToBase64(emp.id, emp.name, emp.branch);
                     
-                    // ปรับขนาด QR Code ให้เท่ากับ 150x150 พอดีกับกรอบ
                     new QRCode(qrDiv, { 
                         text: `VIPPARTY|${encodedData}`, 
                         width: 150, 
@@ -1002,7 +1092,6 @@
                         correctLevel : QRCode.CorrectLevel.H 
                     });
 
-                    // วางโลโก้ตรงกลางพร้อมกรอบขาววงกลม
                     setTimeout(() => {
                         const logoWrapper = document.createElement("div");
                         logoWrapper.style.position = "absolute";
