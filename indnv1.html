@@ -132,7 +132,6 @@
         }
         input[type="text"]:focus { border-color: #850c16; outline: none; box-shadow: 0 0 6px rgba(133,12,22,0.3); }
         
-        /* สไตล์เมื่อช่องถูกล็อก ไม่ให้ใส่รหัสคนอื่น */
         input[type="text"]:disabled { 
             background: #f1f5f9 !important; 
             color: #475569 !important; 
@@ -160,7 +159,7 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1) translateY(0); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
-        /* ป๊อปอัป QR Code เพิ่มความสว่างด้วยพื้นขาว 100% */
+        /* ป๊อปอัป QR Code ปรับพื้นหลังขาว 100% สว่างเต็มจอ */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: #ffffff !important;
@@ -295,11 +294,10 @@
         let cachedGuests = [];
         let pollingTimer = null;
         let wakeLock = null;
+        let isAlreadyCheckedIn = false; // ตัวแปรบอกสถานะการเช็คอินจริงจากฐานข้อมูล Sheets
 
         window.addEventListener('DOMContentLoaded', () => {
-            // ตรวจสอบสถานะการล็อกเครื่องทันทีเมื่อเปิดเว็บ
-            checkDeviceLock();
-
+            // โหลดรายชื่อผู้มีสิทธิ์เข้างาน
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
@@ -311,29 +309,46 @@
                         }));
                     }
                 });
+
+            // ตรวจสอบสถานะการผูกเครื่องและซิงค์กับ Sheets
+            syncDeviceBindingWithCloud();
         });
 
-        // ฟังก์ชันตรวจสอบและล็อกเครื่อง
-        function checkDeviceLock() {
-            const lockedEmpId = localStorage.getItem("clt_checked_empid");
-            const lockedEmpName = localStorage.getItem("clt_checked_name");
+        // ตรวจสอบว่าเครื่องนี้เคยผูกรหัสไว้ไหม และใน Google Sheets มีสถานะเช็คอินอยู่หรือไม่
+        function syncDeviceBindingWithCloud() {
+            const boundEmpId = localStorage.getItem("clt_bound_empid");
+            const boundEmpName = localStorage.getItem("clt_bound_name");
 
-            if (lockedEmpId) {
-                const inputField = document.getElementById('checkId');
-                const btn = document.getElementById('btnShowQR');
-                const label = document.getElementById('inputLabelText');
+            if (!boundEmpId) return;
 
-                // บังคับใส่รหัสเดิม และสั่งปิดการแก้ไข (disabled + readonly)
-                inputField.value = lockedEmpId;
-                inputField.disabled = true;
-                inputField.readOnly = true;
+            const inputField = document.getElementById('checkId');
+            const btn = document.getElementById('btnShowQR');
+            const label = document.getElementById('inputLabelText');
 
-                // เปลี่ยนข้อความกำกับเตือนว่าเครื่องนี้ล็อกแล้ว
-                label.innerHTML = `🔒 <b>เครื่องนี้ผูกกับรหัส:</b> ${lockedEmpName || lockedEmpId} <br><span style="color:#e11d48; font-size:11px;">⚠️ (ลงทะเบียนแล้ว ไม่อนุญาตให้กรอกรหัสของผู้อื่น)</span>`;
-                
-                btn.innerText = "🔒 เครื่องนี้เช็คอินเรียบร้อยแล้ว";
-                btn.classList.add("locked");
-            }
+            // ล็อกช่องกรอกข้อมูลให้อยู่กับรหัสเดิมเสมอ เพื่อป้องกันการนำเครื่องไปกรอกรหัสของคนอื่น
+            inputField.value = boundEmpId;
+            inputField.disabled = true;
+            inputField.readOnly = true;
+
+            // ถาม Google Sheets ว่าในชีตรหัสนี้ยังมีประวัติการสแกนอยู่หรือไม่
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${new Date().getTime()}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.checkedIn) {
+                        // กรณีที่ 1: ในชีตยังมีประวัติสแกนอยู่ -> ล็อกห้ามสแกนซ้ำ
+                        isAlreadyCheckedIn = true;
+                        label.innerHTML = `🔒 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpName || boundEmpId} <br><span style="color:#e11d48; font-size:11px;">⚠️ (ลงทะเบียนสำเร็จแล้ว ไม่อนุญาตให้กรอกรหัสอื่น)</span>`;
+                        btn.innerText = "🔒 เครื่องนี้เช็คอินเรียบร้อยแล้ว";
+                        btn.classList.add("locked");
+                    } else {
+                        // กรณีที่ 2: แอดมินลบประวัติใน Sheets ออกแล้ว -> ปลดล็อกให้สแกนใหม่ได้ แต่ยังคงเป็นรหัสเดิม
+                        isAlreadyCheckedIn = false;
+                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpName || boundEmpId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว คุณสามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
+                        btn.innerText = "🎟️ แสดง QR Code ของฉัน";
+                        btn.classList.remove("locked");
+                    }
+                })
+                .catch(() => {});
         }
 
         function toggleEnvelope() {
@@ -362,10 +377,11 @@
         function showMyQRCode(event) {
             if (event) event.stopPropagation();
 
-            // ตรวจสอบความปลอดภัยระดับที่ 1: บล็อกถ้าเครื่องนี้ถูกล็อกไว้แล้ว
-            const lockedEmpId = localStorage.getItem("clt_checked_empid");
-            if (lockedEmpId) {
-                alert(`❌ เครื่องนี้ได้ทำการเช็คอินไปแล้ว (รหัส: ${lockedEmpId})\nไม่อนุญาตให้เปลี่ยนหรือกรอกรหัสของคนอื่นครับ`);
+            const boundEmpId = localStorage.getItem("clt_bound_empid");
+
+            // ถ้าในชีตยังมีสถานะเช็คอินอยู่ ห้ามสร้าง QR ซ้ำ
+            if (isAlreadyCheckedIn) {
+                alert(`❌ เครื่องนี้ได้ทำการเช็คอินไปแล้ว (รหัส: ${boundEmpId})\nไม่อนุญาตให้เปลี่ยนหรือกรอกรหัสของคนอื่นครับ`);
                 return;
             }
 
@@ -375,10 +391,24 @@
                 return; 
             }
 
+            // ป้องกันกรณีแอบแก้ไข input ใน devtools ถ้าเครื่องนี้เคยผูกรหัสอื่นไว้แล้ว
+            if (boundEmpId && boundEmpId.toLowerCase() !== rawEmpId.toLowerCase()) {
+                alert(`❌ เครื่องนี้ถูกล็อกกับรหัส ${boundEmpId} เท่านั้น ไม่อนุญาตให้กรอกรหัสอื่น`);
+                document.getElementById('checkId').value = boundEmpId;
+                return;
+            }
+
             const guest = cachedGuests.find(g => g.id.toLowerCase() === rawEmpId.toLowerCase());
             if (!guest) {
                 alert(`ไม่พบรหัสพนักงาน "${rawEmpId}" ในระบบ กรุณาติดต่อเจ้าหน้าที่`);
                 return;
+            }
+
+            // ผูกเครื่องนี้เข้ากับรหัสพนักงานคนนี้ทันทีตั้งแต่สร้าง QR Code เพื่อป้องกันการเปลี่ยนรหัส
+            if (!boundEmpId) {
+                localStorage.setItem("clt_bound_empid", guest.id);
+                localStorage.setItem("clt_bound_name", guest.name);
+                syncDeviceBindingWithCloud();
             }
 
             const qrContainer = document.getElementById("personal-qrcode");
@@ -423,7 +453,7 @@
             document.getElementById("qr-modal").style.display = "flex";
             requestWakeLock();
 
-            // เริ่มตรวจสอบสถานะการสแกนแบบ Real-time
+            // เริ่มตรวจเช็คว่าแอดมินสแกนติดหรือยัง
             startListeningForCheckIn(guest.id);
         }
 
@@ -438,15 +468,13 @@
                             clearInterval(pollingTimer);
                             closeModal();
 
-                            // สั่นเตือนที่มือถือ
                             if ("vibrate" in navigator) {
                                 navigator.vibrate([200, 100, 200]);
                             }
 
-                            // ล็อกเครื่องมือถือเครื่องนี้เข้ากับรหัสพนักงานคนนี้ถาวรทันที
-                            localStorage.setItem("clt_checked_empid", empId);
-                            localStorage.setItem("clt_checked_name", res.name);
-                            checkDeviceLock();
+                            // ล็อกสถานะเช็คอินสำเร็จ
+                            isAlreadyCheckedIn = true;
+                            syncDeviceBindingWithCloud();
 
                             document.getElementById('res-guest-name').innerText = res.name;
                             document.getElementById('res-guest-branch').innerText = res.branch;
