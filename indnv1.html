@@ -247,7 +247,6 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- ป๊อปอัป QR Code -->
     <div id="qr-modal" onclick="closeModal()">
         <div class="qr-card-box" onclick="event.stopPropagation()">
             <div class="scan-status-pill">
@@ -264,7 +263,6 @@
         </div>
     </div>
 
-    <!-- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ -->
     <div id="checkin-success-modal">
         <div class="success-box">
             <div style="width: 70px; height: 70px; background: rgba(34, 197, 94, 0.15); border: 3px solid #22c55e; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px; color: #22c55e;">
@@ -294,37 +292,37 @@
         let myDeviceId = "";
         let isAlreadyCheckedIn = false;
 
-        // ฟังก์ชันสร้างลายนิ้วมือฮาร์ดแวร์ประจำเครื่อง (Canvas Fingerprint) ที่เหมือนกันทุกเบราว์เซอร์บน iPhone เครื่องเดียวกัน
-        function generateDeviceFingerprint() {
+        async function getCrossBrowserFingerprint() {
+            let gpuInfo = "GPU_GENERIC";
             try {
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = 200; canvas.height = 50;
-                ctx.textBaseline = "top";
-                ctx.font = "14px 'Arial'";
-                ctx.textBaseline = "alphabetic";
-                ctx.fillStyle = "#f60";
-                ctx.fillRect(125, 1, 62, 20);
-                ctx.fillStyle = "#069";
-                ctx.fillText("CLT-PARTY-IPHONE", 2, 15);
-                ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-                ctx.fillText("CLT-PARTY-IPHONE", 4, 17);
-                
-                const b64 = canvas.toDataURL();
-                let hash = 0;
-                for (let i = 0; i < b64.length; i++) {
-                    hash = ((hash << 5) - hash) + b64.charCodeAt(i);
-                    hash |= 0;
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    }
                 }
-                const screenProps = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
-                return "DEV_" + Math.abs(hash) + "_" + screenProps;
-            } catch(e) {
-                return "DEV_GENERIC_" + window.screen.width + "_" + window.screen.height;
+            } catch(e) {}
+
+            let ip = "LOCAL";
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                ip = ipData.ip;
+            } catch(e) {}
+
+            const rawString = `${ip}_${gpuInfo}_${window.screen.width}x${window.screen.height}_${window.devicePixelRatio}`;
+            let hash = 0;
+            for (let i = 0; i < rawString.length; i++) {
+                hash = ((hash << 5) - hash) + rawString.charCodeAt(i);
+                hash |= 0;
             }
+            return "IPHONE_" + Math.abs(hash);
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            myDeviceId = generateDeviceFingerprint();
+        window.addEventListener('DOMContentLoaded', async () => {
+            myDeviceId = await getCrossBrowserFingerprint();
 
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
@@ -338,7 +336,6 @@
                     }
                 });
 
-            // ตรวจสอบกับ Cloud ว่าเครื่องนี้ (ไม่ว่าจะเปิดผ่าน Safari, Chrome หรือ LINE) เคยถูกล็อกไว้หรือยัง
             verifyDeviceOnCloud();
         });
 
@@ -351,7 +348,6 @@
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(localSavedId)}&deviceId=${encodeURIComponent(myDeviceId)}&t=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(res => {
-                    // หากตรวจพบว่าเครื่องนี้ (DeviceID นี้) เคยสแกนเข้างานไปแล้วในระบบ
                     if (res.deviceLocked || res.checkedIn) {
                         isAlreadyCheckedIn = true;
                         const empName = res.boundEmpName || res.name;
@@ -365,12 +361,11 @@
                         btn.innerText = "🔒 เครื่องนี้เช็คอินเรียบร้อยแล้ว";
                         btn.classList.add("locked");
                     } else if (localSavedId !== "") {
-                        // กรณีแอดมินลบประวัติใน Sheets -> ปลดล็อกให้สแกนใหม่ได้ แต่ล็อกให้เป็นรหัสเดิม
                         isAlreadyCheckedIn = false;
                         inputField.value = localSavedId;
                         inputField.disabled = true;
                         inputField.readOnly = true;
-                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${localSavedId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว คุณสามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
+                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${localSavedId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว สามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
                         btn.innerText = "🎟️ แสดง QR Code ของฉัน";
                         btn.classList.remove("locked");
                     }
@@ -428,7 +423,6 @@
             const infoContainer = document.getElementById("personal-info");
             qrContainer.innerHTML = "";
 
-            // แนบ Device ID ไปกับ QR Code เพื่อให้ระบบผูกเครื่องทันทีที่ Admin สแกน
             const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}|${myDeviceId}`)));
             
             new QRCode(qrContainer, { 
