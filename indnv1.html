@@ -131,7 +131,6 @@
             box-sizing: border-box; color: #333; cursor: text; 
         }
         input[type="text"]:focus { border-color: #850c16; outline: none; box-shadow: 0 0 6px rgba(133,12,22,0.3); }
-        
         input[type="text"]:disabled { 
             background: #f1f5f9 !important; 
             color: #475569 !important; 
@@ -159,7 +158,6 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1) translateY(0); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
-        /* ป๊อปอัป QR Code ปรับพื้นหลังขาว 100% สว่างเต็มจอ */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: #ffffff !important;
@@ -185,7 +183,6 @@
         @keyframes pulsePill { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
         .radar-dot { width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
 
-        /* หน้าต่างแจ้งเตือนเมื่อแอดมินสแกนลงทะเบียนเสร็จแล้ว */
         #checkin-success-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(15, 23, 42, 0.95); z-index: 100000; justify-content: center; align-items: center;
@@ -294,10 +291,41 @@
         let cachedGuests = [];
         let pollingTimer = null;
         let wakeLock = null;
-        let isAlreadyCheckedIn = false; // ตัวแปรบอกสถานะการเช็คอินจริงจากฐานข้อมูล Sheets
+        let myDeviceId = "";
+        let isAlreadyCheckedIn = false;
+
+        // ฟังก์ชันสร้างลายนิ้วมือฮาร์ดแวร์ประจำเครื่อง (Canvas Fingerprint) ที่เหมือนกันทุกเบราว์เซอร์บน iPhone เครื่องเดียวกัน
+        function generateDeviceFingerprint() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 200; canvas.height = 50;
+                ctx.textBaseline = "top";
+                ctx.font = "14px 'Arial'";
+                ctx.textBaseline = "alphabetic";
+                ctx.fillStyle = "#f60";
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = "#069";
+                ctx.fillText("CLT-PARTY-IPHONE", 2, 15);
+                ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                ctx.fillText("CLT-PARTY-IPHONE", 4, 17);
+                
+                const b64 = canvas.toDataURL();
+                let hash = 0;
+                for (let i = 0; i < b64.length; i++) {
+                    hash = ((hash << 5) - hash) + b64.charCodeAt(i);
+                    hash |= 0;
+                }
+                const screenProps = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
+                return "DEV_" + Math.abs(hash) + "_" + screenProps;
+            } catch(e) {
+                return "DEV_GENERIC_" + window.screen.width + "_" + window.screen.height;
+            }
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // โหลดรายชื่อผู้มีสิทธิ์เข้างาน
+            myDeviceId = generateDeviceFingerprint();
+
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
@@ -310,40 +338,39 @@
                     }
                 });
 
-            // ตรวจสอบสถานะการผูกเครื่องและซิงค์กับ Sheets
-            syncDeviceBindingWithCloud();
+            // ตรวจสอบกับ Cloud ว่าเครื่องนี้ (ไม่ว่าจะเปิดผ่าน Safari, Chrome หรือ LINE) เคยถูกล็อกไว้หรือยัง
+            verifyDeviceOnCloud();
         });
 
-        // ตรวจสอบว่าเครื่องนี้เคยผูกรหัสไว้ไหม และใน Google Sheets มีสถานะเช็คอินอยู่หรือไม่
-        function syncDeviceBindingWithCloud() {
-            const boundEmpId = localStorage.getItem("clt_bound_empid");
-            const boundEmpName = localStorage.getItem("clt_bound_name");
-
-            if (!boundEmpId) return;
-
+        function verifyDeviceOnCloud() {
             const inputField = document.getElementById('checkId');
             const btn = document.getElementById('btnShowQR');
             const label = document.getElementById('inputLabelText');
+            const localSavedId = localStorage.getItem("clt_bound_empid") || "";
 
-            // ล็อกช่องกรอกข้อมูลให้อยู่กับรหัสเดิมเสมอ เพื่อป้องกันการนำเครื่องไปกรอกรหัสของคนอื่น
-            inputField.value = boundEmpId;
-            inputField.disabled = true;
-            inputField.readOnly = true;
-
-            // ถาม Google Sheets ว่าในชีตรหัสนี้ยังมีประวัติการสแกนอยู่หรือไม่
-            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${new Date().getTime()}`)
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(localSavedId)}&deviceId=${encodeURIComponent(myDeviceId)}&t=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(res => {
-                    if (res.checkedIn) {
-                        // กรณีที่ 1: ในชีตยังมีประวัติสแกนอยู่ -> ล็อกห้ามสแกนซ้ำ
+                    // หากตรวจพบว่าเครื่องนี้ (DeviceID นี้) เคยสแกนเข้างานไปแล้วในระบบ
+                    if (res.deviceLocked || res.checkedIn) {
                         isAlreadyCheckedIn = true;
-                        label.innerHTML = `🔒 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpName || boundEmpId} <br><span style="color:#e11d48; font-size:11px;">⚠️ (ลงทะเบียนสำเร็จแล้ว ไม่อนุญาตให้กรอกรหัสอื่น)</span>`;
+                        const empName = res.boundEmpName || res.name;
+                        const empId = res.boundEmpId || localSavedId;
+
+                        inputField.value = empId;
+                        inputField.disabled = true;
+                        inputField.readOnly = true;
+
+                        label.innerHTML = `🔒 <b>เครื่องนี้ถูกใช้งานแล้ว:</b> ${empName || empId} <br><span style="color:#e11d48; font-size:11px;">⚠️ (เครื่องนี้ลงทะเบียนแล้ว ไม่อนุญาตให้กรอกรหัสของผู้อื่นแม้จะเปลี่ยนเบราว์เซอร์)</span>`;
                         btn.innerText = "🔒 เครื่องนี้เช็คอินเรียบร้อยแล้ว";
                         btn.classList.add("locked");
-                    } else {
-                        // กรณีที่ 2: แอดมินลบประวัติใน Sheets ออกแล้ว -> ปลดล็อกให้สแกนใหม่ได้ แต่ยังคงเป็นรหัสเดิม
+                    } else if (localSavedId !== "") {
+                        // กรณีแอดมินลบประวัติใน Sheets -> ปลดล็อกให้สแกนใหม่ได้ แต่ล็อกให้เป็นรหัสเดิม
                         isAlreadyCheckedIn = false;
-                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpName || boundEmpId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว คุณสามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
+                        inputField.value = localSavedId;
+                        inputField.disabled = true;
+                        inputField.readOnly = true;
+                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${localSavedId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว คุณสามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
                         btn.innerText = "🎟️ แสดง QR Code ของฉัน";
                         btn.classList.remove("locked");
                     }
@@ -377,11 +404,8 @@
         function showMyQRCode(event) {
             if (event) event.stopPropagation();
 
-            const boundEmpId = localStorage.getItem("clt_bound_empid");
-
-            // ถ้าในชีตยังมีสถานะเช็คอินอยู่ ห้ามสร้าง QR ซ้ำ
             if (isAlreadyCheckedIn) {
-                alert(`❌ เครื่องนี้ได้ทำการเช็คอินไปแล้ว (รหัส: ${boundEmpId})\nไม่อนุญาตให้เปลี่ยนหรือกรอกรหัสของคนอื่นครับ`);
+                alert(`❌ เครื่องนี้ได้ทำการเช็คอินเข้างานไปแล้ว\nไม่อนุญาตให้เปลี่ยนเบราว์เซอร์เพื่อกรอกรหัสของคนอื่นครับ`);
                 return;
             }
 
@@ -391,31 +415,21 @@
                 return; 
             }
 
-            // ป้องกันกรณีแอบแก้ไข input ใน devtools ถ้าเครื่องนี้เคยผูกรหัสอื่นไว้แล้ว
-            if (boundEmpId && boundEmpId.toLowerCase() !== rawEmpId.toLowerCase()) {
-                alert(`❌ เครื่องนี้ถูกล็อกกับรหัส ${boundEmpId} เท่านั้น ไม่อนุญาตให้กรอกรหัสอื่น`);
-                document.getElementById('checkId').value = boundEmpId;
-                return;
-            }
-
             const guest = cachedGuests.find(g => g.id.toLowerCase() === rawEmpId.toLowerCase());
             if (!guest) {
                 alert(`ไม่พบรหัสพนักงาน "${rawEmpId}" ในระบบ กรุณาติดต่อเจ้าหน้าที่`);
                 return;
             }
 
-            // ผูกเครื่องนี้เข้ากับรหัสพนักงานคนนี้ทันทีตั้งแต่สร้าง QR Code เพื่อป้องกันการเปลี่ยนรหัส
-            if (!boundEmpId) {
-                localStorage.setItem("clt_bound_empid", guest.id);
-                localStorage.setItem("clt_bound_name", guest.name);
-                syncDeviceBindingWithCloud();
-            }
+            localStorage.setItem("clt_bound_empid", guest.id);
+            localStorage.setItem("clt_bound_name", guest.name);
 
             const qrContainer = document.getElementById("personal-qrcode");
             const infoContainer = document.getElementById("personal-info");
             qrContainer.innerHTML = "";
 
-            const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
+            // แนบ Device ID ไปกับ QR Code เพื่อให้ระบบผูกเครื่องทันทีที่ Admin สแกน
+            const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}|${myDeviceId}`)));
             
             new QRCode(qrContainer, { 
                 text: `VIPPARTY|${encodedData}`, 
@@ -453,7 +467,6 @@
             document.getElementById("qr-modal").style.display = "flex";
             requestWakeLock();
 
-            // เริ่มตรวจเช็คว่าแอดมินสแกนติดหรือยัง
             startListeningForCheckIn(guest.id);
         }
 
@@ -461,7 +474,7 @@
             if (pollingTimer) clearInterval(pollingTimer);
 
             pollingTimer = setInterval(() => {
-                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${new Date().getTime()}`)
+                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&deviceId=${encodeURIComponent(myDeviceId)}&t=${new Date().getTime()}`)
                     .then(res => res.json())
                     .then(res => {
                         if (res.checkedIn) {
@@ -472,9 +485,8 @@
                                 navigator.vibrate([200, 100, 200]);
                             }
 
-                            // ล็อกสถานะเช็คอินสำเร็จ
                             isAlreadyCheckedIn = true;
-                            syncDeviceBindingWithCloud();
+                            verifyDeviceOnCloud();
 
                             document.getElementById('res-guest-name').innerText = res.name;
                             document.getElementById('res-guest-branch').innerText = res.branch;
