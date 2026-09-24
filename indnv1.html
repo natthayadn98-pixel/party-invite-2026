@@ -131,6 +131,7 @@
             box-sizing: border-box; color: #333; cursor: text; 
         }
         input[type="text"]:focus { border-color: #850c16; outline: none; box-shadow: 0 0 6px rgba(133,12,22,0.3); }
+        
         input[type="text"]:disabled { 
             background: #f1f5f9 !important; 
             color: #475569 !important; 
@@ -158,6 +159,7 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1) translateY(0); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
+        /* ป๊อปอัป QR Code เพิ่มความสว่างด้วยพื้นขาว 100% */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: #ffffff !important;
@@ -183,6 +185,7 @@
         @keyframes pulsePill { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
         .radar-dot { width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
 
+        /* หน้าต่างแจ้งเตือนเมื่อแอดมินสแกนลงทะเบียนเสร็จแล้ว */
         #checkin-success-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(15, 23, 42, 0.95); z-index: 100000; justify-content: center; align-items: center;
@@ -199,10 +202,41 @@
             from { opacity: 0; transform: scale(0.6); }
             to { opacity: 1; transform: scale(1); }
         }
+
+        /* กล่องแจ้งเตือนเมื่อเปิดนอกแอป LINE */
+        #line-block-screen {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            background: #0f172a; z-index: 9999999;
+            justify-content: center; align-items: center; padding: 24px;
+        }
+        .line-block-box {
+            background: #1e293b; border: 2px solid #06c755; border-radius: 24px;
+            padding: 35px 24px; text-align: center; color: #fff; max-width: 350px; width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
     </style>
 </head>
 <body>
 
+    <!-- หน้าต่างบล็อกเมื่อเปิดผ่าน Safari / Chrome (ไม่ได้เปิดผ่าน LINE) -->
+    <div id="line-block-screen">
+        <div class="line-block-box">
+            <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
+                💬
+            </div>
+            <h2 style="color: #06c755; margin: 0 0 10px; font-size: 20px; font-weight: bold;">กรุณาเปิดผ่านแอป LINE</h2>
+            <p style="color: #94a3b8; font-size: 13.5px; line-height: 1.6; margin-bottom: 22px;">
+                เพื่อความปลอดภัยและการยืนยันตัวตนเข้าร่วมงานเลี้ยง ระบบอนุญาตให้เปิดผ่านห้องแชทใน <b>แอปพลิเคชัน LINE</b> เท่านั้น<br>
+                <small style="color:#ef4444;">(ไม่อนุญาตให้เปิดผ่าน Safari หรือ Browser อื่น)</small>
+            </p>
+            <a id="btnOpenLine" href="#" style="display: block; background: #06c755; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 25px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4);">
+                เปิดในแอป LINE ทันที
+            </a>
+        </div>
+    </div>
+
+    <!-- ส่วนของการ์ดเชิญ -->
     <div class="envelope-wrapper" id="envelopeWrapper" onclick="toggleEnvelope()">
         <div class="envelope-back paper-wrinkle"></div>
         <div class="flap-left paper-wrinkle"></div>
@@ -247,6 +281,7 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
+    <!-- ป๊อปอัป QR Code -->
     <div id="qr-modal" onclick="closeModal()">
         <div class="qr-card-box" onclick="event.stopPropagation()">
             <div class="scan-status-pill">
@@ -263,6 +298,7 @@
         </div>
     </div>
 
+    <!-- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ -->
     <div id="checkin-success-modal">
         <div class="success-box">
             <div style="width: 70px; height: 70px; background: rgba(34, 197, 94, 0.15); border: 3px solid #22c55e; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px; color: #22c55e;">
@@ -289,40 +325,27 @@
         let cachedGuests = [];
         let pollingTimer = null;
         let wakeLock = null;
-        let myDeviceId = "";
         let isAlreadyCheckedIn = false;
 
-        async function getCrossBrowserFingerprint() {
-            let gpuInfo = "GPU_GENERIC";
-            try {
-                const canvas = document.createElement('canvas');
-                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (gl) {
-                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                    if (debugInfo) {
-                        gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    }
-                }
-            } catch(e) {}
+        // 1. ตรวจสอบว่าเปิดผ่าน LINE หรือไม่ ถ้าเปิดผ่าน Safari / Chrome ให้บล็อกทันที
+        function checkIsLineApp() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isLine = /Line/i.test(ua);
 
-            let ip = "LOCAL";
-            try {
-                const ipRes = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipRes.json();
-                ip = ipData.ip;
-            } catch(e) {}
-
-            const rawString = `${ip}_${gpuInfo}_${window.screen.width}x${window.screen.height}_${window.devicePixelRatio}`;
-            let hash = 0;
-            for (let i = 0; i < rawString.length; i++) {
-                hash = ((hash << 5) - hash) + rawString.charCodeAt(i);
-                hash |= 0;
+            if (!isLine) {
+                const currentUrl = window.location.href;
+                // สร้างลิงก์บังคับเปิดกลับเข้า LINE App
+                document.getElementById('btnOpenLine').href = "https://line.me/R/app/" + encodeURIComponent(currentUrl);
+                document.getElementById('line-block-screen').style.display = 'flex';
+                return false;
             }
-            return "IPHONE_" + Math.abs(hash);
+            return true;
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            myDeviceId = await getCrossBrowserFingerprint();
+        window.addEventListener('DOMContentLoaded', () => {
+            // ทำการตรวจจับ LINE Browser ทันทีที่โหลดหน้า
+            const isLine = checkIsLineApp();
+            if (!isLine) return; // หากไม่ใช่ LINE ให้หยุดการทำงานทันที
 
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
@@ -336,36 +359,36 @@
                     }
                 });
 
-            verifyDeviceOnCloud();
+            // ตรวจสอบสถานะการล็อกเครื่องใน LINE
+            checkDeviceLockInLine();
         });
 
-        function verifyDeviceOnCloud() {
+        function checkDeviceLockInLine() {
+            const boundEmpId = localStorage.getItem("clt_line_empid");
+            const boundEmpName = localStorage.getItem("clt_line_name");
+
+            if (!boundEmpId) return;
+
             const inputField = document.getElementById('checkId');
             const btn = document.getElementById('btnShowQR');
             const label = document.getElementById('inputLabelText');
-            const localSavedId = localStorage.getItem("clt_bound_empid") || "";
 
-            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(localSavedId)}&deviceId=${encodeURIComponent(myDeviceId)}&t=${new Date().getTime()}`)
+            inputField.value = boundEmpId;
+            inputField.disabled = true;
+            inputField.readOnly = true;
+
+            // ตรวจสอบกับ Sheets ว่าถูกแอดมินลบประวัติไปหรือยัง
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(res => {
-                    if (res.deviceLocked || res.checkedIn) {
+                    if (res.checkedIn) {
                         isAlreadyCheckedIn = true;
-                        const empName = res.boundEmpName || res.name;
-                        const empId = res.boundEmpId || localSavedId;
-
-                        inputField.value = empId;
-                        inputField.disabled = true;
-                        inputField.readOnly = true;
-
-                        label.innerHTML = `🔒 <b>เครื่องนี้ถูกใช้งานแล้ว:</b> ${empName || empId} <br><span style="color:#e11d48; font-size:11px;">⚠️ (เครื่องนี้ลงทะเบียนแล้ว ไม่อนุญาตให้กรอกรหัสของผู้อื่นแม้จะเปลี่ยนเบราว์เซอร์)</span>`;
+                        label.innerHTML = `🔒 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpName || boundEmpId} <br><span style="color:#e11d48; font-size:11px;">⚠️ (ลงทะเบียนแล้ว ไม่อนุญาตให้กรอกรหัสของผู้อื่น)</span>`;
                         btn.innerText = "🔒 เครื่องนี้เช็คอินเรียบร้อยแล้ว";
                         btn.classList.add("locked");
-                    } else if (localSavedId !== "") {
+                    } else {
                         isAlreadyCheckedIn = false;
-                        inputField.value = localSavedId;
-                        inputField.disabled = true;
-                        inputField.readOnly = true;
-                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${localSavedId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว สามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
+                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpName || boundEmpId} <br><span style="color:#059669; font-size:11px;">✨ (แอดมินรีเซ็ตประวัติแล้ว สามารถกดแสดง QR Code เพื่อลงทะเบียนใหม่อีกครั้ง)</span>`;
                         btn.innerText = "🎟️ แสดง QR Code ของฉัน";
                         btn.classList.remove("locked");
                     }
@@ -399,8 +422,10 @@
         function showMyQRCode(event) {
             if (event) event.stopPropagation();
 
+            const boundEmpId = localStorage.getItem("clt_line_empid");
+
             if (isAlreadyCheckedIn) {
-                alert(`❌ เครื่องนี้ได้ทำการเช็คอินเข้างานไปแล้ว\nไม่อนุญาตให้เปลี่ยนเบราว์เซอร์เพื่อกรอกรหัสของคนอื่นครับ`);
+                alert(`❌ เครื่องนี้ได้ทำการเช็คอินเข้างานแล้ว (รหัส: ${boundEmpId})\nไม่อนุญาตให้กรอกรหัสของผู้อื่นครับ`);
                 return;
             }
 
@@ -410,20 +435,60 @@
                 return; 
             }
 
+            if (boundEmpId && boundEmpId.toLowerCase() !== rawEmpId.toLowerCase()) {
+                alert(`❌ เครื่องนี้ถูกล็อกกับรหัส ${boundEmpId} เท่านั้น ไม่อนุญาตให้กรอกรหัสอื่น`);
+                document.getElementById('checkId').value = boundEmpId;
+                return;
+            }
+
             const guest = cachedGuests.find(g => g.id.toLowerCase() === rawEmpId.toLowerCase());
             if (!guest) {
                 alert(`ไม่พบรหัสพนักงาน "${rawEmpId}" ในระบบ กรุณาติดต่อเจ้าหน้าที่`);
                 return;
             }
 
-            localStorage.setItem("clt_bound_empid", guest.id);
-            localStorage.setItem("clt_bound_name", guest.name);
+            const btn = document.getElementById('btnShowQR');
+            btn.innerText = "⏳ กำลังตรวจสอบสิทธิ์...";
+            btn.disabled = true;
 
+            // ตรวจสอบกับ Cloud โดยตรงก่อนออกบัตร QR
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(guest.id)}&t=${new Date().getTime()}`)
+                .then(res => res.json())
+                .then(res => {
+                    btn.disabled = false;
+                    btn.innerText = "🎟️ แสดง QR Code ของฉัน";
+
+                    if (res.checkedIn) {
+                        alert(`❌ รหัสพนักงานนี้ (${guest.name}) ได้ทำการเช็คอินเข้างาน (${res.round}) เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำ`);
+                        isAlreadyCheckedIn = true;
+                        localStorage.setItem("clt_line_empid", guest.id);
+                        localStorage.setItem("clt_line_name", guest.name);
+                        checkDeviceLockInLine();
+                        return;
+                    }
+
+                    // ผูกรหัสกับเครื่องนี้ทันที
+                    if (!boundEmpId) {
+                        localStorage.setItem("clt_line_empid", guest.id);
+                        localStorage.setItem("clt_line_name", guest.name);
+                        checkDeviceLockInLine();
+                    }
+
+                    renderQRCodeCard(guest);
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = "🎟️ แสดง QR Code ของฉัน";
+                    renderQRCodeCard(guest);
+                });
+        }
+
+        function renderQRCodeCard(guest) {
             const qrContainer = document.getElementById("personal-qrcode");
             const infoContainer = document.getElementById("personal-info");
             qrContainer.innerHTML = "";
 
-            const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}|${myDeviceId}`)));
+            const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
             
             new QRCode(qrContainer, { 
                 text: `VIPPARTY|${encodedData}`, 
@@ -468,7 +533,7 @@
             if (pollingTimer) clearInterval(pollingTimer);
 
             pollingTimer = setInterval(() => {
-                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&deviceId=${encodeURIComponent(myDeviceId)}&t=${new Date().getTime()}`)
+                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${new Date().getTime()}`)
                     .then(res => res.json())
                     .then(res => {
                         if (res.checkedIn) {
@@ -480,7 +545,7 @@
                             }
 
                             isAlreadyCheckedIn = true;
-                            verifyDeviceOnCloud();
+                            checkDeviceLockInLine();
 
                             document.getElementById('res-guest-name').innerText = res.name;
                             document.getElementById('res-guest-branch').innerText = res.branch;
