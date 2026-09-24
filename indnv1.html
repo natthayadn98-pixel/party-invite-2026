@@ -127,7 +127,7 @@
         input[type="text"] { 
             width: 100%; padding: 10px; margin: 6px 0 6px; 
             border: 1.5px solid #b8a68e; background: #fffcf7; 
-            border-radius: 6px; font-size: 14px; font-family: 'Anakotmai', sans-serif; 
+            border-radius: 6px; font-size: 16px; font-family: 'Anakotmai', sans-serif; 
             box-sizing: border-box; color: #333; cursor: text; 
         }
         input[type="text"]:focus { border-color: #850c16; outline: none; box-shadow: 0 0 6px rgba(133,12,22,0.3); }
@@ -159,7 +159,6 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1) translateY(0); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
-        /* ป๊อปอัป QR Code เพิ่มความสว่างด้วยพื้นขาว 100% */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: #ffffff !important;
@@ -185,7 +184,6 @@
         @keyframes pulsePill { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
         .radar-dot { width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
 
-        /* หน้าต่างแจ้งเตือนเมื่อแอดมินสแกนลงทะเบียนเสร็จแล้ว */
         #checkin-success-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(15, 23, 42, 0.95); z-index: 100000; justify-content: center; align-items: center;
@@ -203,7 +201,6 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* กล่องแจ้งเตือนเมื่อเปิดนอกแอป LINE */
         #line-block-screen {
             display: none;
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
@@ -219,7 +216,6 @@
 </head>
 <body>
 
-    <!-- หน้าต่างบล็อกเมื่อเปิดผ่าน Safari / Chrome (ไม่ได้เปิดผ่าน LINE) -->
     <div id="line-block-screen">
         <div class="line-block-box">
             <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
@@ -236,7 +232,6 @@
         </div>
     </div>
 
-    <!-- ส่วนของการ์ดเชิญ -->
     <div class="envelope-wrapper" id="envelopeWrapper" onclick="toggleEnvelope()">
         <div class="envelope-back paper-wrinkle"></div>
         <div class="flap-left paper-wrinkle"></div>
@@ -269,7 +264,15 @@
                     </div>
 
                     <span id="inputLabelText">กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:</span><br>
-                    <input type="text" id="checkId" placeholder="รหัสพนักงาน (เช่น 012345)" onclick="event.stopPropagation()">
+                    
+                    <!-- ช่องกรอกรหัสพนักงาน: ปรับให้เด้งคีย์บอร์ดตัวเลข และพิมพ์ได้เฉพาะตัวเลขเท่านั้น -->
+                    <input type="text" 
+                           id="checkId" 
+                           inputmode="numeric" 
+                           pattern="[0-9]*" 
+                           placeholder="รหัสพนักงาน (เฉพาะตัวเลข เช่น 012345)" 
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           onclick="event.stopPropagation()">
                 </div>
             </div>
             <div>
@@ -281,7 +284,6 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- ป๊อปอัป QR Code -->
     <div id="qr-modal" onclick="closeModal()">
         <div class="qr-card-box" onclick="event.stopPropagation()">
             <div class="scan-status-pill">
@@ -298,7 +300,6 @@
         </div>
     </div>
 
-    <!-- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ -->
     <div id="checkin-success-modal">
         <div class="success-box">
             <div style="width: 70px; height: 70px; background: rgba(34, 197, 94, 0.15); border: 3px solid #22c55e; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px; color: #22c55e;">
@@ -327,14 +328,12 @@
         let wakeLock = null;
         let isAlreadyCheckedIn = false;
 
-        // 1. ตรวจสอบว่าเปิดผ่าน LINE หรือไม่ ถ้าเปิดผ่าน Safari / Chrome ให้บล็อกทันที
         function checkIsLineApp() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isLine = /Line/i.test(ua);
 
             if (!isLine) {
                 const currentUrl = window.location.href;
-                // สร้างลิงก์บังคับเปิดกลับเข้า LINE App
                 document.getElementById('btnOpenLine').href = "https://line.me/R/app/" + encodeURIComponent(currentUrl);
                 document.getElementById('line-block-screen').style.display = 'flex';
                 return false;
@@ -343,9 +342,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // ทำการตรวจจับ LINE Browser ทันทีที่โหลดหน้า
             const isLine = checkIsLineApp();
-            if (!isLine) return; // หากไม่ใช่ LINE ให้หยุดการทำงานทันที
+            if (!isLine) return;
 
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
@@ -359,7 +357,6 @@
                     }
                 });
 
-            // ตรวจสอบสถานะการล็อกเครื่องใน LINE
             checkDeviceLockInLine();
         });
 
@@ -377,7 +374,6 @@
             inputField.disabled = true;
             inputField.readOnly = true;
 
-            // ตรวจสอบกับ Sheets ว่าถูกแอดมินลบประวัติไปหรือยัง
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(res => {
@@ -431,7 +427,7 @@
 
             const rawEmpId = document.getElementById('checkId').value.trim();
             if(!rawEmpId) { 
-                alert("กรุณากรอกรหัสพนักงานก่อนครับ"); 
+                alert("กรุณากรอกรหัสพนักงานเป็นตัวเลขก่อนครับ"); 
                 return; 
             }
 
@@ -451,7 +447,6 @@
             btn.innerText = "⏳ กำลังตรวจสอบสิทธิ์...";
             btn.disabled = true;
 
-            // ตรวจสอบกับ Cloud โดยตรงก่อนออกบัตร QR
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(guest.id)}&t=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(res => {
@@ -467,7 +462,6 @@
                         return;
                     }
 
-                    // ผูกรหัสกับเครื่องนี้ทันที
                     if (!boundEmpId) {
                         localStorage.setItem("clt_line_empid", guest.id);
                         localStorage.setItem("clt_line_name", guest.name);
