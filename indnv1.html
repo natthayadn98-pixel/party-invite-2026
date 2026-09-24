@@ -211,47 +211,36 @@
         }
         .line-block-box {
             background: #1e293b; border: 2px solid #06c755; border-radius: 24px;
-            padding: 30px 20px; text-align: center; color: #fff; max-width: 350px; width: 100%;
+            padding: 35px 22px; text-align: center; color: #fff; max-width: 350px; width: 100%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
         .btn-line-open {
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: #06c755; color: #fff; text-decoration: none; padding: 13px 20px;
+            background: #06c755; color: #fff; text-decoration: none; padding: 14px 20px;
             border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer;
             box-shadow: 0 6px 20px rgba(6, 199, 85, 0.4); border: none; width: 100%;
-            font-family: 'Anakotmai', sans-serif; margin-bottom: 10px;
-        }
-        .btn-copy-link {
-            display: block; background: rgba(255,255,255,0.08); color: #cbd5e1;
-            padding: 10px 16px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.2);
-            cursor: pointer; width: 100%; font-family: 'Anakotmai', sans-serif;
+            font-family: 'Anakotmai', sans-serif;
         }
     </style>
 </head>
 <body>
 
-    <!-- หน้าต่างบล็อกเมื่อเปิดผ่าน Safari / Chrome พร้อมปุ่มเปิดแอป LINE ทันที -->
+    <!-- หน้าต่างบล็อกเมื่อเปิดผ่าน Safari / Chrome พร้อมปุ่มเปิดแอป LINE ทันที (แก้ System Error) -->
     <div id="line-block-screen">
         <div class="line-block-box">
-            <div style="width: 68px; height: 68px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px; font-size: 32px;">
+            <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
                 💬
             </div>
             <h2 style="color: #06c755; margin: 0 0 10px; font-size: 20px; font-weight: bold;">กรุณาเปิดผ่านแอป LINE</h2>
-            <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin-bottom: 22px;">
-                เพื่อความปลอดภัยและการยืนยันตัวตนเข้าร่วมงานเลี้ยง ระบบอนุญาตให้เปิดผ่านห้องแชทใน <b>แอปพลิเคชัน LINE</b> เท่านั้น<br>
+            <p style="color: #94a3b8; font-size: 13.5px; line-height: 1.6; margin-bottom: 25px;">
+                เพื่อความปลอดภัยและการยืนยันสิทธิ์เข้าร่วมงานเลี้ยง ระบบอนุญาตให้เปิดผ่านห้องแชทใน <b>แอปพลิเคชัน LINE</b> เท่านั้น<br>
                 <small style="color:#ef4444;">(ไม่อนุญาตให้เปิดผ่าน Safari หรือ Browser อื่น)</small>
             </p>
 
-            <!-- ปุ่มแตะแล้วเปิดเข้าสู่แอป LINE ทันที -->
+            <!-- ปุ่มแตะแล้วเปิดเข้าสู่แอป LINE ทันทีโดยตรง -->
             <button class="btn-line-open" onclick="openDirectLineApp()">
                 <span>📲 แตะเพื่อเปิดในแอป LINE</span>
             </button>
-
-            <!-- ปุ่มทางเลือก: คัดลอกลิงก์ส่งเข้า LINE -->
-            <button class="btn-copy-link" onclick="copyCardLink()">
-                📋 คัดลอกลิงก์ (นำไปวางในแชท LINE)
-            </button>
-            <div id="copyAlert" style="color: #06c755; font-size: 12px; margin-top: 8px; min-height: 18px;"></div>
         </div>
     </div>
 
@@ -289,6 +278,7 @@
 
                     <span id="inputLabelText">กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:</span><br>
                     
+                    <!-- ช่องกรอกรหัส: แป้นพิมพ์ตัวเลข + บังคับพิมพ์ได้เฉพาะตัวเลข -->
                     <input type="text" 
                            id="checkId" 
                            inputmode="numeric" 
@@ -353,47 +343,14 @@
         let wakeLock = null;
         let isAlreadyCheckedIn = false;
 
-        // ฟังก์ชันสั่งเปิดแอป LINE ทันทีจากเบราว์เซอร์ภายนอก
+        // สั่งเปิดเข้าแอป LINE โดยตรงผ่าน URL Scheme ที่ถูกต้อง (ไม่มี System Error)
         function openDirectLineApp() {
             const currentUrl = window.location.href;
-            // ใช้ Deep Link ของ LINE ที่ระบบ iOS / Android รองรับเพื่อสลับเข้าแอป LINE โดยตรง
-            window.location.href = "line://app/" + encodeURIComponent(currentUrl);
-
-            // กรณีเครื่องยังไม่สลับ ให้ใช้ URL Scheme สำรอง
-            setTimeout(() => {
-                window.location.href = "https://line.me/R/app/" + encodeURIComponent(currentUrl);
-            }, 500);
+            // คำสั่งเปิดแชทส่งข้อความตัวเองใน LINE เพื่อเปิดลิงก์ทันที
+            window.location.href = "https://line.me/R/msg/text/?" + encodeURIComponent(currentUrl);
         }
 
-        // ฟังก์ชันคัดลอกลิงก์
-        function copyCardLink() {
-            const url = window.location.href;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(() => {
-                    showCopySuccess();
-                }).catch(() => fallbackCopy(url));
-            } else {
-                fallbackCopy(url);
-            }
-        }
-
-        function fallbackCopy(text) {
-            const temp = document.createElement("input");
-            temp.value = text;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand("copy");
-            document.body.removeChild(temp);
-            showCopySuccess();
-        }
-
-        function showCopySuccess() {
-            const alertBox = document.getElementById("copyAlert");
-            alertBox.innerText = "✅ คัดลอกสำเร็จ! นำไปวางในห้องแชท LINE แล้วแตะเปิดได้เลย";
-            setTimeout(() => { alertBox.innerText = ""; }, 4000);
-        }
-
-        // ตรวจสอบว่าเปิดผ่าน LINE หรือไม่
+        // ตรวจสอบว่าเปิดผ่าน In-App Browser ของ LINE หรือไม่
         function checkIsLineApp() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isLine = /Line/i.test(ua);
@@ -407,7 +364,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const isLine = checkIsLineApp();
-            if (!isLine) return;
+            if (!isLine) return; // บล็อกทันทีถ้าไม่ได้เปิดผ่าน LINE
 
             fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
                 .then(res => res.json())
