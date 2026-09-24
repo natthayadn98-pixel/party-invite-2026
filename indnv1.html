@@ -201,37 +201,61 @@
             to { opacity: 1; transform: scale(1); }
         }
 
+        /* หน้าต่างบล็อกเมื่อเปิดนอกแอป LINE */
         #line-block-screen {
             display: none;
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-            background: #0f172a; z-index: 9999999;
-            justify-content: center; align-items: center; padding: 24px;
+            background: radial-gradient(circle, #0f172a 0%, #020617 100%); 
+            z-index: 9999999;
+            justify-content: center; align-items: center; padding: 20px;
         }
         .line-block-box {
             background: #1e293b; border: 2px solid #06c755; border-radius: 24px;
-            padding: 35px 24px; text-align: center; color: #fff; max-width: 350px; width: 100%;
+            padding: 30px 20px; text-align: center; color: #fff; max-width: 350px; width: 100%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .btn-line-open {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: #06c755; color: #fff; text-decoration: none; padding: 13px 20px;
+            border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 6px 20px rgba(6, 199, 85, 0.4); border: none; width: 100%;
+            font-family: 'Anakotmai', sans-serif; margin-bottom: 10px;
+        }
+        .btn-copy-link {
+            display: block; background: rgba(255,255,255,0.08); color: #cbd5e1;
+            padding: 10px 16px; border-radius: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer; width: 100%; font-family: 'Anakotmai', sans-serif;
         }
     </style>
 </head>
 <body>
 
+    <!-- หน้าต่างบล็อกเมื่อเปิดผ่าน Safari / Chrome พร้อมปุ่มเปิดแอป LINE ทันที -->
     <div id="line-block-screen">
         <div class="line-block-box">
-            <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
+            <div style="width: 68px; height: 68px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px; font-size: 32px;">
                 💬
             </div>
             <h2 style="color: #06c755; margin: 0 0 10px; font-size: 20px; font-weight: bold;">กรุณาเปิดผ่านแอป LINE</h2>
-            <p style="color: #94a3b8; font-size: 13.5px; line-height: 1.6; margin-bottom: 22px;">
+            <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin-bottom: 22px;">
                 เพื่อความปลอดภัยและการยืนยันตัวตนเข้าร่วมงานเลี้ยง ระบบอนุญาตให้เปิดผ่านห้องแชทใน <b>แอปพลิเคชัน LINE</b> เท่านั้น<br>
                 <small style="color:#ef4444;">(ไม่อนุญาตให้เปิดผ่าน Safari หรือ Browser อื่น)</small>
             </p>
-            <a id="btnOpenLine" href="#" style="display: block; background: #06c755; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 25px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4);">
-                เปิดในแอป LINE ทันที
-            </a>
+
+            <!-- ปุ่มแตะแล้วเปิดเข้าสู่แอป LINE ทันที -->
+            <button class="btn-line-open" onclick="openDirectLineApp()">
+                <span>📲 แตะเพื่อเปิดในแอป LINE</span>
+            </button>
+
+            <!-- ปุ่มทางเลือก: คัดลอกลิงก์ส่งเข้า LINE -->
+            <button class="btn-copy-link" onclick="copyCardLink()">
+                📋 คัดลอกลิงก์ (นำไปวางในแชท LINE)
+            </button>
+            <div id="copyAlert" style="color: #06c755; font-size: 12px; margin-top: 8px; min-height: 18px;"></div>
         </div>
     </div>
 
+    <!-- การ์ดเชิญ -->
     <div class="envelope-wrapper" id="envelopeWrapper" onclick="toggleEnvelope()">
         <div class="envelope-back paper-wrinkle"></div>
         <div class="flap-left paper-wrinkle"></div>
@@ -265,7 +289,6 @@
 
                     <span id="inputLabelText">กรอกรหัสพนักงานเพื่อแสดงบัตร QR Code สำหรับเข้างาน:</span><br>
                     
-                    <!-- ช่องกรอกรหัสพนักงาน: ปรับให้เด้งคีย์บอร์ดตัวเลข และพิมพ์ได้เฉพาะตัวเลขเท่านั้น -->
                     <input type="text" 
                            id="checkId" 
                            inputmode="numeric" 
@@ -284,6 +307,7 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
+    <!-- ป๊อปอัป QR Code -->
     <div id="qr-modal" onclick="closeModal()">
         <div class="qr-card-box" onclick="event.stopPropagation()">
             <div class="scan-status-pill">
@@ -300,6 +324,7 @@
         </div>
     </div>
 
+    <!-- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ -->
     <div id="checkin-success-modal">
         <div class="success-box">
             <div style="width: 70px; height: 70px; background: rgba(34, 197, 94, 0.15); border: 3px solid #22c55e; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px; color: #22c55e;">
@@ -328,13 +353,52 @@
         let wakeLock = null;
         let isAlreadyCheckedIn = false;
 
+        // ฟังก์ชันสั่งเปิดแอป LINE ทันทีจากเบราว์เซอร์ภายนอก
+        function openDirectLineApp() {
+            const currentUrl = window.location.href;
+            // ใช้ Deep Link ของ LINE ที่ระบบ iOS / Android รองรับเพื่อสลับเข้าแอป LINE โดยตรง
+            window.location.href = "line://app/" + encodeURIComponent(currentUrl);
+
+            // กรณีเครื่องยังไม่สลับ ให้ใช้ URL Scheme สำรอง
+            setTimeout(() => {
+                window.location.href = "https://line.me/R/app/" + encodeURIComponent(currentUrl);
+            }, 500);
+        }
+
+        // ฟังก์ชันคัดลอกลิงก์
+        function copyCardLink() {
+            const url = window.location.href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showCopySuccess();
+                }).catch(() => fallbackCopy(url));
+            } else {
+                fallbackCopy(url);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const temp = document.createElement("input");
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            showCopySuccess();
+        }
+
+        function showCopySuccess() {
+            const alertBox = document.getElementById("copyAlert");
+            alertBox.innerText = "✅ คัดลอกสำเร็จ! นำไปวางในห้องแชท LINE แล้วแตะเปิดได้เลย";
+            setTimeout(() => { alertBox.innerText = ""; }, 4000);
+        }
+
+        // ตรวจสอบว่าเปิดผ่าน LINE หรือไม่
         function checkIsLineApp() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isLine = /Line/i.test(ua);
 
             if (!isLine) {
-                const currentUrl = window.location.href;
-                document.getElementById('btnOpenLine').href = "https://line.me/R/app/" + encodeURIComponent(currentUrl);
                 document.getElementById('line-block-screen').style.display = 'flex';
                 return false;
             }
