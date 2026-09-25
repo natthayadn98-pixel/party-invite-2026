@@ -170,7 +170,6 @@
         .pin-title { color: #f8fafc; font-size: 17px; font-weight: 700; margin: 0 0 6px; }
         .pin-subtitle { color: #94a3b8; font-size: 12px; margin: 0 0 18px; }
 
-        /* กรอบแสดงจุดรหัส 6 หลัก */
         .pin-display-frame {
             display: flex; justify-content: center; align-items: center; gap: 12px;
             background: rgba(0, 0, 0, 0.35);
@@ -180,15 +179,6 @@
             margin: 0 auto 22px;
             max-width: 250px;
             transition: border-color 0.2s, transform 0.2s;
-        }
-        .pin-display-frame.shake {
-            animation: shakeBox 0.35s ease;
-            border-color: #ef4444;
-        }
-        @keyframes shakeBox {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
         }
 
         .pin-dot {
@@ -205,7 +195,6 @@
             transform: scale(1.15);
         }
 
-        /* แป้นพิมพ์ตัวเลข (Keypad) */
         .pin-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -271,10 +260,22 @@
             display: inline-flex; align-items: center; gap: 8px;
             background: #f0fdf4; border: 1.5px solid #22c55e; color: #15803d;
             padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;
-            margin-bottom: 12px; animation: pulsePill 1.8s infinite;
+            margin-bottom: 8px; animation: pulsePill 1.8s infinite;
         }
         @keyframes pulsePill { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
         .radar-dot { width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
+
+        .round-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
         /* ---------- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ ---------- */
         #checkin-success-modal {
@@ -337,7 +338,7 @@
         <div class="flap-top paper-wrinkle">
             <div class="top-text">
                 <div class="envelope-title">งานเลี้ยงสังสรรค์</div>
-                <div class="envelope-date">28 พฤศจิกายน 2569</div>
+                <div class="envelope-date">งานเลี้ยงสังสรรค์ประจำปี CLT</div>
             </div>
         </div>
 
@@ -351,8 +352,8 @@
                     ขอเรียนเชิญร่วมงานเลี้ยงสังสรรค์ประจำปีตามกำหนดการดังนี้:
                     
                     <div style="margin: 6px 0 10px; background: rgba(255,255,255,0.75); padding: 8px 10px; border-radius: 6px; border-left: 3px solid #850c16; font-size: 11.5px;">
-                        <p style="margin: 2px 0;"><span>🗓️ วันที่:</span> 28 พฤศจิกายน 2569</p>
-                        <p style="margin: 2px 0;"><span>⏰ เวลา:</span> 09:00-23:00 น.</p>
+                        <p style="margin: 2px 0;"><span>☀️ รอบเช้า:</span> 07:00 - 10:00 น.</p>
+                        <p style="margin: 2px 0;"><span>🌙 รอบเย็น:</span> 14:00 น. เป็นต้นไป</p>
                         <p style="margin: 2px 0;"><span>📍 สถานที่:</span> รอยัล ฮิลล์ กอล์ฟ รีสอร์ท แอนด์ สปา</p>
                         <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> ชุดกีฬา</p>
                     </div>
@@ -373,13 +374,12 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- ป๊อปอัปแป้นพิมพ์ PIN PAD แบบ 6 หลัก (ตามภาพต้นฉบับ) -->
+    <!-- ป๊อปอัปแป้นพิมพ์ PIN PAD แบบ 6 หลัก -->
     <div id="pin-modal" onclick="closePinModal()">
         <div class="pin-box" onclick="event.stopPropagation()">
             <h3 class="pin-title">Enter Employee PIN</h3>
             <p class="pin-subtitle">กรอกรหัสพนักงาน 6 หลัก เพื่อเข้าสู่ระบบ</p>
 
-            <!-- แสดง 6 จุด PIN -->
             <div class="pin-display-frame" id="pinDisplayFrame">
                 <span class="pin-dot" id="dot-0"></span>
                 <span class="pin-dot" id="dot-1"></span>
@@ -389,7 +389,6 @@
                 <span class="pin-dot" id="dot-5"></span>
             </div>
 
-            <!-- แป้นตัวเลข 1-9, 0 และปุ่มลบ -->
             <div class="pin-grid">
                 <div class="pin-btn" onclick="pressPin('1')">1</div>
                 <div class="pin-btn" onclick="pressPin('2')">2</div>
@@ -419,6 +418,8 @@
                 <span class="radar-dot"></span>
                 <span>รอเจ้าหน้าที่สแกนเข้างาน...</span>
             </div>
+            
+            <div id="current-round-badge" class="round-badge">📍 ลงทะเบียนรอบเช้า</div>
 
             <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 0 auto; position: relative; width: 220px; height: 220px;"></div>
             <div id="personal-info" style="font-size: 14px; color: #222; margin: 14px 0 16px; line-height: 1.5; font-weight: bold;"></div>
@@ -437,7 +438,7 @@
             </div>
             
             <h2 style="color: #22c55e; margin: 0 0 6px; font-size: 22px; font-weight: bold;">ลงทะเบียนเรียบร้อยแล้ว!</h2>
-            <p style="color: #94a3b8; font-size: 13.5px; margin: 0 0 18px;">เครื่องนี้ได้ทำการเช็คอินเข้างานแล้ว</p>
+            <p style="color: #94a3b8; font-size: 13.5px; margin: 0 0 18px;">ระบบได้บันทึกการเข้างานเรียบร้อยแล้ว</p>
             
             <div style="background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; font-size: 14px; text-align: left; line-height: 1.6; margin-bottom: 22px; border: 1px solid rgba(255,255,255,0.1);">
                 <div>👤 <b>ชื่อ-นามสกุล:</b> <span id="res-guest-name" style="color:#ffd700;">-</span></div>
@@ -456,8 +457,35 @@
         let cachedGuests = [];
         let pollingTimer = null;
         let wakeLock = null;
-        let isAlreadyCheckedIn = false;
-        let currentPin = ""; // เก็บค่ารหัส 6 หลักที่กำลังกด
+        let currentPin = "";
+        
+        let morningChecked = false;
+        let eveningChecked = false;
+
+        // ฟังก์ชันประเมินรอบตามเวลา: รอบเช้า (07:00 - 10:00 น.) และ รอบเย็น (14:00 น. เป็นต้นไป)
+        function checkCurrentSession() {
+            const now = new Date();
+            const minutesNow = now.getHours() * 60 + now.getMinutes();
+
+            const morningStart = 7 * 60;   // 07:00 น. (420 นาที)
+            const morningEnd   = 10 * 60;  // 10:00 น. (600 นาที)
+            const eveningStart = 14 * 60;  // 14:00 น. (840 นาที)
+
+            if (minutesNow < morningStart) {
+                return { active: false, msg: "⏰ ระบบยังไม่เปิดให้แสดง QR Code\nจะเปิดลงทะเบียนรอบเช้าเวลา 07:00 - 10:00 น." };
+            }
+            if (minutesNow >= morningStart && minutesNow <= morningEnd) {
+                return { active: true, round: "รอบเช้า" };
+            }
+            if (minutesNow > morningEnd && minutesNow < eveningStart) {
+                return { active: false, msg: "⏸️ หมดเวลาลงทะเบียนรอบเช้าแล้ว\nระบบจะเปิดให้สแกนรอบเย็นเวลา 14:00 น. เป็นต้นไป" };
+            }
+            if (minutesNow >= eveningStart) {
+                return { active: true, round: "รอบเย็น" };
+            }
+
+            return { active: false, msg: "ไม่อยู่ในช่วงเวลาการลงทะเบียน" };
+        }
 
         // ตรวจสอบว่าเปิดผ่าน In-App Browser ของ LINE หรือไม่
         function checkIsLineApp() {
@@ -490,6 +518,7 @@
             checkDeviceLockInLine();
         });
 
+        // ฟังก์ชันตรวจเช็คสถานะการผูกเครื่องและรอบเช็คอิน
         function checkDeviceLockInLine() {
             const boundEmpId = localStorage.getItem("clt_line_empid");
             const boundEmpName = localStorage.getItem("clt_line_name");
@@ -498,19 +527,30 @@
 
             const btn = document.getElementById('btnOpenPinModal');
             const label = document.getElementById('inputLabelText');
+            const session = checkCurrentSession();
 
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(res => {
-                    if (res.checkedIn) {
-                        isAlreadyCheckedIn = true;
-                        label.innerHTML = `🔒 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#e11d48; font-size:11.5px; font-weight:bold;">⚠️ (เช็คอินแล้ว ไม่อนุญาตให้กรอกรหัสผู้อื่น)</span>`;
-                        btn.innerText = "🔒 เครื่องนี้เช็คอินเรียบร้อยแล้ว";
+                    morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                    eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                    if (morningChecked && eveningChecked) {
+                        label.innerHTML = `🔒 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#e11d48; font-size:11.5px; font-weight:bold;">✨ เช็คอินครบทั้งรอบเช้าและรอบเย็นแล้ว</span>`;
+                        btn.innerText = "🔒 เช็คอินครบทุกรอบแล้ว";
+                        btn.classList.add("locked");
+                    } else if (session.active && session.round === "รอบเช้า" && morningChecked) {
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✅ เช็คอินรอบเช้าแล้ว (รอเปิดรอบเย็น 14:00 น.)</span>`;
+                        btn.innerText = "✅ เช็คอินรอบเช้าเรียบร้อยแล้ว";
+                        btn.classList.add("locked");
+                    } else if (session.active && session.round === "รอบเย็น" && eveningChecked) {
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✅ เช็คอินรอบเย็นเรียบร้อยแล้ว</span>`;
+                        btn.innerText = "✅ เช็คอินรอบเย็นเรียบร้อยแล้ว";
                         btn.classList.add("locked");
                     } else {
-                        isAlreadyCheckedIn = false;
-                        label.innerHTML = `👤 <b>เครื่องนี้ผูกกับรหัส:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✨ (แตะปุ่มด้านล่างเพื่อแสดง QR Code เข้างาน)</span>`;
-                        btn.innerText = "🎟️ แสดง QR Code ของฉัน";
+                        const roundTitle = session.active ? session.round : "บัตรเข้างาน";
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#0284c7; font-size:11.5px; font-weight:bold;">🎟️ พร้อมแสดงบัตรเข้างาน (${roundTitle})</span>`;
+                        btn.innerText = `🎟️ แสดง QR Code (${roundTitle})`;
                         btn.classList.remove("locked");
                     }
                 })
@@ -529,20 +569,31 @@
         function openPinModal(event) {
             if (event) event.stopPropagation();
 
+            const session = checkCurrentSession();
+            
+            // ตรวจสอบเงื่อนไขเวลาตามรอบ
+            if (!session.active) {
+                alert(session.msg);
+                return;
+            }
+
             const boundEmpId = localStorage.getItem("clt_line_empid");
 
-            if (isAlreadyCheckedIn) {
-                alert(`❌ เครื่องนี้ได้ทำการเช็คอินเข้างานแล้ว (รหัส: ${boundEmpId})\nไม่อนุญาตให้ใช้เครื่องกรอกให้ผู้อื่นครับ`);
+            if (morningChecked && eveningChecked) {
+                alert("❌ เครื่องนี้ได้ทำการเช็คอินครบทั้งรอบเช้าและรอบเย็นแล้วครับ");
                 return;
             }
 
-            // ถ้าเครื่องนี้เคยผูกรหัสไว้แล้วและยังไม่เช็คอิน สามารถกดแสดง QR Code เดิมได้เลย
+            if ((session.round === "รอบเช้า" && morningChecked) || (session.round === "รอบเย็น" && eveningChecked)) {
+                alert(`✅ รหัสนี้ได้ทำการเช็คอิน ${session.round} เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำในรอบเดียวกันครับ`);
+                return;
+            }
+
             if (boundEmpId) {
-                validateAndShowQR(boundEmpId);
+                validateAndShowQR(boundEmpId, session.round);
                 return;
             }
 
-            // ถ้ายังไม่เคยผูก ให้เปิดหน้าจอ PIN Pad ขึ้นมา
             currentPin = "";
             updatePinDots();
             document.getElementById('pin-modal').style.display = 'flex';
@@ -566,12 +617,12 @@
                 currentPin += digit;
                 updatePinDots();
 
-                // เมื่อกดครบ 6 หลัก ให้ส่งตรวจทันทีอัตโนมัติ
                 if (currentPin.length === 6) {
                     setTimeout(() => {
                         const pinToSubmit = currentPin;
                         closePinModal();
-                        validateAndShowQR(pinToSubmit);
+                        const session = checkCurrentSession();
+                        validateAndShowQR(pinToSubmit, session.round || "รอบเช้า");
                     }, 250);
                 }
             }
@@ -596,33 +647,11 @@
             }
         }
 
-        function shakePinBox() {
-            const frame = document.getElementById('pinDisplayFrame');
-            frame.classList.add('shake');
-            if ("vibrate" in navigator) navigator.vibrate([40, 60, 40]);
-            setTimeout(() => { frame.classList.remove('shake'); }, 400);
-        }
-
-        /* ---------- ตรวจสอบสิทธิ์และเวลา ---------- */
-        function validateAndShowQR(empId) {
-            // 1. ตรวจสอบเวลา (เปิด 28 พ.ย. 2569 เวลา 07:00 - 20:00 น.)
-            const now = new Date();
-            const openTime = new Date(2026, 10, 28, 7, 0, 0);
-            const closeTime = new Date(2026, 10, 28, 20, 0, 0);
-
-            // หากต้องการทดสอบก่อนวันจริง สามารถใส่ // ปิด 2 เงื่อนไขนี้ได้ชั่วคราว
-            if (now < openTime) {
-                alert("⏰ ระบบยังไม่เปิดให้แสดง QR Code เข้างาน\nจะเปิดในวันที่ 28 พ.ย. 2569 เวลา 07:00 น. เป็นต้นไป");
-                return;
-            }
-            if (now > closeTime) {
-                alert("⌛ หมดเวลาแสดง QR Code สำหรับลงทะเบียนเข้างานแล้ว (สิ้นสุด 20:00 น.)");
-                return;
-            }
-
+        /* ---------- ตรวจสอบสิทธิ์และแสดง QR ---------- */
+        function validateAndShowQR(empId, activeRound) {
             const boundEmpId = localStorage.getItem("clt_line_empid");
             if (boundEmpId && boundEmpId.toLowerCase() !== empId.toLowerCase()) {
-                alert(`❌ เครื่องนี้ผูกกับรหัส ${boundEmpId} เท่านั้น ไม่อนุญาตให้กรอกรหัสอื่น`);
+                alert(`❌ เครื่องนี้ผูกกับรหัส ${boundEmpId} เท่านั้น ไม่อนุญาตให้กรอกรหัสของผู้อื่น`);
                 return;
             }
 
@@ -640,13 +669,13 @@
                 .then(res => res.json())
                 .then(res => {
                     btn.disabled = false;
-                    btn.innerText = "🎟️ แสดง QR Code ของฉัน";
+                    btn.innerText = `🎟️ แสดง QR Code (${activeRound})`;
 
-                    if (res.checkedIn) {
-                        alert(`❌ รหัสพนักงานนี้ (${guest.name}) ได้ทำการเช็คอินเข้างาน (${res.round}) เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำ`);
-                        isAlreadyCheckedIn = true;
-                        localStorage.setItem("clt_line_empid", guest.id);
-                        localStorage.setItem("clt_line_name", guest.name);
+                    morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                    eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                    if ((activeRound === "รอบเช้า" && morningChecked) || (activeRound === "รอบเย็น" && eveningChecked)) {
+                        alert(`❌ รหัสพนักงานนี้ (${guest.name}) ได้ทำการเช็คอิน "${activeRound}" เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำในรอบเดียวกัน`);
                         checkDeviceLockInLine();
                         return;
                     }
@@ -657,12 +686,12 @@
                         checkDeviceLockInLine();
                     }
 
-                    renderQRCodeCard(guest);
+                    renderQRCodeCard(guest, activeRound);
                 })
                 .catch(() => {
                     btn.disabled = false;
-                    btn.innerText = "🎟️ แสดง QR Code ของฉัน";
-                    renderQRCodeCard(guest);
+                    btn.innerText = `🎟️ แสดง QR Code (${activeRound})`;
+                    renderQRCodeCard(guest, activeRound);
                 });
         }
 
@@ -681,9 +710,12 @@
             }
         }
 
-        function renderQRCodeCard(guest) {
+        function renderQRCodeCard(guest, activeRound) {
             const qrContainer = document.getElementById("personal-qrcode");
             const infoContainer = document.getElementById("personal-info");
+            const badge = document.getElementById("current-round-badge");
+            
+            badge.innerText = `📍 ลงทะเบียน${activeRound}`;
             qrContainer.innerHTML = "";
 
             const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
@@ -724,17 +756,22 @@
             document.getElementById("qr-modal").style.display = "flex";
             requestWakeLock();
 
-            startListeningForCheckIn(guest.id);
+            startListeningForCheckIn(guest.id, activeRound);
         }
 
-        function startListeningForCheckIn(empId) {
+        function startListeningForCheckIn(empId, currentCheckingRound) {
             if (pollingTimer) clearInterval(pollingTimer);
 
             pollingTimer = setInterval(() => {
                 fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${new Date().getTime()}`)
                     .then(res => res.json())
                     .then(res => {
-                        if (res.checkedIn) {
+                        const isNowMorning = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                        const isNowEvening = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                        if ((currentCheckingRound === "รอบเช้า" && isNowMorning) || 
+                            (currentCheckingRound === "รอบเย็น" && isNowEvening)) {
+                            
                             clearInterval(pollingTimer);
                             closeModal();
 
@@ -742,12 +779,13 @@
                                 navigator.vibrate([200, 100, 200]);
                             }
 
-                            isAlreadyCheckedIn = true;
+                            morningChecked = isNowMorning;
+                            eveningChecked = isNowEvening;
                             checkDeviceLockInLine();
 
                             document.getElementById('res-guest-name').innerText = res.name;
                             document.getElementById('res-guest-branch').innerText = res.branch;
-                            document.getElementById('res-guest-round').innerText = res.round;
+                            document.getElementById('res-guest-round').innerText = currentCheckingRound;
                             document.getElementById('checkin-success-modal').style.display = 'flex';
                         }
                     })
