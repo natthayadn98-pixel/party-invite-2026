@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Party Connect - ระบบต้อนรับหน้างาน</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="calendar.png">
+    <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,7 +17,7 @@
             --bg-dark: #0f051d;
             --card-bg: rgba(25, 18, 43, 0.95);
         }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Anakotmai', sans-serif; 
             background: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
@@ -34,7 +35,7 @@
             z-index: -1;
         }
 
-        /* ซ่อนเนื้อหาหลักและล็อกไม่ให้เลื่อนหน้าจอก่อนล็อกอิน */
+        /* ล็อกหน้าจอและซ่อนเนื้อหาหลักก่อนกรอกรหัสผ่าน */
         body.login-locked {
             overflow: hidden !important;
             height: 100vh !important;
@@ -46,97 +47,110 @@
             display: none !important;
         }
 
-        /* หน้าต่าง Modal Login ปิดทับสนิท 100% เต็มหน้าจอมือถือ */
+        /* Modal Login การ์ดขาวมินิมอล */
         .login-overlay {
             position: fixed;
             inset: 0;
-            width: 100%;
-            height: 100%;
-            min-height: 100vh;
-            min-height: 100dvh;
-            background: #111526;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 999999;
             padding: 20px;
-            overflow: hidden;
+            box-sizing: border-box;
         }
         .login-card {
             background: #ffffff;
             width: 100%;
-            max-width: 360px;
-            border-radius: 24px;
-            padding: 40px 26px;
+            max-width: 350px;
+            border-radius: 28px;
+            padding: 38px 24px 34px;
             text-align: center;
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
-            animation: modalFadeIn 0.3s ease-out;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            animation: modalFadeIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-sizing: border-box;
         }
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.94); }
+            from { opacity: 0; transform: scale(0.92); }
             to { opacity: 1; transform: scale(1); }
         }
         .login-icon-box {
-            font-size: 50px;
-            margin-bottom: 12px;
+            font-size: 34px;
+            margin-bottom: 6px;
             display: inline-block;
             line-height: 1;
         }
         .login-title {
-            color: #172033;
-            font-size: 22px;
+            color: #0f172a;
+            font-size: 21px;
             font-weight: 700;
             margin: 0 0 6px 0;
+            letter-spacing: -0.3px;
         }
         .login-sub {
-            color: #717d96;
+            color: #64748b;
             font-size: 13.5px;
             margin: 0 0 24px 0;
         }
         .login-input {
             width: 100%;
-            padding: 12px 16px;
+            height: 52px;
+            padding: 0 16px;
             font-size: 26px;
             text-align: center;
-            letter-spacing: 8px;
-            border: 2px solid #3b82f6;
+            letter-spacing: 6px;
+            border: 2px solid #bfdbfe;
             border-radius: 14px;
             background: #ffffff;
             color: #1e293b;
             outline: none;
             transition: all 0.2s ease;
             box-sizing: border-box;
-            font-family: inherit;
+            font-family: caption, sans-serif;
+            margin-bottom: 4px;
         }
         .login-input:focus {
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
         }
         .login-btn {
             width: 100%;
-            padding: 13px;
+            height: 50px;
             margin-top: 18px;
             border: none;
             border-radius: 12px;
-            background: #386df4;
+            background: #2563eb;
             color: #ffffff;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
             font-family: 'Anakotmai', sans-serif;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(56, 109, 244, 0.4);
-            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            transition: background 0.15s, transform 0.1s;
         }
-        .login-btn:hover { background: #2557dc; }
-        .login-btn:active { transform: scale(0.98); }
+        .login-btn:hover { background: #1d4ed8; }
+        .login-btn:active { transform: scale(0.98); background: #1e40af; }
         .login-error {
-            color: #e53e3e;
+            color: #ef4444;
             font-size: 12.5px;
             font-weight: bold;
             min-height: 20px;
-            margin-top: 10px;
+            margin-top: 8px;
+        }
+        .shake-error {
+            animation: shake 0.35s ease;
+            border-color: #ef4444 !important;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
         }
 
-        /* แถบควบคุมด้านบน */
+        /* Header และปุ่มด้านบน */
         .top-bar-nav {
             display: flex;
             justify-content: space-between;
@@ -147,7 +161,6 @@
             padding: 12px 15px 0;
             gap: 10px;
         }
-
         .header { 
             text-align: center; 
             padding: 10px 15px 10px; 
@@ -219,6 +232,7 @@
             .back-home { font-size: 13px; padding: 7px 16px; }
         }
         
+        /* Tabs & Container */
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 15px 10px; }
         .tab-btn { background: rgba(255, 255, 255, 0.1); color: #ddd; border: 2px solid rgba(255,215,0,0.3); padding: 10px 18px; border-radius: 30px; cursor: pointer; font-size: 14px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
         .tab-btn:hover { background: rgba(255, 215, 0, 0.2); color: #fff; }
@@ -471,28 +485,36 @@
             .tab-content { box-shadow: none; padding: 0; background: transparent; color: #333; } 
             .branch-section { page-break-after: always; padding: 0; background: white; border: none; } 
             .qr-card { break-inside: avoid; border: 1px solid #ddd; background: white; color: #333; } 
-            .login-overlay { display: none !important; }
+            .login-overlay { display: none !important; } 
         }
     </style>
 </head>
 <body class="login-locked">
 
-    <!-- Modal Login ควบคุมรหัสผ่าน Admin รูปแบบการ์ดสีขาว -->
+    <!-- 1. Modal Login การ์ดขาวมินิมอลตามภาพต้นฉบับ -->
     <div id="adminLoginOverlay" class="login-overlay">
         <div class="login-card">
-            <div class="login-icon-box">🔐</div>
+            <div class="login-icon-box">🔒</div>
             <h2 class="login-title">ระบบจัดการ Admin</h2>
             <p class="login-sub">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
             
             <form onsubmit="handleAdminLogin(event)">
-                <input type="password" id="adminPasswordInput" class="login-input" placeholder="• • •" autofocus required>
+                <input 
+                    type="password" 
+                    id="adminPasswordInput" 
+                    class="login-input" 
+                    placeholder="•••" 
+                    autocomplete="off"
+                    autofocus 
+                    required
+                >
                 <div id="adminLoginError" class="login-error"></div>
                 <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
             </form>
         </div>
     </div>
 
-    <!-- ส่วนเนื้อหาหลัก ถูกครอบด้วย main-app-content เพื่อซ่อน 100% จนกว่าจะผ่านรหัสผ่าน -->
+    <!-- 2. ส่วนเนื้อหาหลัก ซ่อนมิดชิดจนกว่าจะปลดล็อกผ่านรหัสผ่าน -->
     <div class="main-app-content">
         <div class="top-bar-nav print-hide">
             <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
@@ -519,6 +541,7 @@
 
         <div class="container">
             
+            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ -->
             <div id="tab-single" class="tab-content active">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
                 <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
@@ -542,6 +565,7 @@
                 </div>
             </div>
 
+            <!-- แท็บพิมพ์บัตรและซิงค์ Cloud -->
             <div id="tab-bulk" class="tab-content">
                 <div class="print-hide">
                     <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">จัดการรายชื่อและพิมพ์บัตร QR Code</h2>
@@ -557,18 +581,20 @@
                 <div id="qrContainer"></div>
             </div>
 
+            <!-- แท็บค้นหาเมื่อไม่มี QR พร้อมปุ่มปลดล็อกเครื่อง -->
             <div id="tab-search" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
-                <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
+                <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด หรือต้องการปลดล็อกเครื่องที่พนักงานกรอกรหัสผิด</p>
                 
                 <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." onkeyup="searchAttendee()">
                 <div id="search-alert" style="text-align: center; font-weight: bold; margin-bottom: 10px; min-height: 25px;"></div>
                 
-                <ul class="recent-list" id="searchResults" style="list-style: none; padding: 0; margin-top: 15px; text-align: left; max-height: 280px; overflow-y: auto;">
+                <ul class="recent-list" id="searchResults" style="list-style: none; padding: 0; margin-top: 15px; text-align: left; max-height: 350px; overflow-y: auto;">
                     <li style="text-align: center; color: #777; border-left: 5px solid #444; background: #18122B; padding: 10px 12px; border-radius: 8px;">กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>
                 </ul>
             </div>
 
+            <!-- แท็บจุดสแกนเข้างาน -->
             <div id="tab-scanner" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
                 
@@ -598,6 +624,7 @@
                 <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
             </div>
 
+            <!-- แท็บ Dashboard สถิติ Real-time -->
             <div id="tab-dashboard" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
                 
@@ -648,12 +675,20 @@
         
         const branchFilterState = {};
 
-        // ล็อกหน้าจอทันทีเมื่อเริ่มต้น
+        // ตรวจสอบและโฟกัสช่องกรอกรหัสผ่านทันทีเมื่อเปิดหน้า
         window.addEventListener('DOMContentLoaded', () => {
             const passInput = document.getElementById('adminPasswordInput');
             if (passInput) passInput.focus();
+
+            if (sessionStorage.getItem('clt_admin_logged') === 'true') {
+                const overlay = document.getElementById('adminLoginOverlay');
+                if (overlay) overlay.style.display = 'none';
+                document.body.classList.remove('login-locked');
+                fastSync(false);
+            }
         });
 
+        /* ---------- ระบบล็อกอิน ADMIN ---------- */
         function handleAdminLogin(e) {
             e.preventDefault();
             const passInput = document.getElementById('adminPasswordInput');
@@ -662,12 +697,19 @@
 
             if (passInput.value === "9999") {
                 overlay.style.display = 'none';
-                document.body.classList.remove('login-locked'); // ปลดล็อกและแสดงเนื้อหาทั้งหมด
+                document.body.classList.remove('login-locked');
+                sessionStorage.setItem('clt_admin_logged', 'true');
                 fastSync(false);
             } else {
                 errBox.innerText = "❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง";
-                passInput.value = "";
-                passInput.focus();
+                passInput.classList.add('shake-error');
+                if ("vibrate" in navigator) navigator.vibrate([40, 50, 40]);
+                
+                setTimeout(() => {
+                    passInput.classList.remove('shake-error');
+                    passInput.value = "";
+                    passInput.focus();
+                }, 400);
             }
         }
 
@@ -1190,6 +1232,7 @@
             document.getElementById('uploadStatus').innerHTML = "";
         }
 
+        /* ---------- ค้นหารายชื่อ & ปุ่มปลดล็อกเครื่อง ---------- */
         function searchAttendee() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
             const list = document.getElementById('searchResults');
@@ -1220,7 +1263,16 @@
                 li.style.borderRadius = '8px';
                 li.style.borderLeft = '4px solid #ffd700';
                 
-                let btnHtml = `<button class="action-btn" style="width: auto; padding: 8px 20px; font-size: 14px; margin: 0;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">เข้างาน</button>`;
+                let btnHtml = `
+                    <div style="display: flex; gap: 6px;">
+                        <button class="action-btn" style="width: auto; padding: 7px 14px; font-size: 13px; margin: 0; background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); color: white;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">
+                            ✓ เข้างาน
+                        </button>
+                        <button class="action-btn" style="width: auto; padding: 7px 12px; font-size: 13px; margin: 0; background: #f97316; color: white;" onclick="adminResetDevice('${emp.id}', '${emp.name}')">
+                            🔓 ปลดล็อกเครื่อง
+                        </button>
+                    </div>
+                `;
 
                 li.innerHTML = `
                     <div style="line-height: 1.4;">
@@ -1231,6 +1283,37 @@
                 `;
                 list.appendChild(li);
             });
+        }
+
+        // ฟังก์ชันให้แอดมินปลดล็อกเครื่องและล้างประวัติในชีต
+        function adminResetDevice(empId, empName) {
+            if (!confirm(`ยืนยันการปลดล็อกเครื่อง / ล้างประวัติของ "${empName}" (${empId}) หรือไม่?\n(เครื่องที่ผูกกับรหัสนี้จะสามารถกรอกรหัสใหม่ได้ทันที)`)) {
+                return;
+            }
+
+            const alertBox = document.getElementById('search-alert');
+            alertBox.innerHTML = `⏳ กำลังปลดล็อกเครื่อง: ${empName}...`;
+            alertBox.style.color = "#f97316";
+
+            fetch(`${scriptUrl}?action=resetDevice&id=${encodeURIComponent(empId)}&t=${new Date().getTime()}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === "success") {
+                        alertBox.innerHTML = `✅ ${res.message}`;
+                        alertBox.style.color = "#22c55e";
+                        fastSync(false);
+                    } else {
+                        alertBox.innerHTML = `❌ ${res.message}`;
+                        alertBox.style.color = "#ef4444";
+                    }
+                })
+                .catch(() => {
+                    alertBox.innerHTML = "❌ การเชื่อมต่อเซิร์ฟเวอร์ล้มเหลว";
+                    alertBox.style.color = "#ef4444";
+                })
+                .finally(() => {
+                    setTimeout(() => { alertBox.innerHTML = ""; }, 3500);
+                });
         }
 
         function manualCheckIn(empId, empName, empBranch) {
@@ -1414,4 +1497,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
