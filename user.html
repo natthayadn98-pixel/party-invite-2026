@@ -541,7 +541,7 @@
 
         <div class="container">
             
-            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ -->
+            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ พร้อมปุ่มล้างข้อมูลที่กรอก -->
             <div id="tab-single" class="tab-content active">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
                 <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
@@ -553,6 +553,8 @@
                 <div class="btn-group">
                     <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
                     <button class="action-btn checkin-btn" onclick="processNewGuest('instantCheckIn')">🚀 เช็คอินเข้างานทันที (ไม่ต้องสแกน)</button>
+                    <!-- ปุ่มล้างข้อมูลที่กรอกในฟอร์ม -->
+                    <button class="action-btn" style="background: #475569; color: #fff; box-shadow: none;" onclick="clearSingleInputForm()">🔄 ล้างข้อมูลที่กรอก</button>
                 </div>
                 
                 <div id="single-status-alert" style="text-align: center; font-weight: bold; margin-top: 15px; min-height: 25px;"></div>
@@ -581,12 +583,29 @@
                 <div id="qrContainer"></div>
             </div>
 
-            <!-- แท็บค้นหาเมื่อไม่มี QR พร้อมปุ่มปลดล็อกเครื่อง -->
+            <!-- แท็บค้นหาเมื่อไม่มี QR พร้อมปุ่มเคลียร์ค้นหา และปุ่มปลดล็อกเครื่อง -->
             <div id="tab-search" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
                 <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด หรือต้องการปลดล็อกเครื่องที่พนักงานกรอกรหัสผิด</p>
                 
-                <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." onkeyup="searchAttendee()">
+                <!-- ช่องค้นหาพร้อมปุ่มเคลียร์ข้อความ -->
+                <div style="position: relative; display: flex; align-items: center; margin: 8px 0 12px;">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." 
+                        onkeyup="searchAttendee()"
+                        style="margin: 0; padding-right: 85px;"
+                    >
+                    <button 
+                        type="button" 
+                        onclick="clearSearchInput()"
+                        style="position: absolute; right: 8px; background: #334155; color: #e2e8f0; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; font-family: inherit;"
+                    >
+                        ✕ เคลียร์
+                    </button>
+                </div>
+                
                 <div id="search-alert" style="text-align: center; font-weight: bold; margin-bottom: 10px; min-height: 25px;"></div>
                 
                 <ul class="recent-list" id="searchResults" style="list-style: none; padding: 0; margin-top: 15px; text-align: left; max-height: 350px; overflow-y: auto;">
@@ -808,9 +827,7 @@
             } else if (tabId === 'dashboard') {
                 renderBranchStats(latestBranchStats);
             } else if (tabId === 'search') {
-                document.getElementById('searchInput').value = "";
-                document.getElementById('searchResults').innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444; background: #18122B; padding: 10px 12px; border-radius: 8px;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
-                document.getElementById('search-alert').innerHTML = "";
+                clearSearchInput();
             }
         }
 
@@ -1026,6 +1043,15 @@
             }
         }
 
+        /* ---------- ฟังก์ชันล้างฟอร์มกรอกคนใหม่ (Walk-in) ---------- */
+        function clearSingleInputForm() {
+            document.getElementById("s_empId").value = "";
+            document.getElementById("s_empName").value = "";
+            document.getElementById("s_empBranch").value = "";
+            document.getElementById("single-status-alert").innerHTML = "";
+            document.getElementById("single-qr-output").style.display = "none";
+        }
+
         function processNewGuest(mode) {
             const id = (document.getElementById("s_empId").value || "-").trim();
             const name = document.getElementById("s_empName").value.trim();
@@ -1232,6 +1258,14 @@
             document.getElementById('uploadStatus').innerHTML = "";
         }
 
+        /* ---------- ฟังก์ชันเคลียร์ช่องค้นหา ---------- */
+        function clearSearchInput() {
+            document.getElementById('searchInput').value = "";
+            document.getElementById('searchResults').innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444; background: #18122B; padding: 10px 12px; border-radius: 8px;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
+            document.getElementById('search-alert').innerHTML = "";
+            document.getElementById('searchInput').focus();
+        }
+
         /* ---------- ค้นหารายชื่อ & ปุ่มปลดล็อกเครื่อง ---------- */
         function searchAttendee() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -1285,7 +1319,6 @@
             });
         }
 
-        // ฟังก์ชันให้แอดมินปลดล็อกเครื่องและล้างประวัติในชีต
         function adminResetDevice(empId, empName) {
             if (!confirm(`ยืนยันการปลดล็อกเครื่อง / ล้างประวัติของ "${empName}" (${empId}) หรือไม่?\n(เครื่องที่ผูกกับรหัสนี้จะสามารถกรอกรหัสใหม่ได้ทันที)`)) {
                 return;
