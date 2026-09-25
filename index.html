@@ -144,7 +144,7 @@
         .envelope-wrapper.open .letter { opacity: 1; transform: scale(1) translateY(0); z-index: 20; pointer-events: auto; }
         .envelope-wrapper.open .tap-hint { display: none; }
 
-        /* ---------- ป๊อปอัป PIN PAD 6 หลัก ---------- */
+        /* ---------- ป๊อปอัป PIN PAD 6 หลัก (แสดงตัวเลข) ---------- */
         #pin-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: radial-gradient(circle at 50% 30%, #2a111a 0%, #0d0407 100%);
@@ -155,7 +155,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .pin-box {
-            background: rgba(30, 16, 22, 0.7);
+            background: rgba(30, 16, 22, 0.85);
             border: 1px solid rgba(255, 215, 0, 0.25);
             border-radius: 28px;
             padding: 26px 20px 22px;
@@ -168,31 +168,34 @@
         }
 
         .pin-title { color: #f8fafc; font-size: 17px; font-weight: 700; margin: 0 0 6px; }
-        .pin-subtitle { color: #94a3b8; font-size: 12px; margin: 0 0 18px; }
+        .pin-subtitle { color: #94a3b8; font-size: 12px; margin: 0 0 16px; }
 
+        /* กรอบแสดงตัวเลข 6 ช่อง */
         .pin-display-frame {
-            display: flex; justify-content: center; align-items: center; gap: 12px;
-            background: rgba(0, 0, 0, 0.35);
-            border: 1.5px solid rgba(255, 255, 255, 0.18);
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1.5px solid rgba(255, 215, 0, 0.4);
             border-radius: 16px;
-            padding: 14px 10px;
-            margin: 0 auto 22px;
-            max-width: 250px;
-            transition: border-color 0.2s, transform 0.2s;
+            padding: 8px 6px;
+            margin: 0 auto 20px;
+            max-width: 270px;
+            min-height: 52px;
         }
 
         .pin-dot {
-            width: 13px; height: 13px;
-            border-radius: 50%;
-            border: 1.5px solid #94a3b8;
+            width: 34px; height: 38px;
+            border-bottom: 2.5px solid #64748b;
             background: transparent;
+            color: #ffd700;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             transition: all 0.15s ease-out;
         }
         .pin-dot.filled {
-            background: #ffd700;
-            border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-            transform: scale(1.15);
+            border-bottom-color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
         }
 
         .pin-grid {
@@ -380,7 +383,7 @@
         <div class="tap-hint">👆 แตะที่ซองจดหมายเพื่อเปิด</div>
     </div>
 
-    <!-- ป๊อปอัปแป้นพิมพ์ PIN PAD แบบ 6 หลัก -->
+    <!-- ป๊อปอัปแป้นพิมพ์ PIN PAD แบบ 6 หลัก (แสดงตัวเลขในช่อง) -->
     <div id="pin-modal" onclick="closePinModal()">
         <div class="pin-box" onclick="event.stopPropagation()">
             <h3 class="pin-title">Enter Employee PIN</h3>
@@ -472,12 +475,12 @@
             const now = new Date();
             const minutesNow = now.getHours() * 60 + now.getMinutes();
 
-            const morningStart = 7 * 60;   
-            const morningEnd   = 10 * 60;  
-            const eveningStart = 14 * 60;  
+            const morningStart = 8 * 60 + 30; // 08:30 น.
+            const morningEnd   = 9 * 60 + 30; // 09:30 น.
+            const eveningStart = 14 * 60;     // 14:00 น.
 
             if (minutesNow < morningStart) {
-                return { active: false, msg: "⏰ ระบบยังไม่เปิดให้แสดง QR Code\nจะเปิดลงทะเบียนรอบเช้าเวลา 07:00 - 10:00 น." };
+                return { active: false, msg: "⏰ ระบบยังไม่เปิดให้แสดง QR Code\nจะเปิดลงทะเบียนรอบเช้าเวลา 08:30 - 09:30 น." };
             }
             if (minutesNow >= morningStart && minutesNow <= morningEnd) {
                 return { active: true, round: "รอบเช้า" };
@@ -522,13 +525,11 @@
             checkDeviceLockInLine();
         });
 
-        // ตรวจสอบสถานะการผูกเครื่อง และโควตาการปลดล็อก
         function checkDeviceLockInLine() {
             const boundEmpId = localStorage.getItem("clt_line_empid");
             const boundEmpName = localStorage.getItem("clt_line_name");
             const resetBtnBox = document.getElementById("userResetBtnBox");
             
-            // อ่านจำนวนครั้งที่เคยปลดล็อกไปแล้ว (ค่าเริ่มต้น 0)
             const resetCount = parseInt(localStorage.getItem("clt_reset_count") || "0", 10);
 
             if (!boundEmpId) {
@@ -546,9 +547,11 @@
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
                     eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
 
-                    // เงื่อนไขแสดงปุ่มปลดล็อก: ต้องยังไม่เช็คอิน และต้องใช้สิทธิ์ปลดล็อกไม่เกิน 1 ครั้ง
-                    if (!morningChecked && !eveningChecked && resetCount < 1) {
-                        if (resetBtnBox) resetBtnBox.style.display = "block";
+                    // หากแอดมินเป็นคนสั่งปลดล็อกให้จากหน้า user.html
+                    if (!morningChecked && !eveningChecked && res.morningChecked === false && res.eveningChecked === false) {
+                        if (resetCount < 1) {
+                            if (resetBtnBox) resetBtnBox.style.display = "block";
+                        }
                     } else {
                         if (resetBtnBox) resetBtnBox.style.display = "none";
                     }
@@ -575,7 +578,6 @@
                 .catch(() => {});
         }
 
-        // ฟังก์ชันให้พนักงานกดรีเซ็ตเครื่องตัวเอง (ปลดล็อกได้ 1 ครั้งเท่านั้น)
         function resetDeviceBindingSelf() {
             if (morningChecked || eveningChecked) {
                 alert("❌ เครื่องนี้ได้ทำการเช็คอินเข้างานไปแล้ว ไม่สามารถเปลี่ยนรหัสได้ กรุณาติดต่อแอดมิน");
@@ -589,10 +591,7 @@
             }
 
             if (confirm("⚠️ สิทธิ์ปลดล็อกเครื่องทำได้เพียง 1 ครั้งเท่านั้น!\n\nคุณต้องการยกเลิกการผูกรหัสเพื่อกรอกรหัสพนักงานใหม่ ใช่หรือไม่?")) {
-                // บันทึกว่าใช้สิทธิ์ปลดล็อกไปแล้ว 1 ครั้ง
                 localStorage.setItem("clt_reset_count", (currentResetCount + 1).toString());
-                
-                // ล้างรหัสที่ผูกไว้เดิม
                 localStorage.removeItem("clt_line_empid");
                 localStorage.removeItem("clt_line_name");
 
@@ -609,7 +608,7 @@
             toggleEnvelope();
         }
 
-        /* ---------- ระบบ PIN PAD 6 หลัก ---------- */
+        /* ---------- ระบบ PIN PAD 6 หลัก (แสดงตัวเลข) ---------- */
         function openPinModal(event) {
             if (event) event.stopPropagation();
 
@@ -676,12 +675,15 @@
             }
         }
 
+        // แสดงตัวเลขที่กดลงในช่องโดยตรง
         function updatePinDots() {
             for (let i = 0; i < 6; i++) {
                 const dot = document.getElementById(`dot-${i}`);
                 if (i < currentPin.length) {
+                    dot.innerText = currentPin[i]; // แสดงตัวเลขจริง
                     dot.classList.add('filled');
                 } else {
+                    dot.innerText = ""; // ล้างค่าเมื่อยังไม่ได้กด
                     dot.classList.remove('filled');
                 }
             }
