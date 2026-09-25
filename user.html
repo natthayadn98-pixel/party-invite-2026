@@ -2,9 +2,10 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Party Connect - ระบบต้อนรับหน้างาน</title>
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -33,6 +34,109 @@
             z-index: -1;
         }
 
+        /* ซ่อนเนื้อหาหลักและล็อกไม่ให้เลื่อนหน้าจอก่อนล็อกอิน */
+        body.login-locked {
+            overflow: hidden !important;
+            height: 100vh !important;
+            position: fixed !important;
+            width: 100% !important;
+            touch-action: none;
+        }
+        body.login-locked .main-app-content {
+            display: none !important;
+        }
+
+        /* หน้าต่าง Modal Login ปิดทับสนิท 100% เต็มหน้าจอมือถือ */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: #111526;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 360px;
+            border-radius: 24px;
+            padding: 40px 26px;
+            text-align: center;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.94); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .login-icon-box {
+            font-size: 50px;
+            margin-bottom: 12px;
+            display: inline-block;
+            line-height: 1;
+        }
+        .login-title {
+            color: #172033;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+        }
+        .login-sub {
+            color: #717d96;
+            font-size: 13.5px;
+            margin: 0 0 24px 0;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 26px;
+            text-align: center;
+            letter-spacing: 8px;
+            border: 2px solid #3b82f6;
+            border-radius: 14px;
+            background: #ffffff;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .login-input:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            margin-top: 18px;
+            border: none;
+            border-radius: 12px;
+            background: #386df4;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Anakotmai', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(56, 109, 244, 0.4);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .login-btn:hover { background: #2557dc; }
+        .login-btn:active { transform: scale(0.98); }
+        .login-error {
+            color: #e53e3e;
+            font-size: 12.5px;
+            font-weight: bold;
+            min-height: 20px;
+            margin-top: 10px;
+        }
+
+        /* แถบควบคุมด้านบน */
         .top-bar-nav {
             display: flex;
             justify-content: space-between;
@@ -108,6 +212,13 @@
         }
         @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
+        @media (min-width: 600px) {
+            .header h1 { font-size: 30px; }
+            .header p { font-size: 14px; }
+            .sync-top-btn { font-size: 13px; padding: 7px 16px; }
+            .back-home { font-size: 13px; padding: 7px 16px; }
+        }
+        
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 15px 10px; }
         .tab-btn { background: rgba(255, 255, 255, 0.1); color: #ddd; border: 2px solid rgba(255,215,0,0.3); padding: 10px 18px; border-radius: 30px; cursor: pointer; font-size: 14px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
         .tab-btn:hover { background: rgba(255, 215, 0, 0.2); color: #fff; }
@@ -248,23 +359,15 @@
             transition: all 0.2s ease;
             text-align: center;
         }
-        .branch-filter-btn:hover {
-            transform: translateY(-1px);
-        }
-        .branch-filter-btn.btn-checked {
-            border-color: rgba(0, 230, 118, 0.4);
-            color: #00e676;
-        }
+        .branch-filter-btn:hover { transform: translateY(-1px); }
+        .branch-filter-btn.btn-checked { border-color: rgba(0, 230, 118, 0.4); color: #00e676; }
         .branch-filter-btn.btn-checked.active {
             background: rgba(0, 230, 118, 0.25);
             border-color: #00e676;
             box-shadow: 0 0 10px rgba(0,230,118,0.3);
             color: #fff;
         }
-        .branch-filter-btn.btn-absent {
-            border-color: rgba(255, 82, 82, 0.4);
-            color: #ff5252;
-        }
+        .branch-filter-btn.btn-absent { border-color: rgba(255, 82, 82, 0.4); color: #ff5252; }
         .branch-filter-btn.btn-absent.active {
             background: rgba(255, 82, 82, 0.25);
             border-color: #ff5252;
@@ -294,9 +397,7 @@
             max-height: 320px;
             overflow-y: auto;
         }
-        .branch-stat-card.open .branch-guest-list {
-            display: block;
-        }
+        .branch-stat-card.open .branch-guest-list { display: block; }
         .branch-guest-item {
             display: flex;
             justify-content: space-between;
@@ -370,149 +471,168 @@
             .tab-content { box-shadow: none; padding: 0; background: transparent; color: #333; } 
             .branch-section { page-break-after: always; padding: 0; background: white; border: none; } 
             .qr-card { break-inside: avoid; border: 1px solid #ddd; background: white; color: #333; } 
+            .login-overlay { display: none !important; }
         }
     </style>
 </head>
-<body>
+<body class="login-locked">
 
-    <div class="top-bar-nav print-hide">
-        <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
-        
-        <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
-            <span class="live-dot"></span>
-            <span class="sync-icon">🔄</span>
-            <span id="syncStatusText">ซิงค์ Sheets</span>
-        </button>
+    <!-- Modal Login ควบคุมรหัสผ่าน Admin รูปแบบการ์ดสีขาว -->
+    <div id="adminLoginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-icon-box">🔐</div>
+            <h2 class="login-title">ระบบจัดการ Admin</h2>
+            <p class="login-sub">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+            
+            <form onsubmit="handleAdminLogin(event)">
+                <input type="password" id="adminPasswordInput" class="login-input" placeholder="• • •" autofocus required>
+                <div id="adminLoginError" class="login-error"></div>
+                <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
+            </form>
+        </div>
     </div>
 
-    <div class="header print-hide">
-        <h1>✨ VIP Party Connect</h1>
-        <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
-    </div>
-
-    <div class="tabs print-hide">
-        <button class="tab-btn active" onclick="switchTab('single', this)">🎟️ สร้าง QR (เพิ่มคน)</button>
-        <button class="tab-btn" onclick="switchTab('bulk', this)">📊 รายชื่อ & QR จาก Cloud</button>
-        <button class="tab-btn" onclick="switchTab('search', this)">🔍 ค้นหา (ไม่มี QR)</button>
-        <button class="tab-btn" onclick="switchTab('scanner', this)">📸 จุดสแกนเข้างาน</button>
-        <button class="tab-btn" onclick="switchTab('dashboard', this)">📈 สถิติเข้างาน</button>
-    </div>
-
-    <div class="container">
-        
-        <div id="tab-single" class="tab-content active">
-            <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
-            <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
+    <!-- ส่วนเนื้อหาหลัก ถูกครอบด้วย main-app-content เพื่อซ่อน 100% จนกว่าจะผ่านรหัสผ่าน -->
+    <div class="main-app-content">
+        <div class="top-bar-nav print-hide">
+            <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
             
-            <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 012345)">
-            <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
-            <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
-            
-            <div class="btn-group">
-                <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
-                <button class="action-btn checkin-btn" onclick="processNewGuest('instantCheckIn')">🚀 เช็คอินเข้างานทันที (ไม่ต้องสแกน)</button>
-            </div>
-            
-            <div id="single-status-alert" style="text-align: center; font-weight: bold; margin-top: 15px; min-height: 25px;"></div>
-
-            <div id="single-qr-output" style="margin-top: 25px; display: flex; justify-content: center; display: none;">
-                <div class="qr-card" style="width: 280px; background: #fff; color: #333;">
-                    <div id="single-qrcode" style="position: relative; width: 250px; height: 250px; margin: 0 auto; overflow: hidden; border-radius: 8px;"></div>
-                    <div class="info-text" id="single-info" style="font-size:15px; margin-top:15px; text-align:center; color:#333;"></div>
-                </div>
-            </div>
+            <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
+                <span class="live-dot"></span>
+                <span class="sync-icon">🔄</span>
+                <span id="syncStatusText">ซิงค์ Sheets</span>
+            </button>
         </div>
 
-        <div id="tab-bulk" class="tab-content">
-            <div class="print-hide">
-                <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">จัดการรายชื่อและพิมพ์บัตร QR Code</h2>
-                <p style="text-align: center; color: #bbb; font-size: 13px; margin-top: 0; margin-bottom: 15px;">ข้อมูลนี้ดึงตรงมาจาก Google Sheets ทำให้ทุกเครื่องเห็นตรงกัน</p>
+        <div class="header print-hide">
+            <h1>✨ VIP Party Connect</h1>
+            <p>ระบบต้อนรับและลงทะเบียนเข้างาน (Admin)</p>
+        </div>
+
+        <div class="tabs print-hide">
+            <button class="tab-btn active" onclick="switchTab('single', this)">🎟️ สร้าง QR (เพิ่มคน)</button>
+            <button class="tab-btn" onclick="switchTab('bulk', this)">📊 รายชื่อ & QR จาก Cloud</button>
+            <button class="tab-btn" onclick="switchTab('search', this)">🔍 ค้นหา (ไม่มี QR)</button>
+            <button class="tab-btn" onclick="switchTab('scanner', this)">📸 จุดสแกนเข้างาน</button>
+            <button class="tab-btn" onclick="switchTab('dashboard', this)">📈 สถิติเข้างาน</button>
+        </div>
+
+        <div class="container">
+            
+            <div id="tab-single" class="tab-content active">
+                <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
+                <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
                 
-                <input type="file" id="excelFile" accept=".xlsx, .xls">
-                <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -5px 0 15px 0; color: #ffd700;"></div>
+                <input type="text" id="s_empId" placeholder="รหัสพนักงาน (เช่น 012345)">
+                <input type="text" id="s_empName" placeholder="ชื่อ-นามสกุล (บังคับ)">
+                <input type="text" id="s_empBranch" placeholder="สาขา / แผนก">
                 
-                <button class="action-btn sync-btn" onclick="fastSync(true)">🔄 รีเฟรชดึงข้อมูลล่าสุดจาก Cloud</button>
-                <button class="action-btn print-btn" onclick="window.print()">🖨️ สั่งปริ้นแยกสาขา</button>
-                <button class="action-btn danger-btn" onclick="clearExcelData()">🗑️ ล้างหน้าจอแสดงผล</button>
-            </div>
-            <div id="qrContainer"></div>
-        </div>
-
-        <div id="tab-search" class="tab-content">
-            <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
-            <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
-            
-            <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." onkeyup="searchAttendee()">
-            <div id="search-alert" style="text-align: center; font-weight: bold; margin-bottom: 10px; min-height: 25px;"></div>
-            
-            <ul class="recent-list" id="searchResults" style="list-style: none; padding: 0; margin-top: 15px; text-align: left; max-height: 280px; overflow-y: auto;">
-                <li style="text-align: center; color: #777; border-left: 5px solid #444; background: #18122B; padding: 10px 12px; border-radius: 8px;">กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>
-            </ul>
-        </div>
-
-        <div id="tab-scanner" class="tab-content">
-            <h2 style="color: #ffd700; text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
-            
-            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-                <button class="action-btn mode-btn" onclick="chooseScannerMode('camera')">📸 สแกนด้วยกล้องมือถือ</button>
-                <button class="action-btn mode-btn dark" onclick="chooseScannerMode('hardware')">🔫 ใช้เครื่องยิงบาร์โค้ด</button>
-            </div>
-            
-            <div id="camera-section" style="display: none; text-align: center;">
-                <p style="color: #ffd700; font-size: 14px; margin-bottom: 8px;">📱 เล็ง QR Code ให้อยู่ในกรอบด้านล่าง</p>
-                <div class="scanner-viewfinder">
-                    <div class="scan-line"></div>
-                    <div id="reader"></div>
+                <div class="btn-group">
+                    <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
+                    <button class="action-btn checkin-btn" onclick="processNewGuest('instantCheckIn')">🚀 เช็คอินเข้างานทันที (ไม่ต้องสแกน)</button>
                 </div>
-            </div>
-            
-            <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
-                <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#ff6b6b;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
                 
-                <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 8px; border-radius: 6px; font-size: 12px; color: #ffeb3b; margin: 10px 0;">
-                    💡 <b>คำแนะนำสำหรับเครื่องยิง:</b> หากสแกนหน้าจอมือถือไม่ติด ให้<b>ขยับมือถือเข้าหรือออกห่าง</b>จากเครื่องยิง (ระยะที่เหมาะสมประมาณ 15-20 ซม.)
+                <div id="single-status-alert" style="text-align: center; font-weight: bold; margin-top: 15px; min-height: 25px;"></div>
+
+                <div id="single-qr-output" style="margin-top: 25px; display: flex; justify-content: center; display: none;">
+                    <div class="qr-card" style="width: 280px; background: #fff; color: #333;">
+                        <div id="single-qrcode" style="position: relative; width: 250px; height: 250px; margin: 0 auto; overflow: hidden; border-radius: 8px;"></div>
+                        <div class="info-text" id="single-info" style="font-size:15px; margin-top:15px; text-align:center; color:#333;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-bulk" class="tab-content">
+                <div class="print-hide">
+                    <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">จัดการรายชื่อและพิมพ์บัตร QR Code</h2>
+                    <p style="text-align: center; color: #bbb; font-size: 13px; margin-top: 0; margin-bottom: 15px;">ข้อมูลนี้ดึงตรงมาจาก Google Sheets ทำให้ทุกเครื่องเห็นตรงกัน</p>
+                    
+                    <input type="file" id="excelFile" accept=".xlsx, .xls">
+                    <div id="uploadStatus" style="text-align: center; font-weight: bold; margin: -5px 0 15px 0; color: #ffd700;"></div>
+                    
+                    <button class="action-btn sync-btn" onclick="fastSync(true)">🔄 รีเฟรชดึงข้อมูลล่าสุดจาก Cloud</button>
+                    <button class="action-btn print-btn" onclick="window.print()">🖨️ สั่งปริ้นแยกสาขา</button>
+                    <button class="action-btn danger-btn" onclick="clearExcelData()">🗑️ ล้างหน้าจอแสดงผล</button>
+                </div>
+                <div id="qrContainer"></div>
+            </div>
+
+            <div id="tab-search" class="tab-content">
+                <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
+                <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด ให้พิมพ์ชื่อ หรือ รหัสพนักงานที่นี่</p>
+                
+                <input type="text" id="searchInput" placeholder="🔍 พิมพ์ชื่อ หรือ รหัสพนักงาน..." onkeyup="searchAttendee()">
+                <div id="search-alert" style="text-align: center; font-weight: bold; margin-bottom: 10px; min-height: 25px;"></div>
+                
+                <ul class="recent-list" id="searchResults" style="list-style: none; padding: 0; margin-top: 15px; text-align: left; max-height: 280px; overflow-y: auto;">
+                    <li style="text-align: center; color: #777; border-left: 5px solid #444; background: #18122B; padding: 10px 12px; border-radius: 8px;">กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>
+                </ul>
+            </div>
+
+            <div id="tab-scanner" class="tab-content">
+                <h2 style="color: #ffd700; text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
+                
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="action-btn mode-btn" onclick="chooseScannerMode('camera')">📸 สแกนด้วยกล้องมือถือ</button>
+                    <button class="action-btn mode-btn dark" onclick="chooseScannerMode('hardware')">🔫 ใช้เครื่องยิงบาร์โค้ด</button>
+                </div>
+                
+                <div id="camera-section" style="display: none; text-align: center;">
+                    <p style="color: #ffd700; font-size: 14px; margin-bottom: 8px;">📱 เล็ง QR Code ให้อยู่ในกรอบด้านล่าง</p>
+                    <div class="scanner-viewfinder">
+                        <div class="scan-line"></div>
+                        <div id="reader"></div>
+                    </div>
+                </div>
+                
+                <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
+                    <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#ff6b6b;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
+                    
+                    <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 8px; border-radius: 6px; font-size: 12px; color: #ffeb3b; margin: 10px 0;">
+                        💡 <b>คำแนะนำสำหรับเครื่องยิง:</b> หากสแกนหน้าจอมือถือไม่ติด ให้<b>ขยับมือถือเข้าหรือออกห่าง</b>จากเครื่องยิง (ระยะที่เหมาะสมประมาณ 15-20 ซม.)
+                    </div>
+
+                    <input type="text" id="hardwareInput" placeholder="[ สแกนคิวอาร์โค้ดที่นี่ ]" autocomplete="off">
+                </div>
+                
+                <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
+            </div>
+
+            <div id="tab-dashboard" class="tab-content">
+                <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
+                
+                <div class="round-toggle-container">
+                    <button class="round-btn active" id="btn-round-all" onclick="switchDashboardRound('all')">⭐ ทั้งหมด</button>
+                    <button class="round-btn" id="btn-round-morning" onclick="switchDashboardRound('morning')">☀️ รอบเช้า</button>
+                    <button class="round-btn" id="btn-round-evening" onclick="switchDashboardRound('evening')">🌙 รอบเย็น</button>
+                </div>
+                
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <h3>จำนวนทั้งหมด <button class="edit-btn" onclick="setTotalManually()">✏️ แก้ไข</button></h3>
+                        <p class="stat-number text-blue" id="stat-total">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>สแกนเข้างานแล้ว</h3>
+                        <p class="stat-number text-green" id="stat-checked">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3>ยังไม่มา</h3>
+                        <p class="stat-number text-red" id="stat-absent">0</p>
+                    </div>
                 </div>
 
-                <input type="text" id="hardwareInput" placeholder="[ สแกนคิวอาร์โค้ดที่นี่ ]" autocomplete="off">
+                <h4 style="border-left: 4px solid #ffd700; padding-left: 8px; color: #ffd700; margin: 25px 0 5px; font-size: 16px;">
+                    🏢 สถิติและรายชื่อแยกตามสาขา (<span id="branch-round-label">รวมทุกรอบ</span>)
+                </h4>
+                <p style="color: #888; font-size: 12px; margin: 0 0 12px 0;">👇 กดปุ่ม <b>"มาแล้ว"</b> หรือ <b>"ยังไม่มา"</b> ในแต่ละสาขาเพื่อเปิดดูรายชื่อ (คนที่มาล่าสุดจะอยู่บนสุด)</p>
+                
+                <div class="branch-stat-grid" id="branch-stats-container">
+                    <div style="grid-column: 1/-1; text-align: center; color: #777; padding: 20px;">กำลังประมวลผลสถิติสาขา...</div>
+                </div>
             </div>
-            
-            <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
+
         </div>
-
-        <div id="tab-dashboard" class="tab-content">
-            <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
-            
-            <div class="round-toggle-container">
-                <button class="round-btn active" id="btn-round-all" onclick="switchDashboardRound('all')">⭐ ทั้งหมด</button>
-                <button class="round-btn" id="btn-round-morning" onclick="switchDashboardRound('morning')">☀️ รอบเช้า</button>
-                <button class="round-btn" id="btn-round-evening" onclick="switchDashboardRound('evening')">🌙 รอบเย็น</button>
-            </div>
-            
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <h3>จำนวนทั้งหมด <button class="edit-btn" onclick="setTotalManually()">✏️ แก้ไข</button></h3>
-                    <p class="stat-number text-blue" id="stat-total">0</p>
-                </div>
-                <div class="stat-box">
-                    <h3>สแกนเข้างานแล้ว</h3>
-                    <p class="stat-number text-green" id="stat-checked">0</p>
-                </div>
-                <div class="stat-box">
-                    <h3>ยังไม่มา</h3>
-                    <p class="stat-number text-red" id="stat-absent">0</p>
-                </div>
-            </div>
-
-            <h4 style="border-left: 4px solid #ffd700; padding-left: 8px; color: #ffd700; margin: 25px 0 5px; font-size: 16px;">
-                🏢 สถิติและรายชื่อแยกตามสาขา (<span id="branch-round-label">รวมทุกรอบ</span>)
-            </h4>
-            <p style="color: #888; font-size: 12px; margin: 0 0 12px 0;">👇 กดปุ่ม <b>"มาแล้ว"</b> หรือ <b>"ยังไม่มา"</b> ในแต่ละสาขาเพื่อเปิดดูรายชื่อ (คนที่มาล่าสุดจะอยู่บนสุด)</p>
-            
-            <div class="branch-stat-grid" id="branch-stats-container">
-                <div style="grid-column: 1/-1; text-align: center; color: #777; padding: 20px;">กำลังประมวลผลสถิติสาขา...</div>
-            </div>
-        </div>
-
     </div>
 
     <script>
@@ -528,19 +648,28 @@
         
         const branchFilterState = {};
 
+        // ล็อกหน้าจอทันทีเมื่อเริ่มต้น
         window.addEventListener('DOMContentLoaded', () => {
-            let pass = "";
-            while (pass !== "9999") {
-                pass = prompt("🔐 กรุณาใส่รหัสผ่านผู้ดูแลระบบ (Admin Password):");
-                if (pass === "9999") {
-                    break;
-                } else {
-                    alert("❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง");
-                }
-            }
-
-            fastSync(false);
+            const passInput = document.getElementById('adminPasswordInput');
+            if (passInput) passInput.focus();
         });
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const passInput = document.getElementById('adminPasswordInput');
+            const errBox = document.getElementById('adminLoginError');
+            const overlay = document.getElementById('adminLoginOverlay');
+
+            if (passInput.value === "9999") {
+                overlay.style.display = 'none';
+                document.body.classList.remove('login-locked'); // ปลดล็อกและแสดงเนื้อหาทั้งหมด
+                fastSync(false);
+            } else {
+                errBox.innerText = "❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง";
+                passInput.value = "";
+                passInput.focus();
+            }
+        }
 
         function encodeThaiToBase64(id, name, branch) {
             const rawText = `${id}|${name}|${branch}`;
@@ -1125,7 +1254,7 @@
                     else if (data.status === "duplicate") { 
                         scannedGuests.add(empId); 
                         alertBox.innerHTML = `⚠️ ข้อมูลซ้ำ! <span style="color:#ff5252">${empName}</span> ได้ลงทะเบียน <b>${data.round}</b> ไปแล้ว`;
-                        searchAttendee();
+                        searchAttendee(); 
                     }
                     else if (data.status === "out_of_time") {
                         alertBox.innerHTML = `❌ <b>อยู่นอกเวลาสแกน!</b> <small>${data.message}</small>`;
@@ -1178,13 +1307,12 @@
             const empId = dataParts[0] ? dataParts[0].trim() : "-";
             const empName = dataParts[1] ? dataParts[1].trim() : "-";
             const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
-            const deviceId = dataParts[3] ? dataParts[3].trim() : "";
 
             isProcessing = true;
             resultDiv.innerHTML = `⏳ กำลังตรวจสอบและบันทึก: <b>${empName}</b>...`;
             resultDiv.style.backgroundColor = "#ffc107"; resultDiv.style.color = "black";
             
-            const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}&deviceId=${encodeURIComponent(deviceId)}`;
+            const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}`;
 
             fetch(fetchUrl)
                 .then(res => res.json())
@@ -1286,4 +1414,4 @@
         });
     </script>
 </body>
-</html>
+</html> 
