@@ -47,7 +47,7 @@
             display: none !important;
         }
 
-        /* Modal Login การ์ดขาวมินิมอลตามภาพต้นฉบับ */
+        /* ---------- Modal Login การ์ดขาวมินิมอล + PIN PAD ---------- */
         .login-overlay {
             position: fixed;
             inset: 0;
@@ -59,15 +59,16 @@
             justify-content: center;
             align-items: center;
             z-index: 999999;
-            padding: 20px;
+            padding: 16px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
         .login-card {
             background: #ffffff;
             width: 100%;
             max-width: 350px;
             border-radius: 28px;
-            padding: 38px 24px 34px;
+            padding: 30px 22px 24px;
             text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
             animation: modalFadeIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -79,7 +80,7 @@
         }
         .login-icon-box {
             font-size: 34px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: inline-block;
             line-height: 1;
         }
@@ -87,39 +88,49 @@
             color: #0f172a;
             font-size: 21px;
             font-weight: 700;
-            margin: 0 0 6px 0;
+            margin: 0 0 4px 0;
             letter-spacing: -0.3px;
         }
         .login-sub {
             color: #64748b;
-            font-size: 13.5px;
-            margin: 0 0 24px 0;
+            font-size: 13px;
+            margin: 0 0 16px 0;
         }
-        .login-input {
+
+        /* ช่องแสดงจุดรหัสผ่าน 3 หลัก */
+        .admin-pin-display {
             width: 100%;
-            height: 52px;
-            padding: 0 16px;
-            font-size: 26px;
-            text-align: center;
-            letter-spacing: 6px;
+            height: 50px;
             border: 2px solid #bfdbfe;
             border-radius: 14px;
             background: #ffffff;
-            color: #1e293b;
-            outline: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
             transition: all 0.2s ease;
-            box-sizing: border-box;
-            font-family: caption, sans-serif;
-            margin-bottom: 4px;
         }
-        .login-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+        .admin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            background: transparent;
+            transition: all 0.15s ease-out;
         }
+        .admin-dot.filled {
+            background: #2563eb;
+            border-color: #2563eb;
+            transform: scale(1.15);
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+        }
+
+        /* ปุ่มเข้าสู่ระบบ */
         .login-btn {
             width: 100%;
-            height: 50px;
-            margin-top: 18px;
+            height: 48px;
+            margin-top: 10px;
             border: none;
             border-radius: 12px;
             background: #2563eb;
@@ -133,13 +144,57 @@
         }
         .login-btn:hover { background: #1d4ed8; }
         .login-btn:active { transform: scale(0.98); background: #1e40af; }
+        
         .login-error {
             color: #ef4444;
-            font-size: 12.5px;
+            font-size: 12px;
             font-weight: bold;
-            min-height: 20px;
-            margin-top: 8px;
+            min-height: 18px;
+            margin: 4px 0 6px;
         }
+
+        /* แป้นพิมพ์ตัวเลข (PIN PAD) สำหรับมือถือ */
+        .admin-pin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            justify-items: center;
+            max-width: 250px;
+            margin: 14px auto 6px;
+        }
+        .admin-pin-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            font-size: 23px;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.12s, transform 0.08s;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .admin-pin-btn:active {
+            background: #cbd5e1;
+            transform: scale(0.92);
+        }
+        .admin-pin-btn.backspace {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: #64748b;
+        }
+        .admin-pin-btn.backspace:active {
+            background: transparent;
+            color: #ef4444;
+            transform: scale(0.88);
+        }
+
         .shake-error {
             animation: shake 0.35s ease;
             border-color: #ef4444 !important;
@@ -150,7 +205,7 @@
             40%, 80% { transform: translateX(8px); }
         }
 
-        /* Header และปุ่มด้านบน */
+        /* ---------- Header และปุ่มด้านบน ---------- */
         .top-bar-nav {
             display: flex;
             justify-content: space-between;
@@ -219,6 +274,29 @@
         .sync-top-btn.loading .sync-icon { animation: spin 0.8s infinite linear; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* ปุ่มออกจากระบบ (Logout) */
+        .logout-top-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #f87171;
+            padding: 6px 13px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Anakotmai', sans-serif;
+            font-weight: bold;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .logout-top-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+
         .live-dot {
             width: 7px; height: 7px; background-color: #00e676; border-radius: 50%; display: inline-block;
             box-shadow: 0 0 8px #00e676; animation: pulseDot 1.8s infinite;
@@ -229,6 +307,7 @@
             .header h1 { font-size: 30px; }
             .header p { font-size: 14px; }
             .sync-top-btn { font-size: 13px; padding: 7px 16px; }
+            .logout-top-btn { font-size: 13px; padding: 7px 16px; }
             .back-home { font-size: 13px; padding: 7px 16px; }
         }
         
@@ -491,26 +570,39 @@
 </head>
 <body class="login-locked">
 
-    <!-- 1. Modal Login การ์ดขาวมินิมอลตามภาพต้นฉบับ -->
+    <!-- 1. Modal Login การ์ดขาวมินิมอลตามแบบ + PIN PAD 0-9 รองรับทั้ง PC และมือถือ (รหัส: 999) -->
     <div id="adminLoginOverlay" class="login-overlay">
         <div class="login-card">
             <div class="login-icon-box">🔒</div>
             <h2 class="login-title">ระบบจัดการ Admin</h2>
             <p class="login-sub">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
             
-            <form onsubmit="handleAdminLogin(event)">
-                <input 
-                    type="password" 
-                    id="adminPasswordInput" 
-                    class="login-input" 
-                    placeholder="•••" 
-                    autocomplete="off"
-                    autofocus 
-                    required
-                >
-                <div id="adminLoginError" class="login-error"></div>
-                <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
-            </form>
+            <!-- กรอบแสดงจุดรหัสผ่าน 3 หลัก (รหัส 999) -->
+            <div class="admin-pin-display" id="adminPinFrame">
+                <span class="admin-dot" id="adot-0"></span>
+                <span class="admin-dot" id="adot-1"></span>
+                <span class="admin-dot" id="adot-2"></span>
+            </div>
+
+            <div id="adminLoginError" class="login-error"></div>
+
+            <!-- แผงตัวเลข PIN PAD สำหรับกดผ่านหน้าจอมือถือ -->
+            <div class="admin-pin-grid">
+                <div class="admin-pin-btn" onclick="pressAdminPin('1')">1</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('2')">2</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('3')">3</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('4')">4</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('5')">5</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('6')">6</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('7')">7</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('8')">8</div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('9')">9</div>
+                <div style="width:58px; height:58px;"></div>
+                <div class="admin-pin-btn" onclick="pressAdminPin('0')">0</div>
+                <div class="admin-pin-btn backspace" onclick="pressAdminBackspace()">⌫</div>
+            </div>
+
+            <button type="button" class="login-btn" onclick="submitAdminLogin()">เข้าสู่ระบบ</button>
         </div>
     </div>
 
@@ -519,11 +611,18 @@
         <div class="top-bar-nav print-hide">
             <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
             
-            <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
-                <span class="live-dot"></span>
-                <span class="sync-icon">🔄</span>
-                <span id="syncStatusText">ซิงค์ Sheets</span>
-            </button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
+                    <span class="live-dot"></span>
+                    <span class="sync-icon">🔄</span>
+                    <span id="syncStatusText">ซิงค์ Sheets</span>
+                </button>
+                
+                <!-- ปุ่มออกจากระบบ -->
+                <button class="logout-top-btn" onclick="handleAdminLogout()">
+                    <span>🚪</span> ออกจากระบบ
+                </button>
+            </div>
         </div>
 
         <div class="header print-hide">
@@ -553,7 +652,6 @@
                 <div class="btn-group">
                     <button class="action-btn" onclick="processNewGuest('showQR')">✨ สร้าง QR Code สำหรับสแกน</button>
                     <button class="action-btn checkin-btn" onclick="processNewGuest('instantCheckIn')">🚀 เช็คอินเข้างานทันที (ไม่ต้องสแกน)</button>
-                    <!-- ปุ่มล้างข้อมูลที่กรอกในฟอร์ม -->
                     <button class="action-btn" style="background: #475569; color: #fff; box-shadow: none;" onclick="clearSingleInputForm()">🔄 ล้างข้อมูลที่กรอก</button>
                 </div>
                 
@@ -588,7 +686,6 @@
                 <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
                 <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด หรือต้องการปลดล็อกเครื่องที่พนักงานกรอกรหัสผิด</p>
                 
-                <!-- ช่องค้นหาพร้อมปุ่มเคลียร์ข้อความ -->
                 <div style="position: relative; display: flex; align-items: center; margin: 8px 0 12px;">
                     <input 
                         type="text" 
@@ -691,44 +788,167 @@
         let currentDashboardRound = 'all';
         let allGuestsList = [];
         let latestBranchStats = {};
-        
         const branchFilterState = {};
 
-        // ตรวจสอบและโฟกัสช่องกรอกรหัสผ่านทันทีเมื่อเปิดหน้า
-        window.addEventListener('DOMContentLoaded', () => {
-            const passInput = document.getElementById('adminPasswordInput');
-            if (passInput) passInput.focus();
+        /* ---------- ระบบล็อกอิน PIN PAD (รหัสผ่าน: 999) ---------- */
+        const ADMIN_PASS = "999";
+        let enteredAdminPin = "";
 
+        /* ---------- ระบบจับเวลาออกจากระบบอัตโนมัติเมื่อเกิน 5 นาที (300 วินาที) ---------- */
+        const IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 นาที (300,000 มิลลิวินาที)
+        let lastActivityTime = Date.now();
+        let idleCheckTimer = null;
+
+        function updateActivity() {
+            lastActivityTime = Date.now();
+        }
+
+        // ตรวจสอบการใช้งานเมื่อมีการสัมผัสหน้าจอ คลิก หรือพิมพ์
+        ['click', 'touchstart', 'mousemove', 'keydown', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, updateActivity, { passive: true });
+        });
+
+        // ตรวจสอบทุกๆ 5 วินาที
+        function startIdleTimer() {
+            if (idleCheckTimer) clearInterval(idleCheckTimer);
+            lastActivityTime = Date.now();
+
+            idleCheckTimer = setInterval(() => {
+                if (sessionStorage.getItem('clt_admin_logged') === 'true') {
+                    if (Date.now() - lastActivityTime >= IDLE_LIMIT_MS) {
+                        autoLogoutDueToInactivity();
+                    }
+                }
+            }, 5000);
+        }
+
+        // ตรวจสอบเวลาเมื่อผู้ใช้สลับแท็บ หรือพับหน้าจอไปแอปอื่นเกิน 5 นาที
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                if (sessionStorage.getItem('clt_admin_logged') === 'true') {
+                    if (Date.now() - lastActivityTime >= IDLE_LIMIT_MS) {
+                        autoLogoutDueToInactivity();
+                    } else {
+                        updateActivity(); // ยังไม่เกิน 5 นาทีให้อัปเดตเวลาต่อ
+                    }
+                }
+            } else {
+                updateActivity();
+            }
+        });
+
+        function autoLogoutDueToInactivity() {
+            stopCameraScanner();
+            sessionStorage.removeItem('clt_admin_logged');
+            if (idleCheckTimer) clearInterval(idleCheckTimer);
+
+            enteredAdminPin = "";
+            updateAdminDots();
+            
+            const errBox = document.getElementById('adminLoginError');
+            if (errBox) errBox.innerText = "⏳ ออกจากระบบอัตโนมัติ เนื่องจากไม่มีการใช้งานเกิน 5 นาที";
+
+            const overlay = document.getElementById('adminLoginOverlay');
+            if (overlay) overlay.style.display = 'flex';
+            document.body.classList.add('login-locked');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
             if (sessionStorage.getItem('clt_admin_logged') === 'true') {
                 const overlay = document.getElementById('adminLoginOverlay');
                 if (overlay) overlay.style.display = 'none';
                 document.body.classList.remove('login-locked');
+                startIdleTimer();
                 fastSync(false);
             }
         });
 
-        /* ---------- ระบบล็อกอิน ADMIN (รหัส: 9999) ---------- */
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const passInput = document.getElementById('adminPasswordInput');
+        // รองรับการพิมพ์คีย์บอร์ด PC (0-9, Backspace, Enter)
+        window.addEventListener('keydown', (e) => {
+            const overlay = document.getElementById('adminLoginOverlay');
+            if (overlay && overlay.style.display !== 'none') {
+                if (e.key >= '0' && e.key <= '9') {
+                    pressAdminPin(e.key);
+                } else if (e.key === 'Backspace') {
+                    pressAdminBackspace();
+                } else if (e.key === 'Enter') {
+                    submitAdminLogin();
+                }
+            }
+        });
+
+        function pressAdminPin(digit) {
+            if ("vibrate" in navigator) navigator.vibrate(15);
+            if (enteredAdminPin.length < 3) {
+                enteredAdminPin += digit;
+                updateAdminDots();
+
+                // เมื่อกดครบ 3 ตัว ตรวจสอบและล็อกอินให้อัตโนมัติทันที
+                if (enteredAdminPin.length === 3) {
+                    setTimeout(() => {
+                        submitAdminLogin();
+                    }, 180);
+                }
+            }
+        }
+
+        function pressAdminBackspace() {
+            if ("vibrate" in navigator) navigator.vibrate(15);
+            if (enteredAdminPin.length > 0) {
+                enteredAdminPin = enteredAdminPin.slice(0, -1);
+                updateAdminDots();
+            }
+        }
+
+        function updateAdminDots() {
+            for (let i = 0; i < 3; i++) {
+                const dot = document.getElementById(`adot-${i}`);
+                if (i < enteredAdminPin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            }
+        }
+
+        function submitAdminLogin() {
             const errBox = document.getElementById('adminLoginError');
+            const frame = document.getElementById('adminPinFrame');
             const overlay = document.getElementById('adminLoginOverlay');
 
-            if (passInput.value === "9999") {
+            if (enteredAdminPin === ADMIN_PASS) {
                 overlay.style.display = 'none';
                 document.body.classList.remove('login-locked');
                 sessionStorage.setItem('clt_admin_logged', 'true');
+                startIdleTimer();
                 fastSync(false);
             } else {
-                errBox.innerText = "❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง";
-                passInput.classList.add('shake-error');
+                errBox.innerText = "❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่";
+                frame.classList.add('shake-error');
                 if ("vibrate" in navigator) navigator.vibrate([40, 50, 40]);
                 
                 setTimeout(() => {
-                    passInput.classList.remove('shake-error');
-                    passInput.value = "";
-                    passInput.focus();
+                    frame.classList.remove('shake-error');
+                    enteredAdminPin = "";
+                    updateAdminDots();
                 }, 400);
+            }
+        }
+
+        /* ---------- ฟังก์ชันออกจากระบบ (Logout ด้วยตัวเอง) ---------- */
+        function handleAdminLogout() {
+            if (confirm("ต้องการออกจากระบบจัดการ Admin หรือไม่?")) {
+                stopCameraScanner();
+                sessionStorage.removeItem('clt_admin_logged');
+                if (idleCheckTimer) clearInterval(idleCheckTimer);
+                
+                enteredAdminPin = "";
+                updateAdminDots();
+                document.getElementById('adminLoginError').innerText = "";
+                
+                const overlay = document.getElementById('adminLoginOverlay');
+                if (overlay) overlay.style.display = 'flex';
+                document.body.classList.add('login-locked');
             }
         }
 
@@ -1043,7 +1263,6 @@
             }
         }
 
-        /* ---------- ฟังก์ชันล้างฟอร์มกรอกคนใหม่ (Walk-in) ---------- */
         function clearSingleInputForm() {
             document.getElementById("s_empId").value = "";
             document.getElementById("s_empName").value = "";
@@ -1258,7 +1477,6 @@
             document.getElementById('uploadStatus').innerHTML = "";
         }
 
-        /* ---------- ฟังก์ชันเคลียร์ช่องค้นหา ---------- */
         function clearSearchInput() {
             document.getElementById('searchInput').value = "";
             document.getElementById('searchResults').innerHTML = "<li style='text-align: center; color: #777; border-left: 5px solid #444; background: #18122B; padding: 10px 12px; border-radius: 8px;'>กรุณาพิมพ์ข้อมูลเพื่อเริ่มค้นหา...</li>";
@@ -1266,7 +1484,6 @@
             document.getElementById('searchInput').focus();
         }
 
-        /* ---------- ค้นหารายชื่อ & ปุ่มปลดล็อกเครื่อง ---------- */
         function searchAttendee() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
             const list = document.getElementById('searchResults');
