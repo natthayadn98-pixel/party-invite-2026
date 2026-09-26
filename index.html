@@ -12,18 +12,12 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0; padding: 0;
-            background: url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover; 
+            /* ใช้ CSS Gradient โหลดเร็วทันที ไม่ต้องรอรูป Unsplash */
+            background: radial-gradient(circle at 50% 30%, #3d0c15 0%, #170306 70%, #080102 100%) fixed;
             min-height: 100vh; min-height: 100dvh;
             display: flex; justify-content: center; align-items: center;
             overflow-x: hidden; font-family: 'Anakotmai', sans-serif;
             user-select: none;
-        }
-        body::before { 
-            content: ''; position: fixed; 
-            top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-            background: radial-gradient(circle, rgba(20, 5, 8, 0.82) 0%, rgba(10, 2, 4, 0.96) 100%); 
-            z-index: -1; 
         }
 
         .paper-wrinkle {
@@ -170,7 +164,6 @@
         .pin-title { color: #f8fafc; font-size: 17px; font-weight: 700; margin: 0 0 6px; }
         .pin-subtitle { color: #94a3b8; font-size: 12px; margin: 0 0 16px; }
 
-        /* กรอบแสดงตัวเลข 6 ช่อง */
         .pin-display-frame {
             display: flex; justify-content: center; align-items: center; gap: 8px;
             background: rgba(0, 0, 0, 0.45);
@@ -510,19 +503,24 @@
             const isLine = checkIsLineApp();
             if (!isLine) return;
 
-            fetch(scriptUrl + "?action=getGuests&t=" + new Date().getTime())
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === "success" && data.guests.length > 0) {
-                        cachedGuests = data.guests.map(g => ({
-                            id: g.id.toString().trim(),
-                            name: g.name.toString().trim(),
-                            branch: g.branch.toString().trim()
-                        }));
-                    }
-                });
-
+            // ตรวจเช็คสถานะเครื่องทันทีโดยไม่ต้องรอโหลดข้อมูล
             checkDeviceLockInLine();
+
+            // ดึงข้อมูลรายชื่อพนักงานแบบเบื้องหลัง (Background Fetch) ไม่บล็อกหน้าจอ
+            setTimeout(() => {
+                fetch(scriptUrl + "?action=getGuests&t=" + Date.now())
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success" && data.guests) {
+                            cachedGuests = data.guests.map(g => ({
+                                id: g.id.toString().trim(),
+                                name: g.name.toString().trim(),
+                                branch: g.branch.toString().trim()
+                            }));
+                        }
+                    })
+                    .catch(() => {});
+            }, 100);
         });
 
         function checkDeviceLockInLine() {
@@ -541,7 +539,7 @@
             const label = document.getElementById('inputLabelText');
             const session = checkCurrentSession();
 
-            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${new Date().getTime()}`)
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
@@ -675,15 +673,14 @@
             }
         }
 
-        // แสดงตัวเลขที่กดลงในช่องโดยตรง
         function updatePinDots() {
             for (let i = 0; i < 6; i++) {
                 const dot = document.getElementById(`dot-${i}`);
                 if (i < currentPin.length) {
-                    dot.innerText = currentPin[i]; // แสดงตัวเลขจริง
+                    dot.innerText = currentPin[i];
                     dot.classList.add('filled');
                 } else {
-                    dot.innerText = ""; // ล้างค่าเมื่อยังไม่ได้กด
+                    dot.innerText = "";
                     dot.classList.remove('filled');
                 }
             }
@@ -706,7 +703,7 @@
             btn.innerText = "⏳ กำลังตรวจสอบสิทธิ์...";
             btn.disabled = true;
 
-            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(guest.id)}&t=${new Date().getTime()}`)
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(guest.id)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     btn.disabled = false;
@@ -799,7 +796,7 @@
             if (pollingTimer) clearInterval(pollingTimer);
 
             pollingTimer = setInterval(() => {
-                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${new Date().getTime()}`)
+                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${Date.now()}`)
                     .then(res => res.json())
                     .then(res => {
                         const isNowMorning = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
