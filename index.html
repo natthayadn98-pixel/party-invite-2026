@@ -496,16 +496,17 @@
         const QR_REFRESH_SECONDS = 45;
         let remainingSeconds = QR_REFRESH_SECONDS;
 
+        /* ---------- ตรวจสอบรอบเวลาการลงทะเบียน ---------- */
         function checkCurrentSession() {
             const now = new Date();
             const minutesNow = now.getHours() * 60 + now.getMinutes();
 
-            const morningStart = 8 * 60 + 30; // 08:30 น.
+            const morningStart = 7 * 60;      // 07:00 น.
             const morningEnd   = 9 * 60 + 30; // 09:30 น.
             const eveningStart = 14 * 60;     // 14:00 น.
 
             if (minutesNow < morningStart) {
-                return { active: false, msg: "⏰ ระบบยังไม่เปิดให้แสดง QR Code\nจะเปิดลงทะเบียนรอบเช้าเวลา 08:30 - 09:30 น." };
+                return { active: false, msg: "⏰ ระบบยังไม่เปิดให้แสดง QR Code\nจะเปิดลงทะเบียนรอบเช้าเวลา 07:00 - 09:30 น." };
             }
             if (minutesNow >= morningStart && minutesNow <= morningEnd) {
                 return { active: true, round: "รอบเช้า" };
@@ -622,7 +623,6 @@
                 return;
             }
 
-            // ล้างหน่วยความจำในเครื่องทั้งหมด
             localStorage.removeItem("clt_line_empid");
             localStorage.removeItem("clt_line_name");
             localStorage.removeItem("clt_reset_count");
@@ -630,7 +630,6 @@
 
             alert("✅ ปลดล็อกเครื่องเรียบร้อยแล้ว กรุณากรอกรหัสพนักงานใหม่ครับ");
 
-            // บังคับรีเฟรชหน้าเว็บแบบ Cache-Busting เพื่อไม่ให้ LINE จำหน้าเดิม
             const cleanUrl = window.location.href.split('?')[0];
             window.location.replace(cleanUrl + "?t=" + Date.now());
         }
