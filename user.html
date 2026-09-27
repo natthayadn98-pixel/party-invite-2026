@@ -35,7 +35,6 @@
             z-index: -1;
         }
 
-        /* ล็อกหน้าจอและซ่อนเนื้อหาหลักก่อนกรอกรหัสผ่าน */
         body.login-locked {
             overflow: hidden !important;
             height: 100vh !important;
@@ -47,7 +46,7 @@
             display: none !important;
         }
 
-        /* ---------- Modal Login การ์ดขาวมินิมอล + PIN PAD ---------- */
+        /* Modal Login การ์ดขาวมินิมอล + PIN PAD */
         .login-overlay {
             position: fixed;
             inset: 0;
@@ -97,7 +96,6 @@
             margin: 0 0 16px 0;
         }
 
-        /* ช่องแสดงจุดรหัสผ่าน 3 หลัก */
         .admin-pin-display {
             width: 100%;
             height: 50px;
@@ -126,7 +124,6 @@
             box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
         }
 
-        /* ปุ่มเข้าสู่ระบบ */
         .login-btn {
             width: 100%;
             height: 48px;
@@ -153,7 +150,6 @@
             margin: 4px 0 6px;
         }
 
-        /* แป้นพิมพ์ตัวเลข (PIN PAD) สำหรับมือถือ */
         .admin-pin-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -205,7 +201,7 @@
             40%, 80% { transform: translateX(8px); }
         }
 
-        /* ---------- Header และปุ่มด้านบน ---------- */
+        /* Top Bar */
         .top-bar-nav {
             display: flex;
             justify-content: space-between;
@@ -247,6 +243,21 @@
         }
         .back-home:hover { background: rgba(255,215,0,0.2); }
 
+        .top-clock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: bold;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+
         .sync-top-btn {
             display: inline-flex;
             align-items: center;
@@ -274,7 +285,6 @@
         .sync-top-btn.loading .sync-icon { animation: spin 0.8s infinite linear; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* ปุ่มออกจากระบบ (Logout) */
         .logout-top-btn {
             display: inline-flex;
             align-items: center;
@@ -309,16 +319,16 @@
             .sync-top-btn { font-size: 13px; padding: 7px 16px; }
             .logout-top-btn { font-size: 13px; padding: 7px 16px; }
             .back-home { font-size: 13px; padding: 7px 16px; }
+            .top-clock-badge { font-size: 13.5px; padding: 6px 14px; }
         }
         
-        /* Tabs & Container */
+        /* Tabs */
         .tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 15px 10px; }
         .tab-btn { background: rgba(255, 255, 255, 0.1); color: #ddd; border: 2px solid rgba(255,215,0,0.3); padding: 10px 18px; border-radius: 30px; cursor: pointer; font-size: 14px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
         .tab-btn:hover { background: rgba(255, 215, 0, 0.2); color: #fff; }
         .tab-btn.active { background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%); color: #1a0b2e; border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.4); }
         
         .container { max-width: 900px; margin: 0 auto 40px; padding: 0 15px; }
-        
         .tab-content { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; animation: fadeIn 0.4s ease; color: #fff; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -570,14 +580,13 @@
 </head>
 <body class="login-locked">
 
-    <!-- 1. Modal Login การ์ดขาวมินิมอลตามแบบ + PIN PAD 0-9 รองรับทั้ง PC และมือถือ (รหัส: 999) -->
+    <!-- 1. Modal Login การ์ดขาวมินิมอล + PIN PAD (รหัส: 999) -->
     <div id="adminLoginOverlay" class="login-overlay">
         <div class="login-card">
             <div class="login-icon-box">🔒</div>
             <h2 class="login-title">ระบบจัดการ Admin</h2>
             <p class="login-sub">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
             
-            <!-- กรอบแสดงจุดรหัสผ่าน 3 หลัก (รหัส 999) -->
             <div class="admin-pin-display" id="adminPinFrame">
                 <span class="admin-dot" id="adot-0"></span>
                 <span class="admin-dot" id="adot-1"></span>
@@ -586,7 +595,6 @@
 
             <div id="adminLoginError" class="login-error"></div>
 
-            <!-- แผงตัวเลข PIN PAD สำหรับกดผ่านหน้าจอมือถือ -->
             <div class="admin-pin-grid">
                 <div class="admin-pin-btn" onclick="pressAdminPin('1')">1</div>
                 <div class="admin-pin-btn" onclick="pressAdminPin('2')">2</div>
@@ -606,19 +614,23 @@
         </div>
     </div>
 
-    <!-- 2. ส่วนเนื้อหาหลัก ซ่อนมิดชิดจนกว่าจะปลดล็อกผ่านรหัสผ่าน -->
+    <!-- 2. ส่วนเนื้อหาหลัก -->
     <div class="main-app-content">
         <div class="top-bar-nav print-hide">
             <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
             
             <div style="display: flex; gap: 8px; align-items: center;">
+                <!-- นาฬิกาวินาทีสดแถบบน -->
+                <div class="top-clock-badge">
+                    <span>⏱️</span> <span id="admin-top-clock">--:--:--</span>
+                </div>
+
                 <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
                     <span class="live-dot"></span>
                     <span class="sync-icon">🔄</span>
                     <span id="syncStatusText">ซิงค์ Sheets</span>
                 </button>
                 
-                <!-- ปุ่มออกจากระบบ -->
                 <button class="logout-top-btn" onclick="handleAdminLogout()">
                     <span>🚪</span> ออกจากระบบ
                 </button>
@@ -640,7 +652,7 @@
 
         <div class="container">
             
-            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ พร้อมปุ่มล้างข้อมูลที่กรอก -->
+            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ -->
             <div id="tab-single" class="tab-content active">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
                 <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
@@ -681,7 +693,7 @@
                 <div id="qrContainer"></div>
             </div>
 
-            <!-- แท็บค้นหาเมื่อไม่มี QR พร้อมปุ่มเคลียร์ค้นหา และปุ่มปลดล็อกเครื่อง -->
+            <!-- แท็บค้นหาเมื่อไม่มี QR -->
             <div id="tab-search" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center;">ค้นหารายชื่อผู้เข้างาน</h2>
                 <p style="text-align: center; color: #aaa; margin-top: -10px;">กรณีลืมคิวอาร์โค้ด หรือต้องการปลดล็อกเครื่องที่พนักงานกรอกรหัสผิด</p>
@@ -712,8 +724,13 @@
 
             <!-- แท็บจุดสแกนเข้างาน -->
             <div id="tab-scanner" class="tab-content">
-                <h2 style="color: #ffd700; text-align: center;">จุดสแกนรับแขกหน้างาน</h2>
+                <h2 style="color: #ffd700; text-align: center; margin-bottom: 6px;">จุดสแกนรับแขกหน้างาน</h2>
                 
+                <!-- กล่องนาฬิกาเปรียบเทียบเวลาสดตรงจุดสแกน -->
+                <div style="text-align: center; margin-bottom: 15px; font-size: 13.5px; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.2); max-width: 320px; margin-left: auto; margin-right: auto;">
+                    ⏱️ เวลาเครื่องแอดมิน: <b id="admin-scanner-clock" style="color: #ffd700; font-family: monospace; font-size: 16px;">--:--:--</b>
+                </div>
+
                 <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
                     <button class="action-btn mode-btn" onclick="chooseScannerMode('camera')">📸 สแกนด้วยกล้องมือถือ</button>
                     <button class="action-btn mode-btn dark" onclick="chooseScannerMode('hardware')">🔫 ใช้เครื่องยิงบาร์โค้ด</button>
@@ -794,8 +811,8 @@
         const ADMIN_PASS = "999";
         let enteredAdminPin = "";
 
-        /* ---------- ระบบจับเวลาออกจากระบบอัตโนมัติเมื่อเกิน 5 นาที (300 วินาที) ---------- */
-        const IDLE_LIMIT_MS = 5 * 60 * 1000; // 5 นาที (300,000 มิลลิวินาที)
+        /* ---------- ระบบจับเวลาออกจากระบบอัตโนมัติเมื่อเกิน 5 นาที ---------- */
+        const IDLE_LIMIT_MS = 5 * 60 * 1000;
         let lastActivityTime = Date.now();
         let idleCheckTimer = null;
 
@@ -803,12 +820,10 @@
             lastActivityTime = Date.now();
         }
 
-        // ตรวจสอบการใช้งานเมื่อมีการสัมผัสหน้าจอ คลิก หรือพิมพ์
         ['click', 'touchstart', 'mousemove', 'keydown', 'scroll'].forEach(evt => {
             window.addEventListener(evt, updateActivity, { passive: true });
         });
 
-        // ตรวจสอบทุกๆ 5 วินาที
         function startIdleTimer() {
             if (idleCheckTimer) clearInterval(idleCheckTimer);
             lastActivityTime = Date.now();
@@ -822,14 +837,13 @@
             }, 5000);
         }
 
-        // ตรวจสอบเวลาเมื่อผู้ใช้สลับแท็บ หรือพับหน้าจอไปแอปอื่นเกิน 5 นาที
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
                 if (sessionStorage.getItem('clt_admin_logged') === 'true') {
                     if (Date.now() - lastActivityTime >= IDLE_LIMIT_MS) {
                         autoLogoutDueToInactivity();
                     } else {
-                        updateActivity(); // ยังไม่เกิน 5 นาทีให้อัปเดตเวลาต่อ
+                        updateActivity();
                     }
                 }
             } else {
@@ -853,7 +867,23 @@
             document.body.classList.add('login-locked');
         }
 
+        /* ---------- ระบบนาฬิกาวินาทีสด Real-time บน user.html ---------- */
+        function startLiveClocks() {
+            setInterval(() => {
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0];
+                
+                const topClock = document.getElementById('admin-top-clock');
+                if (topClock) topClock.innerText = timeStr;
+
+                const scannerClock = document.getElementById('admin-scanner-clock');
+                if (scannerClock) scannerClock.innerText = timeStr;
+            }, 1000);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            startLiveClocks();
+
             if (sessionStorage.getItem('clt_admin_logged') === 'true') {
                 const overlay = document.getElementById('adminLoginOverlay');
                 if (overlay) overlay.style.display = 'none';
@@ -863,15 +893,24 @@
             }
         });
 
-        // รองรับการพิมพ์คีย์บอร์ด PC (0-9, Backspace, Enter)
+        // รับปุ่มคีย์บอร์ด PC (แถวบน + Numpad ฝั่งขวา)
         window.addEventListener('keydown', (e) => {
             const overlay = document.getElementById('adminLoginOverlay');
-            if (overlay && overlay.style.display !== 'none') {
+            if (overlay && window.getComputedStyle(overlay).display !== 'none') {
                 if (e.key >= '0' && e.key <= '9') {
+                    e.preventDefault();
                     pressAdminPin(e.key);
-                } else if (e.key === 'Backspace') {
+                } else if (e.code && e.code.startsWith('Numpad') && e.code.length === 7) {
+                    const numpadDigit = e.code.replace('Numpad', '');
+                    if (numpadDigit >= '0' && numpadDigit <= '9') {
+                        e.preventDefault();
+                        pressAdminPin(numpadDigit);
+                    }
+                } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                    e.preventDefault();
                     pressAdminBackspace();
-                } else if (e.key === 'Enter') {
+                } else if (e.key === 'Enter' || e.code === 'NumpadEnter') {
+                    e.preventDefault();
                     submitAdminLogin();
                 }
             }
@@ -883,7 +922,6 @@
                 enteredAdminPin += digit;
                 updateAdminDots();
 
-                // เมื่อกดครบ 3 ตัว ตรวจสอบและล็อกอินให้อัตโนมัติทันที
                 if (enteredAdminPin.length === 3) {
                     setTimeout(() => {
                         submitAdminLogin();
@@ -935,7 +973,6 @@
             }
         }
 
-        /* ---------- ฟังก์ชันออกจากระบบ (Logout ด้วยตัวเอง) ---------- */
         function handleAdminLogout() {
             if (confirm("ต้องการออกจากระบบจัดการ Admin หรือไม่?")) {
                 stopCameraScanner();
@@ -978,7 +1015,7 @@
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 9000);
 
-            return fetch(scriptUrl + "?action=getFullSync&t=" + new Date().getTime(), { signal: controller.signal })
+            return fetch(scriptUrl + "?action=getFullSync&t=" + Date.now(), { signal: controller.signal })
                 .then(res => res.json())
                 .then(data => {
                     clearTimeout(timeoutId);
@@ -1545,7 +1582,7 @@
             alertBox.innerHTML = `⏳ กำลังปลดล็อกเครื่อง: ${empName}...`;
             alertBox.style.color = "#f97316";
 
-            fetch(`${scriptUrl}?action=resetDevice&id=${encodeURIComponent(empId)}&t=${new Date().getTime()}`)
+            fetch(`${scriptUrl}?action=resetDevice&id=${encodeURIComponent(empId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
                     if (res.status === "success") {
@@ -1617,18 +1654,22 @@
             }
         }
 
+        /* ---------- ตรวจสอบ Dynamic QR หรือ Static บัตรกระดาษ ---------- */
         function processQRCode(decodedText) {
             if (isProcessing || !decodedText) return;
 
             decodedText = decodedText.replace(/\uFFFD/g, '').trim();
             const resultDiv = document.getElementById('result');
 
-            if (!decodedText.startsWith("VIPPARTY|")) {
+            const isLiveMobile = decodedText.startsWith("VIPPARTY_LIVE|");
+            const isStaticTicket = decodedText.startsWith("VIPPARTY|");
+
+            if (!isLiveMobile && !isStaticTicket) {
                 showError("❌ ข้อมูลไม่ถูกต้อง<br><small>(ไม่ใช่ QR ของระบบนี้ หรือแป้นพิมพ์ไม่ได้เป็นภาษาอังกฤษ)</small>");
                 return;
             }
 
-            const base64Data = decodedText.split("|")[1];
+            const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|")[1];
             const decodedString = decodeBase64ToThai(base64Data);
 
             if (!decodedString) {
@@ -1640,6 +1681,18 @@
             const empId = dataParts[0] ? dataParts[0].trim() : "-";
             const empName = dataParts[1] ? dataParts[1].trim() : "-";
             const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
+            const timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
+
+            // ตรวจสอบเวลาถ้าเป็น Dynamic QR จากมือถือ (หมดอายุใน 60 วินาที ป้องกันการแคปจอ)
+            if (isLiveMobile && timestamp) {
+                const now = Date.now();
+                const diffSeconds = (now - timestamp) / 1000;
+                
+                if (diffSeconds > 60 || diffSeconds < -30) {
+                    showError("❌ <b>QR Code หมดอายุแล้ว!</b><br><span style='font-size:14px; color:#ffd700;'>(ตรวจพบว่าเป็นภาพแคปหน้าจอ กรุณาเปิดจากในแอปตัวจริง)</span>");
+                    return;
+                }
+            }
 
             isProcessing = true;
             resultDiv.innerHTML = `⏳ กำลังตรวจสอบและบันทึก: <b>${empName}</b>...`;

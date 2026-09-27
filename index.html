@@ -12,7 +12,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0; padding: 0;
-            /* ใช้ CSS Gradient โหลดเร็วทันที ไม่ต้องรอรูป Unsplash */
             background: radial-gradient(circle at 50% 30%, #3d0c15 0%, #170306 70%, #080102 100%) fixed;
             min-height: 100vh; min-height: 100dvh;
             display: flex; justify-content: center; align-items: center;
@@ -235,16 +234,16 @@
             font-family: 'Anakotmai', sans-serif;
         }
 
-        /* ---------- ป๊อปอัป QR CODE ---------- */
+        /* ---------- ป๊อปอัป QR CODE แบบ Dynamic Auto-Refresh ---------- */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: #ffffff !important;
             z-index: 99999; justify-content: center; align-items: center; 
-            padding: 20px; font-family: 'Anakotmai', sans-serif;
+            padding: 16px; font-family: 'Anakotmai', sans-serif;
         }
         .qr-card-box {
             background: #ffffff; border: 2px solid #ffd700; border-radius: 20px;
-            padding: 22px 20px 20px; text-align: center; width: 100%; max-width: 320px;
+            padding: 18px 16px 16px; text-align: center; width: 100%; max-width: 320px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.12); animation: zoomIn 0.3s ease;
         }
         @keyframes zoomIn {
@@ -253,24 +252,40 @@
         }
 
         .scan-status-pill {
-            display: inline-flex; align-items: center; gap: 8px;
+            display: inline-flex; align-items: center; gap: 6px;
             background: #f0fdf4; border: 1.5px solid #22c55e; color: #15803d;
-            padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;
-            margin-bottom: 8px; animation: pulsePill 1.8s infinite;
+            padding: 3px 12px; border-radius: 20px; font-size: 11.5px; font-weight: bold;
+            margin-bottom: 6px;
         }
-        @keyframes pulsePill { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
-        .radar-dot { width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
+        .radar-dot { width: 7px; height: 7px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; animation: pulseDot 1.5s infinite; }
+        @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .round-badge {
             display: inline-block;
             background: #fef3c7;
             color: #92400e;
             border: 1px solid #f59e0b;
-            padding: 3px 12px;
+            padding: 2px 10px;
             border-radius: 12px;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
+        }
+
+        /* หลอดนับถอยหลังรีเฟรช Dynamic QR */
+        .qr-progress-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin: 6px auto 10px;
+            overflow: hidden;
+        }
+        .qr-progress-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 1s linear;
         }
 
         /* ---------- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ ---------- */
@@ -413,7 +428,7 @@
         </div>
     </div>
 
-    <!-- ป๊อปอัป QR Code ประจำตัว -->
+    <!-- ป๊อปอัป QR Code ประจำตัว (Dynamic Auto-Refresh ป้องกันการแคปจอ) -->
     <div id="qr-modal" onclick="closeModal()">
         <div class="qr-card-box" onclick="event.stopPropagation()">
             <div class="scan-status-pill">
@@ -423,10 +438,21 @@
             
             <div id="current-round-badge" class="round-badge">📍 ลงทะเบียนรอบเช้า</div>
 
-            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 0 auto; position: relative; width: 220px; height: 220px;"></div>
-            <div id="personal-info" style="font-size: 14px; color: #222; margin: 14px 0 16px; line-height: 1.5; font-weight: bold;"></div>
+            <!-- กล่องแสดง QR Code พร้อมโลโก้ -->
+            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 0 auto; position: relative; width: 210px; height: 210px;"></div>
             
-            <button onclick="closeModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 9px 24px; border-radius: 20px; font-weight: bold; font-family: 'Anakotmai', sans-serif; cursor: pointer; font-size: 13px; width: 100%;">
+            <!-- แถบนับถอยหลังและเวลานาฬิกาสด -->
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-top: 8px;">
+                <span>🔄 อัปเดตใน: <b id="qr-countdown-text" style="color:#059669;">45s</b></span>
+                <span>⏱️ <b id="qr-live-clock" style="color:#334155;">--:--:--</b></span>
+            </div>
+            <div class="qr-progress-bar-bg">
+                <div class="qr-progress-bar-fill" id="qr-progress-bar"></div>
+            </div>
+
+            <div id="personal-info" style="font-size: 13.5px; color: #222; margin: 4px 0 12px; line-height: 1.4; font-weight: bold;"></div>
+            
+            <button onclick="closeModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-family: 'Anakotmai', sans-serif; cursor: pointer; font-size: 13px; width: 100%;">
                 ปิดหน้าจอ
             </button>
         </div>
@@ -458,11 +484,16 @@
         const scriptUrl = "https://script.google.com/macros/s/AKfycbxwf4GF2ebnkN_qg6T8C3pfF9k0PTqUDLFAHWywGHhRm1OQffUMtHIEsKBu0Qci9yv_Zg/exec";
         let cachedGuests = [];
         let pollingTimer = null;
+        let dynamicQrInterval = null;
+        let clockTimer = null;
         let wakeLock = null;
         let currentPin = "";
         
         let morningChecked = false;
         let eveningChecked = false;
+
+        const QR_REFRESH_SECONDS = 45;
+        let remainingSeconds = QR_REFRESH_SECONDS;
 
         function checkCurrentSession() {
             const now = new Date();
@@ -503,10 +534,9 @@
             const isLine = checkIsLineApp();
             if (!isLine) return;
 
-            // ตรวจเช็คสถานะเครื่องทันทีโดยไม่ต้องรอโหลดข้อมูล
             checkDeviceLockInLine();
 
-            // ดึงข้อมูลรายชื่อพนักงานแบบเบื้องหลัง (Background Fetch) ไม่บล็อกหน้าจอ
+            // โหลดรายชื่อแบบเบื้องหลัง ไม่บล็อกหน้าจอ
             setTimeout(() => {
                 fetch(scriptUrl + "?action=getGuests&t=" + Date.now())
                     .then(res => res.json())
@@ -545,7 +575,6 @@
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
                     eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
 
-                    // หากแอดมินเป็นคนสั่งปลดล็อกให้จากหน้า user.html
                     if (!morningChecked && !eveningChecked && res.morningChecked === false && res.eveningChecked === false) {
                         if (resetCount < 1) {
                             if (resetBtnBox) resetBtnBox.style.display = "block";
@@ -606,7 +635,7 @@
             toggleEnvelope();
         }
 
-        /* ---------- ระบบ PIN PAD 6 หลัก (แสดงตัวเลข) ---------- */
+        /* ---------- ระบบ PIN PAD 6 หลัก ---------- */
         function openPinModal(event) {
             if (event) event.stopPropagation();
 
@@ -724,12 +753,12 @@
                         checkDeviceLockInLine();
                     }
 
-                    renderQRCodeCard(guest, activeRound);
+                    startDynamicQRDisplay(guest, activeRound);
                 })
                 .catch(() => {
                     btn.disabled = false;
                     btn.innerText = `🎟️ แสดง QR Code (${activeRound})`;
-                    renderQRCodeCard(guest, activeRound);
+                    startDynamicQRDisplay(guest, activeRound);
                 });
         }
 
@@ -743,19 +772,56 @@
             if (wakeLock !== null) wakeLock.release().then(() => { wakeLock = null; });
         }
 
-        function renderQRCodeCard(guest, activeRound) {
-            const qrContainer = document.getElementById("personal-qrcode");
-            const infoContainer = document.getElementById("personal-info");
-            const badge = document.getElementById("current-round-badge");
+        /* ---------- ระบบ Dynamic QR Code (อัปเดตทุก 45 วิ ป้องกันการแคปจอ) ---------- */
+        function startDynamicQRDisplay(guest, activeRound) {
+            document.getElementById("qr-modal").style.display = "flex";
+            document.getElementById("current-round-badge").innerText = `📍 ลงทะเบียน${activeRound}`;
+            document.getElementById("personal-info").innerHTML = `รหัส: ${guest.id}<br>${guest.name}<br><span style="color:#64748b; font-size:12px;">${guest.branch}</span>`;
             
-            badge.innerText = `📍 ลงทะเบียน${activeRound}`;
+            requestWakeLock();
+            generateSingleDynamicQR(guest);
+
+            remainingSeconds = QR_REFRESH_SECONDS;
+            updateProgressBar();
+
+            if (dynamicQrInterval) clearInterval(dynamicQrInterval);
+            if (clockTimer) clearInterval(clockTimer);
+
+            // ตัวนับถอยหลังและนาฬิกาวินาทีสด
+            clockTimer = setInterval(() => {
+                const now = new Date();
+                document.getElementById('qr-live-clock').innerText = now.toTimeString().split(' ')[0];
+
+                remainingSeconds--;
+                if (remainingSeconds <= 0) {
+                    remainingSeconds = QR_REFRESH_SECONDS;
+                    generateSingleDynamicQR(guest); // รีเฟรช QR Code รอบใหม่แบบอัตโนมัติ
+                }
+                updateProgressBar();
+            }, 1000);
+
+            startListeningForCheckIn(guest.id, activeRound);
+        }
+
+        function updateProgressBar() {
+            const percent = (remainingSeconds / QR_REFRESH_SECONDS) * 100;
+            document.getElementById('qr-progress-bar').style.width = percent + "%";
+            document.getElementById('qr-countdown-text').innerText = remainingSeconds + "s";
+        }
+
+        function generateSingleDynamicQR(guest) {
+            const qrContainer = document.getElementById("personal-qrcode");
             qrContainer.innerHTML = "";
 
-            const encodedData = btoa(unescape(encodeURIComponent(`${guest.id}|${guest.name}|${guest.branch}`)));
-            
+            // บรรจุ Timestamp ปัจจุบันลงใน QR Code
+            const currentTs = Date.now();
+            const rawData = `${guest.id}|${guest.name}|${guest.branch}|${currentTs}`;
+            const encodedData = btoa(unescape(encodeURIComponent(rawData)));
+
+            // ใช้แท็ก VIPPARTY_LIVE เพื่อบอกแอดมินว่าเป็นโค้ดสดจากมือถือ
             new QRCode(qrContainer, { 
-                text: `VIPPARTY|${encodedData}`, 
-                width: 220, height: 220, 
+                text: `VIPPARTY_LIVE|${encodedData}`, 
+                width: 210, height: 210, 
                 correctLevel : QRCode.CorrectLevel.H 
             });
 
@@ -765,8 +831,8 @@
                 logoWrapper.style.top = "50%";
                 logoWrapper.style.left = "50%";
                 logoWrapper.style.transform = "translate(-50%, -50%)";
-                logoWrapper.style.width = "48px";
-                logoWrapper.style.height = "48px";
+                logoWrapper.style.width = "46px";
+                logoWrapper.style.height = "46px";
                 logoWrapper.style.backgroundColor = "white";
                 logoWrapper.style.borderRadius = "50%";
                 logoWrapper.style.display = "flex";
@@ -776,20 +842,13 @@
 
                 const logoImg = document.createElement("img");
                 logoImg.src = "logo CLT (1)-01.png";
-                logoImg.style.width = "34px";
-                logoImg.style.height = "34px";
+                logoImg.style.width = "32px";
+                logoImg.style.height = "32px";
                 logoImg.style.objectFit = "contain";
                 
                 logoWrapper.appendChild(logoImg);
                 qrContainer.appendChild(logoWrapper);
-            }, 80);
-
-            infoContainer.innerHTML = `รหัส: ${guest.id}<br>${guest.name}<br><span style="color:#64748b; font-size:12.5px;">${guest.branch}</span>`;
-            
-            document.getElementById("qr-modal").style.display = "flex";
-            requestWakeLock();
-
-            startListeningForCheckIn(guest.id, activeRound);
+            }, 70);
         }
 
         function startListeningForCheckIn(empId, currentCheckingRound) {
@@ -827,6 +886,8 @@
         function closeModal() {
             document.getElementById("qr-modal").style.display = "none";
             if (pollingTimer) clearInterval(pollingTimer);
+            if (dynamicQrInterval) clearInterval(dynamicQrInterval);
+            if (clockTimer) clearInterval(clockTimer);
             releaseWakeLock();
         }
 
