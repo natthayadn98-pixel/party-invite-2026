@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- ป้องกันการจำแคชของเบราว์เซอร์ -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>การ์ดเชิญงานเลี้ยงสังสรรค์ 2569</title>
     <link rel="icon" type="image/png" href="calendar.png">
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
@@ -272,7 +276,6 @@
             margin-bottom: 6px;
         }
 
-        /* หลอดนับถอยหลังรีเฟรช Dynamic QR */
         .qr-progress-bar-bg {
             width: 100%;
             height: 4px;
@@ -373,9 +376,9 @@
                             แตะปุ่มด้านล่างเพื่อ <b>กรอกรหัสพนักงาน 6 หลัก</b> แสดงบัตรเข้างาน
                         </span>
                         
-                        <!-- ลิงก์ปลดล็อกเครื่อง (จำกัด 1 ครั้งต่อเครื่อง) -->
+                        <!-- ลิงก์ปลดล็อกเครื่อง (ล้างแคชขาดทันที) -->
                         <div id="userResetBtnBox" style="display: none; margin-top: 6px;">
-                            <a href="javascript:void(0)" onclick="resetDeviceBindingSelf()" style="color: #ea580c; font-size: 11.5px; text-decoration: underline; font-weight: bold;">
+                            <a href="javascript:void(0)" onclick="resetDeviceBindingSelf()" style="color: #ea580c; font-size: 11.5px; text-decoration: underline; font-weight: bold; display: inline-block; padding: 4px;">
                                 🔄 กรอกผิด? แตะที่นี่เพื่อเปลี่ยนรหัสใหม่ (ทำได้ 1 ครั้ง)
                             </a>
                         </div>
@@ -438,10 +441,8 @@
             
             <div id="current-round-badge" class="round-badge">📍 ลงทะเบียนรอบเช้า</div>
 
-            <!-- กล่องแสดง QR Code พร้อมโลโก้ -->
             <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 0 auto; position: relative; width: 210px; height: 210px;"></div>
             
-            <!-- แถบนับถอยหลังและเวลานาฬิกาสด -->
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-top: 8px;">
                 <span>🔄 อัปเดตใน: <b id="qr-countdown-text" style="color:#059669;">45s</b></span>
                 <span>⏱️ <b id="qr-live-clock" style="color:#334155;">--:--:--</b></span>
@@ -536,7 +537,7 @@
 
             checkDeviceLockInLine();
 
-            // โหลดรายชื่อแบบเบื้องหลัง ไม่บล็อกหน้าจอ
+            // โหลดรายชื่อแบบเบื้องหลัง
             setTimeout(() => {
                 fetch(scriptUrl + "?action=getGuests&t=" + Date.now())
                     .then(res => res.json())
@@ -557,7 +558,6 @@
             const boundEmpId = localStorage.getItem("clt_line_empid");
             const boundEmpName = localStorage.getItem("clt_line_name");
             const resetBtnBox = document.getElementById("userResetBtnBox");
-            
             const resetCount = parseInt(localStorage.getItem("clt_reset_count") || "0", 10);
 
             if (!boundEmpId) {
@@ -572,13 +572,23 @@
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
+                    // หากแอดมินกดสั่งปลดล็อกให้จากหน้า user.html
+                    if (res.isReset === true) {
+                        localStorage.removeItem("clt_line_empid");
+                        localStorage.removeItem("clt_line_name");
+                        localStorage.removeItem("clt_reset_count");
+                        alert("🔔 เจ้าหน้าที่แอดมินได้ทำการปลดล็อกเครื่องให้คุณแล้ว กรุณากรอกรหัสพนักงานใหม่อีกครั้งครับ");
+                        const cleanUrl = window.location.href.split('?')[0];
+                        window.location.replace(cleanUrl + "?t=" + Date.now());
+                        return;
+                    }
+
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
                     eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
 
-                    if (!morningChecked && !eveningChecked && res.morningChecked === false && res.eveningChecked === false) {
-                        if (resetCount < 1) {
-                            if (resetBtnBox) resetBtnBox.style.display = "block";
-                        }
+                    // ปลดล็อกเครื่องด้วยตัวเองได้ 1 ครั้ง (ถ้ายังไม่เช็คอิน)
+                    if (!morningChecked && !eveningChecked && resetCount < 1) {
+                        if (resetBtnBox) resetBtnBox.style.display = "block";
                     } else {
                         if (resetBtnBox) resetBtnBox.style.display = "none";
                     }
@@ -605,26 +615,24 @@
                 .catch(() => {});
         }
 
+        /* ---------- ฟังก์ชันปลดล็อกเครื่องตัวเอง (ล้างแคชขาดทันที) ---------- */
         function resetDeviceBindingSelf() {
             if (morningChecked || eveningChecked) {
                 alert("❌ เครื่องนี้ได้ทำการเช็คอินเข้างานไปแล้ว ไม่สามารถเปลี่ยนรหัสได้ กรุณาติดต่อแอดมิน");
                 return;
             }
 
-            const currentResetCount = parseInt(localStorage.getItem("clt_reset_count") || "0", 10);
-            if (currentResetCount >= 1) {
-                alert("⚠️ คุณใช้สิทธิ์ปลดล็อกเครื่องครบ 1 ครั้งแล้ว\nหากต้องการเปลี่ยนรหัสพนักงานอีกครั้ง กรุณาติดต่อเจ้าหน้าที่แอดมินหน้างานครับ");
-                return;
-            }
+            // ล้างหน่วยความจำในเครื่องทั้งหมด
+            localStorage.removeItem("clt_line_empid");
+            localStorage.removeItem("clt_line_name");
+            localStorage.removeItem("clt_reset_count");
+            sessionStorage.clear();
 
-            if (confirm("⚠️ สิทธิ์ปลดล็อกเครื่องทำได้เพียง 1 ครั้งเท่านั้น!\n\nคุณต้องการยกเลิกการผูกรหัสเพื่อกรอกรหัสพนักงานใหม่ ใช่หรือไม่?")) {
-                localStorage.setItem("clt_reset_count", (currentResetCount + 1).toString());
-                localStorage.removeItem("clt_line_empid");
-                localStorage.removeItem("clt_line_name");
+            alert("✅ ปลดล็อกเครื่องเรียบร้อยแล้ว กรุณากรอกรหัสพนักงานใหม่ครับ");
 
-                alert("✅ ปลดล็อกเรียบร้อยแล้ว (ใช้สิทธิ์ครบแล้ว)\nคุณสามารถกรอกรหัสพนักงาน 6 หลักใหม่อีกครั้งได้เลยครับ");
-                location.reload();
-            }
+            // บังคับรีเฟรชหน้าเว็บแบบ Cache-Busting เพื่อไม่ให้ LINE จำหน้าเดิม
+            const cleanUrl = window.location.href.split('?')[0];
+            window.location.replace(cleanUrl + "?t=" + Date.now());
         }
 
         function toggleEnvelope() {
@@ -772,7 +780,7 @@
             if (wakeLock !== null) wakeLock.release().then(() => { wakeLock = null; });
         }
 
-        /* ---------- ระบบ Dynamic QR Code (อัปเดตทุก 45 วิ ป้องกันการแคปจอ) ---------- */
+        /* ---------- Dynamic QR Code: รีเฟรชทุก 45 วิ + นาฬิกาวินาทีสด ---------- */
         function startDynamicQRDisplay(guest, activeRound) {
             document.getElementById("qr-modal").style.display = "flex";
             document.getElementById("current-round-badge").innerText = `📍 ลงทะเบียน${activeRound}`;
@@ -787,7 +795,6 @@
             if (dynamicQrInterval) clearInterval(dynamicQrInterval);
             if (clockTimer) clearInterval(clockTimer);
 
-            // ตัวนับถอยหลังและนาฬิกาวินาทีสด
             clockTimer = setInterval(() => {
                 const now = new Date();
                 document.getElementById('qr-live-clock').innerText = now.toTimeString().split(' ')[0];
@@ -795,7 +802,7 @@
                 remainingSeconds--;
                 if (remainingSeconds <= 0) {
                     remainingSeconds = QR_REFRESH_SECONDS;
-                    generateSingleDynamicQR(guest); // รีเฟรช QR Code รอบใหม่แบบอัตโนมัติ
+                    generateSingleDynamicQR(guest);
                 }
                 updateProgressBar();
             }, 1000);
@@ -813,12 +820,10 @@
             const qrContainer = document.getElementById("personal-qrcode");
             qrContainer.innerHTML = "";
 
-            // บรรจุ Timestamp ปัจจุบันลงใน QR Code
             const currentTs = Date.now();
             const rawData = `${guest.id}|${guest.name}|${guest.branch}|${currentTs}`;
             const encodedData = btoa(unescape(encodeURIComponent(rawData)));
 
-            // ใช้แท็ก VIPPARTY_LIVE เพื่อบอกแอดมินว่าเป็นโค้ดสดจากมือถือ
             new QRCode(qrContainer, { 
                 text: `VIPPARTY_LIVE|${encodedData}`, 
                 width: 210, height: 210, 
