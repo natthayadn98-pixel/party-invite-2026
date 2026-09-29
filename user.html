@@ -209,8 +209,8 @@
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
-            padding: 12px 15px 0;
-            gap: 10px;
+            padding: 10px 10px 0;
+            gap: 6px;
         }
         .header { 
             text-align: center; 
@@ -233,10 +233,10 @@
             align-items: center;
             background: rgba(255,255,255,0.1); 
             color: white; 
-            padding: 6px 14px; 
+            padding: 5px 10px; 
             border-radius: 20px; 
             text-decoration: none; 
-            font-size: 12.5px; 
+            font-size: 11.5px; 
             border: 1px solid rgba(255,215,0,0.3); 
             transition: 0.3s; 
             white-space: nowrap;
@@ -246,13 +246,13 @@
         .top-clock-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             background: rgba(0, 0, 0, 0.45);
             border: 1px solid rgba(255, 215, 0, 0.3);
             color: #ffd700;
-            padding: 5px 12px;
+            padding: 5px 9px;
             border-radius: 20px;
-            font-size: 12.5px;
+            font-size: 11px;
             font-weight: bold;
             font-family: monospace;
             white-space: nowrap;
@@ -261,26 +261,24 @@
         .sync-top-btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             background: linear-gradient(135deg, rgba(33, 147, 176, 0.35) 0%, rgba(109, 213, 237, 0.25) 100%);
             border: 1px solid rgba(109, 213, 237, 0.6);
             color: #6dd5ed;
-            padding: 6px 14px;
+            padding: 5px 10px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-family: 'Anakotmai', sans-serif;
             font-weight: bold;
             transition: all 0.3s ease;
             backdrop-filter: blur(8px);
             white-space: nowrap;
-            box-shadow: 0 2px 10px rgba(33, 147, 176, 0.25);
+            box-shadow: 0 2px 8px rgba(33, 147, 176, 0.2);
         }
         .sync-top-btn:hover {
             background: linear-gradient(135deg, rgba(33, 147, 176, 0.6) 0%, rgba(109, 213, 237, 0.45) 100%);
-            box-shadow: 0 0 15px rgba(109, 213, 237, 0.5);
             color: #fff;
-            transform: translateY(-1px);
         }
         .sync-top-btn.loading .sync-icon { animation: spin 0.8s infinite linear; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -288,38 +286,42 @@
         .logout-top-btn {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.5);
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.55);
             color: #f87171;
-            padding: 6px 13px;
-            border-radius: 20px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
-            font-family: 'Anakotmai', sans-serif;
-            font-weight: bold;
-            transition: all 0.25s ease;
-            white-space: nowrap;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
         }
         .logout-top-btn:hover {
-            background: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.35);
             color: #ffffff;
             border-color: #ef4444;
+            transform: scale(1.05);
+        }
+        .logout-top-btn:active {
+            transform: scale(0.92);
         }
 
         .live-dot {
-            width: 7px; height: 7px; background-color: #00e676; border-radius: 50%; display: inline-block;
-            box-shadow: 0 0 8px #00e676; animation: pulseDot 1.8s infinite;
+            width: 6px; height: 6px; background-color: #00e676; border-radius: 50%; display: inline-block;
+            box-shadow: 0 0 6px #00e676; animation: pulseDot 1.8s infinite;
         }
         @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
         @media (min-width: 600px) {
             .header h1 { font-size: 30px; }
             .header p { font-size: 14px; }
-            .sync-top-btn { font-size: 13px; padding: 7px 16px; }
-            .logout-top-btn { font-size: 13px; padding: 7px 16px; }
-            .back-home { font-size: 13px; padding: 7px 16px; }
-            .top-clock-badge { font-size: 13.5px; padding: 6px 14px; }
+            .sync-top-btn { font-size: 12.5px; padding: 6px 14px; }
+            .back-home { font-size: 12.5px; padding: 6px 14px; }
+            .top-clock-badge { font-size: 13px; padding: 6px 12px; }
+            .logout-top-btn { width: 34px; height: 34px; font-size: 15px; }
         }
         
         /* Tabs */
@@ -341,6 +343,7 @@
         .action-btn.checkin-btn { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); color: white; }
         .action-btn.print-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; margin-bottom: 10px; }
         .action-btn.sync-btn { background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); color: #fff; margin-bottom: 10px; }
+        .action-btn.export-btn { background: linear-gradient(135deg, #10b981 0%, #047857 100%); color: #fff; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); }
         .action-btn.danger-btn { background: #ff4444; color: white; }
         
         .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
@@ -349,7 +352,7 @@
         .mode-btn { width: auto; font-size: 15px; padding: 10px 15px; flex: 1; min-width: 140px; color: white; }
         .mode-btn.dark { background: #222; border: 1px solid #444; }
         
-        .round-toggle-container { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .round-toggle-container { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
         .round-btn { background: rgba(255, 255, 255, 0.08); color: #ccc; border: 1px solid rgba(255, 215, 0, 0.3); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-family: 'Anakotmai', sans-serif; font-weight: 700; transition: 0.3s; }
         .round-btn.active { background: #ffd700; color: #1a0b2e; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.5); }
 
@@ -381,7 +384,7 @@
         } 
         .info-text { margin-top: 8px; font-size: 12px; text-align: left; line-height: 1.4; color: #ddd; width: 100%; }
         
-        .stat-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px; }
+        .stat-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
         .stat-box { background: #18122B; border-radius: 12px; padding: 15px; text-align: center; border: 1px solid rgba(255,215,0,0.3); flex: 1; min-width: 100px; }
         .stat-box h3 { margin: 0 0 8px; font-size: 13px; color: #bbb; display: flex; justify-content: center; align-items: center; gap: 4px; }
         .stat-number { font-size: 30px; font-weight: bold; margin: 0; line-height: 1; color: #ffd700; }
@@ -619,8 +622,7 @@
         <div class="top-bar-nav print-hide">
             <a href="index.html" class="back-home">⬅️ การ์ดเชิญ</a>
             
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <!-- นาฬิกาวินาทีสดแถบบน -->
+            <div style="display: flex; gap: 5px; align-items: center;">
                 <div class="top-clock-badge">
                     <span>⏱️</span> <span id="admin-top-clock">--:--:--</span>
                 </div>
@@ -628,11 +630,11 @@
                 <button class="sync-top-btn" id="topSyncBtn" onclick="triggerManualSync()">
                     <span class="live-dot"></span>
                     <span class="sync-icon">🔄</span>
-                    <span id="syncStatusText">ซิงค์ Sheets</span>
+                    <span id="syncStatusText">ซิงค์</span>
                 </button>
                 
-                <button class="logout-top-btn" onclick="handleAdminLogout()">
-                    <span>🚪</span> ออกจากระบบ
+                <button class="logout-top-btn" onclick="handleAdminLogout()" title="ออกจากระบบ">
+                    🚪
                 </button>
             </div>
         </div>
@@ -726,7 +728,6 @@
             <div id="tab-scanner" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 6px;">จุดสแกนรับแขกหน้างาน</h2>
                 
-                <!-- กล่องนาฬิกาเปรียบเทียบเวลาสดตรงจุดสแกน -->
                 <div style="text-align: center; margin-bottom: 15px; font-size: 13.5px; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; border: 1px solid rgba(255,215,0,0.2); max-width: 320px; margin-left: auto; margin-right: auto;">
                     ⏱️ เวลาเครื่องแอดมิน: <b id="admin-scanner-clock" style="color: #ffd700; font-family: monospace; font-size: 16px;">--:--:--</b>
                 </div>
@@ -757,7 +758,7 @@
                 <div id="result">🟢 กรุณาเลือกโหมดสแกนด้านบน...</div>
             </div>
 
-            <!-- แท็บ Dashboard สถิติ Real-time -->
+            <!-- แท็บ Dashboard สถิติ Real-time พร้อมปุ่ม Export Excel แยกชีต -->
             <div id="tab-dashboard" class="tab-content">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 10px;">สถิติผู้เข้างาน (Real-time)</h2>
                 
@@ -782,7 +783,11 @@
                     </div>
                 </div>
 
-                <h4 style="border-left: 4px solid #ffd700; padding-left: 8px; color: #ffd700; margin: 25px 0 5px; font-size: 16px;">
+                <button class="action-btn export-btn" onclick="exportAttendanceToExcel()">
+                    📊 ส่งออกไฟล์ Excel (แยกชีต เช้า-เย็น)
+                </button>
+
+                <h4 style="border-left: 4px solid #ffd700; padding-left: 8px; color: #ffd700; margin: 15px 0 5px; font-size: 16px;">
                     🏢 สถิติและรายชื่อแยกตามสาขา (<span id="branch-round-label">รวมทุกรอบ</span>)
                 </h4>
                 <p style="color: #888; font-size: 12px; margin: 0 0 12px 0;">👇 กดปุ่ม <b>"มาแล้ว"</b> หรือ <b>"ยังไม่มา"</b> ในแต่ละสาขาเพื่อเปิดดูรายชื่อ (คนที่มาล่าสุดจะอยู่บนสุด)</p>
@@ -807,11 +812,9 @@
         let latestBranchStats = {};
         const branchFilterState = {};
 
-        /* ---------- ระบบล็อกอิน PIN PAD (รหัสผ่าน: 999) ---------- */
         const ADMIN_PASS = "999";
         let enteredAdminPin = "";
 
-        /* ---------- ระบบจับเวลาออกจากระบบอัตโนมัติเมื่อเกิน 5 นาที ---------- */
         const IDLE_LIMIT_MS = 5 * 60 * 1000;
         let lastActivityTime = Date.now();
         let idleCheckTimer = null;
@@ -867,7 +870,6 @@
             document.body.classList.add('login-locked');
         }
 
-        /* ---------- ระบบนาฬิกาวินาทีสด Real-time บน user.html ---------- */
         function startLiveClocks() {
             setInterval(() => {
                 const now = new Date();
@@ -893,7 +895,6 @@
             }
         });
 
-        // รับปุ่มคีย์บอร์ด PC (แถวบน + Numpad ฝั่งขวา)
         window.addEventListener('keydown', (e) => {
             const overlay = document.getElementById('adminLoginOverlay');
             if (overlay && window.getComputedStyle(overlay).display !== 'none') {
@@ -1010,7 +1011,7 @@
             const uploadStatus = document.getElementById('uploadStatus');
 
             if (topBtn) topBtn.classList.add('loading');
-            if (textSpan) textSpan.innerText = 'กำลังซิงค์...';
+            if (textSpan) textSpan.innerText = 'ซิงค์...';
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 9000);
@@ -1060,7 +1061,7 @@
                     if (topBtn) topBtn.classList.remove('loading');
                     if (textSpan) {
                         const now = new Date();
-                        textSpan.innerText = now.toTimeString().split(' ')[0];
+                        textSpan.innerText = now.toTimeString().split(' ')[0].substring(0, 5);
                     }
                 });
         }
@@ -1286,6 +1287,68 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        /* ฟังก์ชัน Export ข้อมูลเป็น Excel แยกชีต เช้า-เย็น */
+        function exportAttendanceToExcel() {
+            if (!allGuestsList || allGuestsList.length === 0) {
+                alert("⚠️ ยังไม่มีข้อมูลพนักงานสำหรับ Export กรุณากดปุ่ม ซิงค์ ก่อนครับ");
+                return;
+            }
+
+            const morningData = allGuestsList.map(g => ({
+                "รหัสพนักงาน": g.id ? g.id.toString() : "",
+                "ชื่อ-นามสกุล": g.name || "",
+                "สาขา / แผนก": g.branch || "",
+                "สถานะรอบเช้า": g.hasMorning ? "✅ เช็คอินแล้ว" : "❌ ยังไม่มา",
+                "เวลาที่เช็คอิน (เช้า)": g.hasMorning && g.morningTime ? g.morningTime : "-"
+            }));
+
+            const eveningData = allGuestsList.map(g => ({
+                "รหัสพนักงาน": g.id ? g.id.toString() : "",
+                "ชื่อ-นามสกุล": g.name || "",
+                "สาขา / แผนก": g.branch || "",
+                "สถานะรอบเย็น": g.hasEvening ? "✅ เช็คอินแล้ว" : "❌ ยังไม่มา",
+                "เวลาที่เช็คอิน (เย็น)": g.hasEvening && g.eveningTime ? g.eveningTime : "-"
+            }));
+
+            const summaryData = allGuestsList.map(g => ({
+                "รหัสพนักงาน": g.id ? g.id.toString() : "",
+                "ชื่อ-นามสกุล": g.name || "",
+                "สาขา / แผนก": g.branch || "",
+                "รอบเช้า": g.hasMorning ? "✅ มา" : "❌ ขาด",
+                "เวลาเช็คอินเช้า": g.hasMorning && g.morningTime ? g.morningTime : "-",
+                "รอบเย็น": g.hasEvening ? "✅ มา" : "❌ ขาด",
+                "เวลาเช็คอินเย็น": g.hasEvening && g.eveningTime ? g.eveningTime : "-",
+                "สรุปการร่วมงาน": (g.hasMorning && g.hasEvening) ? "⭐ ครบทั้ง 2 รอบ" : (g.hasMorning ? "☀️ รอบเช้าเท่านั้น" : (g.hasEvening ? "🌙 รอบเย็นเท่านั้น" : "❌ ไม่ได้มาร่วมงาน"))
+            }));
+
+            const wb = XLSX.utils.book_new();
+
+            const wsMorning = XLSX.utils.json_to_sheet(morningData);
+            const wsEvening = XLSX.utils.json_to_sheet(eveningData);
+            const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+
+            const colWidths = [
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 22 },
+                { wch: 18 },
+                { wch: 22 },
+                { wch: 18 },
+                { wch: 22 },
+                { wch: 20 }
+            ];
+            wsMorning['!cols'] = colWidths;
+            wsEvening['!cols'] = colWidths;
+            wsSummary['!cols'] = colWidths;
+
+            XLSX.utils.book_append_sheet(wb, wsMorning, "รอบเช้า (07.00-09.30)");
+            XLSX.utils.book_append_sheet(wb, wsEvening, "รอบเย็น (14.00 เป็นต้นไป)");
+            XLSX.utils.book_append_sheet(wb, wsSummary, "สรุปภาพรวมทั้งหมด");
+
+            const today = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `รายงานผู้เข้างาน_CLT_Party_${today}.xlsx`);
         }
 
         function setTotalManually() {
@@ -1654,7 +1717,7 @@
             }
         }
 
-        /* ---------- ตรวจสอบ Dynamic QR หรือ Static บัตรกระดาษ ---------- */
+        /* ---------- ตรวจสอบ Dynamic QR หรือ Static บัตรกระดาษ (ตัดปัญหาแคปจอแล้วซ้ำ) ---------- */
         function processQRCode(decodedText) {
             if (isProcessing || !decodedText) return;
 
@@ -1669,7 +1732,7 @@
                 return;
             }
 
-            const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|")[1];
+            const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|");
             const decodedString = decodeBase64ToThai(base64Data);
 
             if (!decodedString) {
@@ -1683,20 +1746,27 @@
             const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
             const timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
 
-            // ตรวจสอบเวลาถ้าเป็น Dynamic QR จากมือถือ (หมดอายุใน 60 วินาที ป้องกันการแคปจอ)
-            if (isLiveMobile && timestamp) {
+            // ตรวจสอบเวลาถ้าเป็น Dynamic QR จากมือถือ
+            if (isLiveMobile) {
+                if (!timestamp) {
+                    showError("❌ <b>ข้อมูล QR ไม่สมบูรณ์</b><br><small>กรุณาเปิดจากหน้าจอแอปตัวจริง</small>");
+                    return; // ตัดการทำงานทันที ไม่ส่งคำสั่งลงชีต
+                }
+
                 const now = Date.now();
                 const diffSeconds = (now - timestamp) / 1000;
                 
+                // ถ้ารหัสเกิน 60 วินาที หรือเวลาเครื่องเพี้ยน ให้แจ้งเตือนและหยุดทันที
                 if (diffSeconds > 60 || diffSeconds < -30) {
-                    showError("❌ <b>QR Code หมดอายุแล้ว!</b><br><span style='font-size:14px; color:#ffd700;'>(ตรวจพบว่าเป็นภาพแคปหน้าจอ กรุณาเปิดจากในแอปตัวจริง)</span>");
-                    return;
+                    showError("❌ <b>QR Code หมดอายุแล้ว!</b><br><span style='font-size:14px; color:#ffd700;'>(ตรวจพบว่าเป็นภาพแคปหน้าจอ ไม่อนุญาตให้ลงทะเบียน)</span>");
+                    return; // หยุดทันที ห้ามรัน fetch ด้านล่าง
                 }
             }
 
             isProcessing = true;
             resultDiv.innerHTML = `⏳ กำลังตรวจสอบและบันทึก: <b>${empName}</b>...`;
-            resultDiv.style.backgroundColor = "#ffc107"; resultDiv.style.color = "black";
+            resultDiv.style.backgroundColor = "#ffc107"; 
+            resultDiv.style.color = "black";
             
             const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}`;
 
@@ -1706,7 +1776,8 @@
                     if(data.status === "success") {
                         scannedGuests.add(empId); 
                         resultDiv.innerHTML = `✅ ยินดีต้อนรับ!<br><span style="font-size:28px;">${empName}</span><br><span style="color:#000; font-size:16px; background:#ffd700; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:5px;">(ลงทะเบียน<b>${data.round}</b>สำเร็จ)</span><br><small>${empBranch} (${empId})</small>`;
-                        resultDiv.style.backgroundColor = "#00C851"; resultDiv.style.color = "white";
+                        resultDiv.style.backgroundColor = "#00C851"; 
+                        resultDiv.style.color = "white";
                     } 
                     else if (data.status === "duplicate") { 
                         scannedGuests.add(empId); 
@@ -1761,7 +1832,8 @@
         function showError(msg) {
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = msg;
-            resultDiv.style.backgroundColor = "#ff5252"; resultDiv.style.color = "white";
+            resultDiv.style.backgroundColor = "#ff5252"; 
+            resultDiv.style.color = "white";
             isProcessing = true;
             setTimeout(() => { isProcessing = false; restoreFocus(); }, 2500); 
         }
