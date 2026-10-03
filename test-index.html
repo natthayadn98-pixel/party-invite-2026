@@ -23,6 +23,21 @@
             user-select: none;
         }
 
+        /* หน้าจอบล็อกค่าเริ่มต้น: แสดงทับบังทั้งหมดจนกว่าจะยืนยันว่าเป็น LINE */
+        #line-block-screen {
+            display: flex; /* แสดงตั้งแต่แรกเริ่ม */
+            position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
+            background: radial-gradient(circle, #0f172a 0%, #020617 100%); 
+            z-index: 99999999;
+            justify-content: center; align-items: center; padding: 20px;
+            touch-action: none;
+        }
+        .line-block-box {
+            background: #1e293b; border: 2.5px solid #06c755; border-radius: 26px;
+            padding: 35px 22px; text-align: center; color: #fff; max-width: 350px; width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
         .paper-wrinkle {
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06), transparent 60%),
@@ -36,6 +51,7 @@
         .envelope-wrapper { 
             position: relative; width: 88%; max-width: 350px; height: 230px; 
             cursor: pointer; margin: auto; perspective: 1000px;
+            display: none; /* ซ่อนไว้ก่อนจนกว่าจะตรวจพบว่าเป็น LINE */
         }
         
         .envelope-back { 
@@ -240,27 +256,25 @@
 
         /* ---------- ป๊อปอัปตรวจสอบและยืนยันข้อมูลพนักงาน (เด่นชัดบนมือถือ) ---------- */
         #confirm-identity-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(0, 0, 0, 0.85);
             z-index: 99999; justify-content: center; align-items: center; 
-            padding: 20px; font-family: 'Anakotmai', sans-serif;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            padding: 20px; box-sizing: border-box; backdrop-filter: blur(8px);
             animation: fadeIn 0.2s ease;
         }
         .confirm-card {
             background: #ffffff;
             border: 3px solid #f59e0b;
-            border-radius: 26px;
+            border-radius: 24px;
             padding: 24px 20px 20px;
             text-align: center;
             max-width: 330px;
             width: 100%;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
-            animation: bounceIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes bounceIn {
-            from { opacity: 0; transform: scale(0.6); }
+            from { opacity: 0; transform: scale(0.7); }
             to { opacity: 1; transform: scale(1); }
         }
 
@@ -330,38 +344,28 @@
             box-shadow: 0 15px 35px rgba(34, 197, 94, 0.25); 
             animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        #line-block-screen {
-            display: none;
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-            background: radial-gradient(circle, #0f172a 0%, #020617 100%); 
-            z-index: 9999999;
-            justify-content: center; align-items: center; padding: 20px;
-        }
-        .line-block-box {
-            background: #1e293b; border: 2px solid #06c755; border-radius: 24px;
-            padding: 35px 22px; text-align: center; color: #fff; max-width: 350px; width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
     </style>
 </head>
 <body>
 
-    <!-- บล็อกการเปิดจากเบราว์เซอร์ภายนอก -->
+    <!-- หน้าจอบล็อก: ปรากฏทันทีเป็นค่าเริ่มต้นเพื่อป้องกันเบราว์เซอร์อื่น -->
     <div id="line-block-screen">
         <div class="line-block-box">
-            <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
+            <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2.5px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
                 💬
             </div>
             <h2 style="color: #06c755; margin: 0 0 10px; font-size: 20px; font-weight: bold;">กรุณาเปิดผ่านแอป LINE</h2>
-            <p style="color: #94a3b8; font-size: 13.5px; line-height: 1.6; margin-bottom: 20px;">
+            <p style="color: #cbd5e1; font-size: 13.5px; line-height: 1.6; margin-bottom: 15px;">
                 เพื่อความปลอดภัยและการยืนยันสิทธิ์เข้าร่วมงานเลี้ยง ระบบอนุญาตให้เปิดผ่าน <b>แอปพลิเคชัน LINE</b> เท่านั้น<br>
-                <small style="color:#ef4444;">(กรุณาสแกน QR Code เพื่อเปิดใน LINE โดยตรง)</small>
+                <small style="color:#f87171;">(ไม่อนุญาตให้เปิดผ่าน Safari, Chrome หรือเบราว์เซอร์ภายนอก)</small>
             </p>
+            <div style="background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.2); padding: 10px; border-radius: 12px; font-size: 12px; color: #94a3b8;">
+                📌 กรุณาแตะลิงก์หรือสแกน QR Code จากในห้องแชท LINE โดยตรง
+            </div>
         </div>
     </div>
 
-    <!-- การ์ดเชิญ -->
+    <!-- การ์ดเชิญ (ซ่อนไว้จนกว่าจะยืนยันว่าเปิดจาก LINE) -->
     <div class="envelope-wrapper" id="envelopeWrapper" onclick="toggleEnvelope()">
         <div class="envelope-back paper-wrinkle"></div>
         <div class="flap-left paper-wrinkle"></div>
@@ -436,54 +440,553 @@
                 <div class="pin-btn" onclick="pressPin('2')">2</div>
                 <div class="pin-btn" onclick="pressPin('3')">3</div>
                 <div class="pin-btn" onclick="pressPin('4')">4</div>
-                <divนี่คือแนวทางการปรับปรุงไฟล์ **`index.html`** ให้มีหน้าต่างยืนยันตัวตนก่อนการบันทึกสิทธิ์ลงเครื่อง เพื่อป้องกันปัญหาพนักงานกดรหัสผิดพลาดได้อย่างสมบูรณ์
+                <div class="pin-btn" onclick="pressPin('5')">5</div>
+                <div class="pin-btn" onclick="pressPin('6')">6</div>
+                <div class="pin-btn" onclick="pressPin('7')">7</div>
+                <div class="pin-btn" onclick="pressPin('8')">8</div>
+                <div class="pin-btn" onclick="pressPin('9')">9</div>
+                <div style="width:62px; height:62px;"></div>
+                <div class="pin-btn" onclick="pressPin('0')">0</div>
+                <div class="pin-btn backspace" onclick="pressBackspace()">⌫</div>
+            </div>
 
----
-
-### จุดสำคัญที่เพิ่มเข้ามาในระบบ
-
-1. **ขั้นตอนการยืนยันตัวตน (Double Check Modal)**  
-   เมื่อกรอกรหัสพนักงานครบ 6 หลัก ระบบจะไม่บันทึกรหัสลงใน `localStorage` ในทันที แต่จะแสดงกล่องแจ้งเตือนขนาดใหญ่กลางหน้าจอ พร้อมระบุ **รหัสพนักงาน, ชื่อ-นามสกุล, และสาขา/แผนก** อย่างชัดเจน เพื่อให้ผู้ใช้งานตรวจสอบความถูกต้อง
-
-2. **ข้อความเตือนให้ตรวจทาน**  
-   มีแถบเตือนสีส้ม-แดงระบุชัดเจนว่า *"กรุณาตรวจสอบรหัสพนักงานและชื่อ-นามสกุลให้ถูกต้องก่อนยืนยัน"*
-
-3. **ทางเลือกแก้ไขข้อมูลได้ทันที**  
-   * **ปุ่มยืนยัน:** เมื่อกดยืนยัน ระบบจึงจะผูกข้อมูลลงในหน่วยความจำของเครื่อง และแสดง Dynamic QR Code สำหรับเข้างาน
-   * **ปุ่มยกเลิก/กรอกใหม่:** หากพบว่าไม่ใช่ชื่อของตนเอง สามารถกดเพื่อล้างข้อมูลและเปิดแป้นพิมพ์ให้กรอกใหม่ได้ทันทีโดยไม่ถูกล็อกเครื่อง
-
----
-
-### โครงสร้างโค้ดส่วนที่เพิ่มใน `index.html`
-
-#### 1. ส่วนของหน้าต่างยืนยันตัวตน (วางถัดจากโมดอล PIN PAD)
-
-```html
-<!-- กล่องตรวจสอบความถูกต้องก่อนบันทึกสิทธิ์ -->
-<div id="confirm-identity-modal" style="display: none; position: fixed; inset: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); z-index: 99999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(8px);">
-    <div style="background: #ffffff; border: 3px solid #f59e0b; border-radius: 24px; padding: 24px 20px; text-align: center; max-width: 330px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
-        <div style="width: 58px; height: 58px; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 12px; font-size: 26px;">
-            👤
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                <span style="color:#64748b; font-size:12px;">CLT Security</span>
+                <button class="pin-cancel-btn" onclick="closePinModal()">Cancel</button>
+            </div>
         </div>
-        
-        <h3 style="color: #92400e; font-size: 18px; margin: 0 0 6px; font-weight: bold;">โปรดตรวจสอบข้อมูล</h3>
-        <p style="color: #dc2626; font-size: 13px; font-weight: bold; background: #fee2e2; border: 1px dashed #ef4444; padding: 8px 10px; border-radius: 10px; margin: 0 0 14px; line-height: 1.4;">
-            ⚠️ กรุณาตรวจสอบเลขและชื่อ-สกุลว่าถูกต้องหรือไม่ ก่อนกดยืนยันการลงทะเบียน
-        </p>
-
-        <!-- แสดงข้อมูลพนักงานที่ค้นพบ -->
-        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; text-align: left; font-size: 14px; line-height: 1.7; margin-bottom: 18px; color: #1e293b;">
-            <div>🔢 <b>รหัสพนักงาน:</b> <span id="conf-emp-id" style="color:#d97706; font-size:16px; font-weight:bold;">-</span></div>
-            <div>👤 <b>ชื่อ-สกุล:</b> <span id="conf-emp-name" style="color:#0f172a; font-weight:bold;">-</span></div>
-            <div>🏢 <b>สาขา/แผนก:</b> <span id="conf-emp-branch" style="color:#64748b;">-</span></div>
-        </div>
-
-        <button onclick="confirmAndProceedCheckIn()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; width: 100%; padding: 13px 0; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
-            ✅ ข้อมูลถูกต้อง ยืนยันการลงทะเบียน
-        </button>
-        
-        <button onclick="cancelIdentityConfirm()" style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; width: 100%; padding: 10px 0; border-radius: 25px; font-size: 13.5px; font-weight: bold; cursor: pointer;">
-            ❌ ไม่ใช่ฉัน / กรอกใหม่
-        </button>
     </div>
-</div>
+
+    <!-- ป๊อปอัปตรวจสอบและยืนยันข้อมูลพนักงาน (เด่นชัดบนมือถือ) -->
+    <div id="confirm-identity-modal">
+        <div class="confirm-card">
+            <div style="width: 58px; height: 58px; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 12px; font-size: 26px;">
+                👤
+            </div>
+            
+            <h3 style="color: #92400e; font-size: 18px; margin: 0 0 6px; font-weight: bold;">โปรดตรวจสอบข้อมูล</h3>
+            <p style="color: #dc2626; font-size: 13px; font-weight: bold; background: #fee2e2; border: 1px dashed #ef4444; padding: 8px 10px; border-radius: 10px; margin: 0 0 14px; line-height: 1.4;">
+                ⚠️ รบกวนตรวจสอบเลขและชื่อ-สกุลว่าถูกต้องไหม ก่อนกดยืนยันการลงทะเบียน
+            </p>
+
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; text-align: left; font-size: 14px; line-height: 1.7; margin-bottom: 18px; color: #1e293b;">
+                <div>🔢 <b>รหัสพนักงาน:</b> <span id="conf-emp-id" style="color:#d97706; font-size:16px; font-weight:bold;">-</span></div>
+                <div>👤 <b>ชื่อ-สกุล:</b> <span id="conf-emp-name" style="color:#0f172a; font-weight:bold;">-</span></div>
+                <div>🏢 <b>สาขา/แผนก:</b> <span id="conf-emp-branch" style="color:#64748b;">-</span></div>
+            </div>
+
+            <button onclick="confirmAndProceedCheckIn()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; width: 100%; padding: 13px 0; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); font-family: 'Anakotmai', sans-serif;">
+                ✅ ข้อมูลถูกต้อง ยืนยันการลงทะเบียน
+            </button>
+            
+            <button onclick="cancelIdentityConfirm()" style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; width: 100%; padding: 10px 0; border-radius: 25px; font-size: 13.5px; font-weight: bold; cursor: pointer; font-family: 'Anakotmai', sans-serif;">
+                ❌ ไม่ใช่ฉัน / กรอกใหม่
+            </button>
+        </div>
+    </div>
+
+    <!-- ป๊อปอัป QR Code ประจำตัว (Dynamic Auto-Refresh ป้องกันการแคปจอ) -->
+    <div id="qr-modal" onclick="closeModal()">
+        <div class="qr-card-box" onclick="event.stopPropagation()">
+            <div class="scan-status-pill">
+                <span class="radar-dot"></span>
+                <span>รอเจ้าหน้าที่สแกนเข้างาน...</span>
+            </div>
+            
+            <div id="current-round-badge" class="round-badge">📍 ลงทะเบียนรอบเช้า</div>
+
+            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 0 auto; position: relative; width: 210px; height: 210px;"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-top: 8px;">
+                <span>🔄 อัปเดตใน: <b id="qr-countdown-text" style="color:#059669;">45s</b></span>
+                <span>⏱️ <b id="qr-live-clock" style="color:#334155;">--:--:--</b></span>
+            </div>
+            <div class="qr-progress-bar-bg">
+                <div class="qr-progress-bar-fill" id="qr-progress-bar"></div>
+            </div>
+
+            <div id="personal-info" style="font-size: 13.5px; color: #222; margin: 4px 0 12px; line-height: 1.4; font-weight: bold;"></div>
+            
+            <button onclick="closeModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-family: 'Anakotmai', sans-serif; cursor: pointer; font-size: 13px; width: 100%;">
+                ปิดหน้าจอ
+            </button>
+        </div>
+    </div>
+
+    <!-- ป๊อปอัปแจ้งผลการลงทะเบียนสำเร็จ -->
+    <div id="checkin-success-modal">
+        <div class="success-box">
+            <div style="width: 70px; height: 70px; background: rgba(34, 197, 94, 0.15); border: 3px solid #22c55e; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px; color: #22c55e;">
+                ✓
+            </div>
+            
+            <h2 style="color: #22c55e; margin: 0 0 6px; font-size: 22px; font-weight: bold;">ลงทะเบียนเรียบร้อยแล้ว!</h2>
+            <p style="color: #94a3b8; font-size: 13.5px; margin: 0 0 18px;">ระบบได้บันทึกการเข้างานเรียบร้อยแล้ว</p>
+            
+            <div style="background: rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; font-size: 14px; text-align: left; line-height: 1.6; margin-bottom: 22px; border: 1px solid rgba(255,255,255,0.1);">
+                <div>👤 <b>ชื่อ-นามสกุล:</b> <span id="res-guest-name" style="color:#ffd700;">-</span></div>
+                <div>🏢 <b>สาขา:</b> <span id="res-guest-branch">-</span></div>
+                <div>⏰ <b>รอบที่ลงทะเบียน:</b> <span id="res-guest-round" style="color:#22c55e; font-weight:bold;">-</span></div>
+            </div>
+
+            <button onclick="closeSuccessModal()" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #fff; border: none; padding: 12px 30px; border-radius: 25px; font-size: 15px; font-weight: bold; font-family: 'Anakotmai', sans-serif; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);">
+                🎉 เข้าสู่งานเลี้ยง
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbxwf4GF2ebnkN_qg6T8C3pfF9k0PTqUDLFAHWywGHhRm1OQffUMtHIEsKBu0Qci9yv_Zg/exec";
+        let cachedGuests = [];
+        let pollingTimer = null;
+        let dynamicQrInterval = null;
+        let clockTimer = null;
+        let wakeLock = null;
+        let currentPin = "";
+        let pendingGuestData = null; // เก็บข้อมูลรอการตรวจสอบและกดยืนยัน
+        
+        let morningChecked = false;
+        let eveningChecked = false;
+
+        const QR_REFRESH_SECONDS = 45;
+        let remainingSeconds = QR_REFRESH_SECONDS;
+
+        /* ---------- ตรวจสอบการเปิดผ่าน LINE (เข้มงวด) ---------- */
+        function checkIsLineApp() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+            // ตรวจหาคำว่า Line หรือ Line/ ใน User Agent ของ iOS และ Android
+            const isLine = /Line\//i.test(ua) || /Line/i.test(ua);
+
+            if (!isLine) {
+                // หากไม่ได้เปิดจาก LINE ให้แสดงหน้าจอบล็อกค้างไว้ และไม่แสดงการ์ดเชิญ
+                document.getElementById('line-block-screen').style.display = 'flex';
+                document.getElementById('envelopeWrapper').style.display = 'none';
+                return false;
+            }
+
+            // ถ้าเปิดจาก LINE ให้ซ่อนหน้าจอบล็อก และเปิดการ์ดเชิญขึ้นมา
+            document.getElementById('line-block-screen').style.display = 'none';
+            document.getElementById('envelopeWrapper').style.display = 'block';
+            return true;
+        }
+
+        /* ---------- ตรวจสอบรอบเวลาการลงทะเบียน ---------- */
+        function checkCurrentSession() {
+            const now = new Date();
+            const minutesNow = now.getHours() * 60 + now.getMinutes();
+
+            const morningStart = 7 * 60;      // 07:00 น.
+            const morningEnd   = 9 * 60 + 30; // 09:30 น.
+            const eveningStart = 14 * 60;     // 14:00 น.
+
+            if (minutesNow < morningStart) {
+                return { active: false, msg: "⏰ ระบบยังไม่เปิดให้แสดง QR Code\nจะเปิดลงทะเบียนรอบเช้าเวลา 07:00 - 09:30 น." };
+            }
+            if (minutesNow >= morningStart && minutesNow <= morningEnd) {
+                return { active: true, round: "รอบเช้า" };
+            }
+            if (minutesNow > morningEnd && minutesNow < eveningStart) {
+                return { active: false, msg: "⏸️️ หมดเวลาลงทะเบียนรอบเช้าแล้ว\nระบบจะเปิดให้สแกนรอบเย็นเวลา 14:00 น. เป็นต้นไป" };
+            }
+            if (minutesNow >= eveningStart) {
+                return { active: true, round: "รอบเย็น" };
+            }
+
+            return { active: false, msg: "ไม่อยู่ในช่วงเวลาการลงทะเบียน" };
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLine = checkIsLineApp();
+            if (!isLine) return;
+
+            checkDeviceLockInLine();
+
+            // โหลดรายชื่อแบบเบื้องหลัง
+            setTimeout(() => {
+                fetch(scriptUrl + "?action=getGuests&t=" + Date.now())
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success" && data.guests) {
+                            cachedGuests = data.guests.map(g => ({
+                                id: g.id.toString().trim(),
+                                name: g.name.toString().trim(),
+                                branch: g.branch.toString().trim()
+                            }));
+                        }
+                    })
+                    .catch(() => {});
+            }, 100);
+        });
+
+        function checkDeviceLockInLine() {
+            const boundEmpId = localStorage.getItem("clt_line_empid");
+            const boundEmpName = localStorage.getItem("clt_line_name");
+            const resetBtnBox = document.getElementById("userResetBtnBox");
+            const resetCount = parseInt(localStorage.getItem("clt_reset_count") || "0", 10);
+
+            if (!boundEmpId) {
+                if (resetBtnBox) resetBtnBox.style.display = "none";
+                return;
+            }
+
+            const btn = document.getElementById('btnOpenPinModal');
+            const label = document.getElementById('inputLabelText');
+            const session = checkCurrentSession();
+
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.isReset === true) {
+                        localStorage.removeItem("clt_line_empid");
+                        localStorage.removeItem("clt_line_name");
+                        localStorage.removeItem("clt_reset_count");
+                        alert("🔔 เจ้าหน้าที่แอดมินได้ทำการปลดล็อกเครื่องให้คุณแล้ว กรุณากรอกรหัสพนักงานใหม่อีกครั้งครับ");
+                        const cleanUrl = window.location.href.split('?')[0];
+                        window.location.replace(cleanUrl + "?t=" + Date.now());
+                        return;
+                    }
+
+                    morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                    eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                    if (!morningChecked && !eveningChecked && resetCount < 1) {
+                        if (resetBtnBox) resetBtnBox.style.display = "block";
+                    } else {
+                        if (resetBtnBox) resetBtnBox.style.display = "none";
+                    }
+
+                    if (morningChecked && eveningChecked) {
+                        label.innerHTML = `🔒 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#e11d48; font-size:11.5px; font-weight:bold;">✨ เช็คอินครบทั้งรอบเช้าและรอบเย็นแล้ว</span>`;
+                        btn.innerText = "🔒 เช็คอินครบทุกรอบแล้ว";
+                        btn.classList.add("locked");
+                    } else if (session.active && session.round === "รอบเช้า" && morningChecked) {
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✅ เช็คอินรอบเช้าแล้ว (รอเปิดรอบเย็น 14:00 น.)</span>`;
+                        btn.innerText = "✅ เช็คอินรอบเช้าเรียบร้อยแล้ว";
+                        btn.classList.add("locked");
+                    } else if (session.active && session.round === "รอบเย็น" && eveningChecked) {
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✅ เช็คอินรอบเย็นเรียบร้อยแล้ว</span>`;
+                        btn.innerText = "✅ เช็คอินรอบเย็นเรียบร้อยแล้ว";
+                        btn.classList.add("locked");
+                    } else {
+                        const roundTitle = session.active ? session.round : "บัตรเข้างาน";
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#0284c7; font-size:11.5px; font-weight:bold;">🎟️ พร้อมแสดงบัตรเข้างาน (${roundTitle})</span>`;
+                        btn.innerText = `🎟️ แสดง QR Code (${roundTitle})`;
+                        btn.classList.remove("locked");
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function resetDeviceBindingSelf() {
+            if (morningChecked || eveningChecked) {
+                alert("❌ เครื่องนี้ได้ทำการเช็คอินเข้างานไปแล้ว ไม่สามารถเปลี่ยนรหัสได้ กรุณาติดต่อแอดมิน");
+                return;
+            }
+
+            localStorage.removeItem("clt_line_empid");
+            localStorage.removeItem("clt_line_name");
+            localStorage.removeItem("clt_reset_count");
+            sessionStorage.clear();
+
+            alert("✅ ปลดล็อกเครื่องเรียบร้อยแล้ว กรุณากรอกรหัสพนักงานใหม่ครับ");
+
+            const cleanUrl = window.location.href.split('?')[0];
+            window.location.replace(cleanUrl + "?t=" + Date.now());
+        }
+
+        function toggleEnvelope() {
+            document.getElementById('envelopeWrapper').classList.toggle('open');
+        }
+
+        function handleCloseClick(e) {
+            toggleEnvelope();
+        }
+
+        /* ---------- ระบบ PIN PAD 6 หลัก ---------- */
+        function openPinModal(event) {
+            if (event) event.stopPropagation();
+
+            const session = checkCurrentSession();
+            if (!session.active) {
+                alert(session.msg);
+                return;
+            }
+
+            const boundEmpId = localStorage.getItem("clt_line_empid");
+
+            if (morningChecked && eveningChecked) {
+                alert("❌ เครื่องนี้ได้ทำการเช็คอินครบทั้งรอบเช้าและรอบเย็นแล้วครับ");
+                return;
+            }
+
+            if ((session.round === "รอบเช้า" && morningChecked) || (session.round === "รอบเย็น" && eveningChecked)) {
+                alert(`✅ รหัสนี้ได้ทำการเช็คอิน ${session.round} เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำในรอบเดียวกันครับ`);
+                return;
+            }
+
+            if (boundEmpId) {
+                const guest = cachedGuests.find(g => g.id.toLowerCase() === boundEmpId.toLowerCase());
+                if (guest) startDynamicQRDisplay(guest, session.round);
+                return;
+            }
+
+            currentPin = "";
+            updatePinDots();
+            document.getElementById('pin-modal').style.display = 'flex';
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').style.display = 'none';
+            currentPin = "";
+            updatePinDots();
+        }
+
+        function hapticTouch() {
+            if ("vibrate" in navigator) navigator.vibrate(15);
+        }
+
+        function pressPin(digit) {
+            hapticTouch();
+            if (currentPin.length < 6) {
+                currentPin += digit;
+                updatePinDots();
+
+                // เมื่อกรอกตัวเลขครบ 6 หลัก ให้เด้งหน้าต่างตรวจสอบความถูกต้องก่อนเสมอ
+                if (currentPin.length === 6) {
+                    setTimeout(() => {
+                        const pinToSubmit = currentPin;
+                        closePinModal();
+                        const session = checkCurrentSession();
+                        verifyGuestIdentityBeforeLock(pinToSubmit, session.round || "รอบเช้า");
+                    }, 250);
+                }
+            }
+        }
+
+        function pressBackspace() {
+            hapticTouch();
+            if (currentPin.length > 0) {
+                currentPin = currentPin.slice(0, -1);
+                updatePinDots();
+            }
+        }
+
+        function updatePinDots() {
+            for (let i = 0; i < 6; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i < currentPin.length) {
+                    dot.innerText = currentPin[i];
+                    dot.classList.add('filled');
+                } else {
+                    dot.innerText = "";
+                    dot.classList.remove('filled');
+                }
+            }
+        }
+
+        /* ---------- ระบบตรวจสอบและยืนยันข้อมูลพนักงาน (เด่นชัดบนมือถือ) ---------- */
+        function verifyGuestIdentityBeforeLock(empId, activeRound) {
+            const guest = cachedGuests.find(g => g.id.toLowerCase() === empId.toLowerCase());
+            if (!guest) {
+                alert(`❌ ไม่พบรหัสพนักงาน "${empId}" ในระบบ\nกรุณาตรวจสอบรหัสใหม่อีกครั้งครับ`);
+                openPinModal();
+                return;
+            }
+
+            pendingGuestData = {
+                guest: guest,
+                activeRound: activeRound
+            };
+
+            // แสดงข้อมูลในกล่องตรวจสอบตัวตน
+            document.getElementById("conf-emp-id").innerText = guest.id;
+            document.getElementById("conf-emp-name").innerText = guest.name;
+            document.getElementById("conf-emp-branch").innerText = guest.branch;
+
+            // แสดงหน้าต่างยืนยันกลางจอ
+            document.getElementById("confirm-identity-modal").style.display = "flex";
+        }
+
+        function confirmAndProceedCheckIn() {
+            if (!pendingGuestData) return;
+            
+            const guest = pendingGuestData.guest;
+            const activeRound = pendingGuestData.activeRound;
+            
+            document.getElementById("confirm-identity-modal").style.display = "none";
+
+            const btn = document.getElementById('btnOpenPinModal');
+            btn.innerText = "⏳ กำลังตรวจสอบสิทธิ์...";
+            btn.disabled = true;
+
+            fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(guest.id)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(res => {
+                    btn.disabled = false;
+                    btn.innerText = `🎟️ แสดง QR Code (${activeRound})`;
+
+                    morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                    eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                    if ((activeRound === "รอบเช้า" && morningChecked) || (activeRound === "รอบเย็น" && eveningChecked)) {
+                        alert(`❌ รหัสพนักงานนี้ (${guest.name}) ได้ทำการเช็คอิน "${activeRound}" เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำในรอบเดียวกัน`);
+                        checkDeviceLockInLine();
+                        return;
+                    }
+
+                    // ผูกรหัสเข้ากับเครื่องหลังจากที่กดยืนยันแล้วเท่านั้น
+                    localStorage.setItem("clt_line_empid", guest.id);
+                    localStorage.setItem("clt_line_name", guest.name);
+                    checkDeviceLockInLine();
+
+                    startDynamicQRDisplay(guest, activeRound);
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = `🎟️ แสดง QR Code (${activeRound})`;
+                    localStorage.setItem("clt_line_empid", guest.id);
+                    localStorage.setItem("clt_line_name", guest.name);
+                    startDynamicQRDisplay(guest, activeRound);
+                });
+        }
+
+        function cancelIdentityConfirm() {
+            document.getElementById("confirm-identity-modal").style.display = "none";
+            pendingGuestData = null;
+            currentPin = "";
+            updatePinDots();
+            openPinModal(); // เปิดแป้นตัวเลขให้กรอกใหม่ทันที
+        }
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+            } catch (err) {}
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) wakeLock.release().then(() => { wakeLock = null; });
+        }
+
+        /* ---------- Dynamic QR Code: รีเฟรชทุก 45 วิ + นาฬิกาวินาทีสด ---------- */
+        function startDynamicQRDisplay(guest, activeRound) {
+            document.getElementById("qr-modal").style.display = "flex";
+            document.getElementById("current-round-badge").innerText = `📍 ลงทะเบียน${activeRound}`;
+            document.getElementById("personal-info").innerHTML = `รหัส: ${guest.id}<br>${guest.name}<br><span style="color:#64748b; font-size:12px;">${guest.branch}</span>`;
+            
+            requestWakeLock();
+            generateSingleDynamicQR(guest);
+
+            remainingSeconds = QR_REFRESH_SECONDS;
+            updateProgressBar();
+
+            if (dynamicQrInterval) clearInterval(dynamicQrInterval);
+            if (clockTimer) clearInterval(clockTimer);
+
+            clockTimer = setInterval(() => {
+                const now = new Date();
+                document.getElementById('qr-live-clock').innerText = now.toTimeString().split(' ')[0];
+
+                remainingSeconds--;
+                if (remainingSeconds <= 0) {
+                    remainingSeconds = QR_REFRESH_SECONDS;
+                    generateSingleDynamicQR(guest);
+                }
+                updateProgressBar();
+            }, 1000);
+
+            startListeningForCheckIn(guest.id, activeRound);
+        }
+
+        function updateProgressBar() {
+            const percent = (remainingSeconds / QR_REFRESH_SECONDS) * 100;
+            document.getElementById('qr-progress-bar').style.width = percent + "%";
+            document.getElementById('qr-countdown-text').innerText = remainingSeconds + "s";
+        }
+
+        function generateSingleDynamicQR(guest) {
+            const qrContainer = document.getElementById("personal-qrcode");
+            qrContainer.innerHTML = "";
+
+            const currentTs = Date.now();
+            const rawData = `${guest.id}|${guest.name}|${guest.branch}|${currentTs}`;
+            const encodedData = btoa(unescape(encodeURIComponent(rawData)));
+
+            new QRCode(qrContainer, { 
+                text: `VIPPARTY_LIVE|${encodedData}`, 
+                width: 210, height: 210, 
+                correctLevel : QRCode.CorrectLevel.H 
+            });
+
+            setTimeout(() => {
+                const logoWrapper = document.createElement("div");
+                logoWrapper.style.position = "absolute";
+                logoWrapper.style.top = "50%";
+                logoWrapper.style.left = "50%";
+                logoWrapper.style.transform = "translate(-50%, -50%)";
+                logoWrapper.style.width = "46px";
+                logoWrapper.style.height = "46px";
+                logoWrapper.style.backgroundColor = "white";
+                logoWrapper.style.borderRadius = "50%";
+                logoWrapper.style.display = "flex";
+                logoWrapper.style.justifyContent = "center";
+                logoWrapper.style.alignItems = "center";
+                logoWrapper.style.boxShadow = "0 0 6px rgba(0,0,0,0.25)";
+
+                const logoImg = document.createElement("img");
+                logoImg.src = "logo CLT (1)-01.png";
+                logoImg.style.width = "32px";
+                logoImg.style.height = "32px";
+                logoImg.style.objectFit = "contain";
+                
+                logoWrapper.appendChild(logoImg);
+                qrContainer.appendChild(logoWrapper);
+            }, 70);
+        }
+
+        function startListeningForCheckIn(empId, currentCheckingRound) {
+            if (pollingTimer) clearInterval(pollingTimer);
+
+            pollingTimer = setInterval(() => {
+                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${Date.now()}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        const isNowMorning = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                        const isNowEvening = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                        if ((currentCheckingRound === "รอบเช้า" && isNowMorning) || 
+                            (currentCheckingRound === "รอบเย็น" && isNowEvening)) {
+                            
+                            clearInterval(pollingTimer);
+                            closeModal();
+
+                            if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+
+                            morningChecked = isNowMorning;
+                            eveningChecked = isNowEvening;
+                            checkDeviceLockInLine();
+
+                            document.getElementById('res-guest-name').innerText = res.name;
+                            document.getElementById('res-guest-branch').innerText = res.branch;
+                            document.getElementById('res-guest-round').innerText = currentCheckingRound;
+                            document.getElementById('checkin-success-modal').style.display = 'flex';
+                        }
+                    })
+                    .catch(() => {});
+            }, 1500);
+        }
+
+        function closeModal() {
+            document.getElementById("qr-modal").style.display = "none";
+            if (pollingTimer) clearInterval(pollingTimer);
+            if (dynamicQrInterval) clearInterval(dynamicQrInterval);
+            if (clockTimer) clearInterval(clockTimer);
+            releaseWakeLock();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById("checkin-success-modal").style.display = "none";
+        }
+    </script>
+</body>
+</html>
