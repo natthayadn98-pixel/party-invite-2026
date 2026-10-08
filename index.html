@@ -25,7 +25,7 @@
 
         /* หน้าจอบล็อกค่าเริ่มต้น: แสดงทับบังทั้งหมดจนกว่าจะยืนยันว่าเป็น LINE */
         #line-block-screen {
-            display: flex; /* แสดงตั้งแต่แรกเริ่ม */
+            display: flex;
             position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: radial-gradient(circle, #0f172a 0%, #020617 100%); 
             z-index: 99999999;
@@ -51,7 +51,7 @@
         .envelope-wrapper { 
             position: relative; width: 88%; max-width: 350px; height: 230px; 
             cursor: pointer; margin: auto; perspective: 1000px;
-            display: none; /* ซ่อนไว้ก่อนจนกว่าจะตรวจพบว่าเป็น LINE */
+            display: none;
         }
         
         .envelope-back { 
@@ -254,7 +254,7 @@
             font-family: 'Anakotmai', sans-serif;
         }
 
-        /* ---------- ป๊อปอัปตรวจสอบและยืนยันข้อมูลพนักงาน (เด่นชัดบนมือถือ) ---------- */
+        /* ---------- ป๊อปอัปตรวจสอบและยืนยันข้อมูลพนักงาน ---------- */
         #confirm-identity-modal {
             display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(0, 0, 0, 0.85);
@@ -278,7 +278,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* ---------- ป๊อปอัป QR CODE แบบ Dynamic Auto-Refresh ---------- */
+        /* ---------- ป๊อปอัป QR CODE Dynamic Auto-Refresh ---------- */
         #qr-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: #ffffff !important;
@@ -348,7 +348,7 @@
 </head>
 <body>
 
-    <!-- หน้าจอบล็อก: ปรากฏทันทีเป็นค่าเริ่มต้นเพื่อป้องกันเบราว์เซอร์อื่น -->
+    <!-- หน้าจอบล็อก: แสดงทันทีหากเปิดผ่านเบราว์เซอร์อื่นที่ไม่ใช่ LINE -->
     <div id="line-block-screen">
         <div class="line-block-box">
             <div style="width: 70px; height: 70px; background: rgba(6, 199, 85, 0.15); border: 2.5px solid #06c755; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px; font-size: 34px;">
@@ -365,7 +365,7 @@
         </div>
     </div>
 
-    <!-- การ์ดเชิญ (ซ่อนไว้จนกว่าจะยืนยันว่าเปิดจาก LINE) -->
+    <!-- การ์ดเชิญ (เปิดแสดงเฉพาะใน LINE เท่านั้น) -->
     <div class="envelope-wrapper" id="envelopeWrapper" onclick="toggleEnvelope()">
         <div class="envelope-back paper-wrinkle"></div>
         <div class="flap-left paper-wrinkle"></div>
@@ -397,17 +397,10 @@
                         <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> ชุดกีฬา</p>
                     </div>
 
-                    <div id="deviceStatusBox" style="background: rgba(255,255,255,0.85); padding: 10px 12px; border-radius: 8px; border: 1.5px dashed #b8a68e; margin-bottom: 6px; text-align: center;">
+                    <div id="deviceStatusBox" style="background: rgba(255,255,255,0.85); padding: 12px 14px; border-radius: 8px; border: 1.5px dashed #b8a68e; margin-bottom: 6px; text-align: center;">
                         <span id="inputLabelText" style="font-size: 12.5px; color: #444;">
                             แตะปุ่มด้านล่างเพื่อ <b>กรอกรหัสพนักงาน 6 หลัก</b> แสดงบัตรเข้างาน
                         </span>
-                        
-                        <!-- ลิงก์ปลดล็อกเครื่อง -->
-                        <div id="userResetBtnBox" style="display: none; margin-top: 6px;">
-                            <a href="javascript:void(0)" onclick="resetDeviceBindingSelf()" style="color: #ea580c; font-size: 11.5px; text-decoration: underline; font-weight: bold; display: inline-block; padding: 4px;">
-                                🔄 กรอกผิด? แตะที่นี่เพื่อเปลี่ยนรหัสใหม่ (ทำได้ 1 ครั้ง)
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -554,17 +547,14 @@
         /* ---------- ตรวจสอบการเปิดผ่าน LINE (เข้มงวด) ---------- */
         function checkIsLineApp() {
             const ua = navigator.userAgent || navigator.vendor || window.opera || "";
-            // ตรวจหาคำว่า Line หรือ Line/ ใน User Agent ของ iOS และ Android
             const isLine = /Line\//i.test(ua) || /Line/i.test(ua);
 
             if (!isLine) {
-                // หากไม่ได้เปิดจาก LINE ให้แสดงหน้าจอบล็อกค้างไว้ และไม่แสดงการ์ดเชิญ
                 document.getElementById('line-block-screen').style.display = 'flex';
                 document.getElementById('envelopeWrapper').style.display = 'none';
                 return false;
             }
 
-            // ถ้าเปิดจาก LINE ให้ซ่อนหน้าจอบล็อก และเปิดการ์ดเชิญขึ้นมา
             document.getElementById('line-block-screen').style.display = 'none';
             document.getElementById('envelopeWrapper').style.display = 'block';
             return true;
@@ -586,7 +576,7 @@
                 return { active: true, round: "รอบเช้า" };
             }
             if (minutesNow > morningEnd && minutesNow < eveningStart) {
-                return { active: false, msg: "⏸️️ หมดเวลาลงทะเบียนรอบเช้าแล้ว\nระบบจะเปิดให้สแกนรอบเย็นเวลา 14:00 น. เป็นต้นไป" };
+                return { active: false, msg: "⏸ หมดเวลาลงทะเบียนรอบเช้าแล้ว\nระบบจะเปิดให้สแกนรอบเย็นเวลา 14:00 น. เป็นต้นไป" };
             }
             if (minutesNow >= eveningStart) {
                 return { active: true, round: "รอบเย็น" };
@@ -621,11 +611,8 @@
         function checkDeviceLockInLine() {
             const boundEmpId = localStorage.getItem("clt_line_empid");
             const boundEmpName = localStorage.getItem("clt_line_name");
-            const resetBtnBox = document.getElementById("userResetBtnBox");
-            const resetCount = parseInt(localStorage.getItem("clt_reset_count") || "0", 10);
 
             if (!boundEmpId) {
-                if (resetBtnBox) resetBtnBox.style.display = "none";
                 return;
             }
 
@@ -636,10 +623,10 @@
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
+                    // หากแอดมินกดสั่งปลดล็อกให้จากหน้า user.html
                     if (res.isReset === true) {
                         localStorage.removeItem("clt_line_empid");
                         localStorage.removeItem("clt_line_name");
-                        localStorage.removeItem("clt_reset_count");
                         alert("🔔 เจ้าหน้าที่แอดมินได้ทำการปลดล็อกเครื่องให้คุณแล้ว กรุณากรอกรหัสพนักงานใหม่อีกครั้งครับ");
                         const cleanUrl = window.location.href.split('?')[0];
                         window.location.replace(cleanUrl + "?t=" + Date.now());
@@ -648,12 +635,6 @@
 
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
                     eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
-
-                    if (!morningChecked && !eveningChecked && resetCount < 1) {
-                        if (resetBtnBox) resetBtnBox.style.display = "block";
-                    } else {
-                        if (resetBtnBox) resetBtnBox.style.display = "none";
-                    }
 
                     if (morningChecked && eveningChecked) {
                         label.innerHTML = `🔒 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#e11d48; font-size:11.5px; font-weight:bold;">✨ เช็คอินครบทั้งรอบเช้าและรอบเย็นแล้ว</span>`;
@@ -675,23 +656,6 @@
                     }
                 })
                 .catch(() => {});
-        }
-
-        function resetDeviceBindingSelf() {
-            if (morningChecked || eveningChecked) {
-                alert("❌ เครื่องนี้ได้ทำการเช็คอินเข้างานไปแล้ว ไม่สามารถเปลี่ยนรหัสได้ กรุณาติดต่อแอดมิน");
-                return;
-            }
-
-            localStorage.removeItem("clt_line_empid");
-            localStorage.removeItem("clt_line_name");
-            localStorage.removeItem("clt_reset_count");
-            sessionStorage.clear();
-
-            alert("✅ ปลดล็อกเครื่องเรียบร้อยแล้ว กรุณากรอกรหัสพนักงานใหม่ครับ");
-
-            const cleanUrl = window.location.href.split('?')[0];
-            window.location.replace(cleanUrl + "?t=" + Date.now());
         }
 
         function toggleEnvelope() {
@@ -784,7 +748,7 @@
             }
         }
 
-        /* ---------- ระบบตรวจสอบและยืนยันข้อมูลพนักงาน (เด่นชัดบนมือถือ) ---------- */
+        /* ---------- ระบบตรวจสอบและยืนยันข้อมูลพนักงาน ---------- */
         function verifyGuestIdentityBeforeLock(empId, activeRound) {
             const guest = cachedGuests.find(g => g.id.toLowerCase() === empId.toLowerCase());
             if (!guest) {
@@ -834,7 +798,7 @@
                         return;
                     }
 
-                    // ผูกรหัสเข้ากับเครื่องหลังจากที่กดยืนยันแล้วเท่านั้น
+                    // ผูกรหัสเข้ากับเครื่องหลังจากที่กดยืนยันแล้วเท่านั้น (แอดมินเป็นผู้ปลดล็อกเท่านั้น)
                     localStorage.setItem("clt_line_empid", guest.id);
                     localStorage.setItem("clt_line_name", guest.name);
                     checkDeviceLockInLine();
