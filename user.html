@@ -645,7 +645,7 @@
 
         <div class="container">
             
-            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ -->
+            <!-- แท็บสร้าง QR / เพิ่มคนใหม่ (พร้อมดักตรวจรหัสพนักงานซ้ำ) -->
             <div id="tab-single" class="tab-content active">
                 <h2 style="color: #ffd700; text-align: center; margin-bottom: 5px;">เพิ่มผู้เข้าร่วมใหม่ (Walk-in)</h2>
                 <p style="text-align: center; color: #aaa; margin-top: 0; margin-bottom: 20px;">กรอกข้อมูล แล้วเลือกสร้าง QR Code หรือ สั่งเช็คอินเข้างานทันที</p>
@@ -737,7 +737,7 @@
                 </div>
                 
                 <div id="hardware-section" class="scanner-box print-hide" style="display: none;">
-                    <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#ff6b6b;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
+                    <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#00e676;">(รองรับแป้นพิมพ์ทุกภาษาอัตโนมัติ ไม่ต้องกังวลเรื่องคีย์บอร์ดไทย/อังกฤษ)</small></p>
                     
                     <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 8px; border-radius: 6px; font-size: 12px; color: #ffeb3b; margin: 10px 0;">
                         ⚡ <b>โหมดสแกนความเร็วสูง:</b> รองรับการยิงต่อเนื่องแบบ Supermarket Speed (ระยะโฟกัสที่แนะนำ: 15-20 ซม.)
@@ -1362,13 +1362,13 @@
             document.getElementById("single-qr-output").style.display = "none";
         }
 
-            function processNewGuest(mode) {
+        /* ---------- เพิ่มผู้เข้าร่วมใหม่ (พร้อมตรวจรหัสพนักงานซ้ำ) ---------- */
+        function processNewGuest(mode) {
             const id = (document.getElementById("s_empId").value || "").trim();
             const name = document.getElementById("s_empName").value.trim();
             const branch = (document.getElementById("s_empBranch").value || "-").trim();
             const alertBox = document.getElementById("single-status-alert");
             
-            // 1. ตรวจสอบว่ากรอกข้อมูลจำเป็นครบไหม
             if (!id || id === "-") {
                 alert("⚠️ กรุณากรอกรหัสพนักงานครับ");
                 document.getElementById("s_empId").focus();
@@ -1380,17 +1380,16 @@
                 return; 
             }
 
-            // ⭐ 2. ตรวจสอบรหัสพนักงานซ้ำในระบบ (ตรวจจากแคชในเครื่องทันที 0.001 วิ)
+            // ⭐ ตรวจสอบรหัสพนักงานซ้ำในระบบทันที
             const existingGuest = allGuestsList.find(g => g.id.toLowerCase() === id.toLowerCase());
             if (existingGuest) {
                 alert(`❌ รหัสพนักงาน "${id}" มีอยู่ในระบบแล้ว!\n\n👤 ชื่อ: ${existingGuest.name}\n🏢 สาขา: ${existingGuest.branch}\n\n👉 กรุณาใช้แท็บ "🔍 ค้นหา (ไม่มี QR)" เพื่อเช็คอินแทนการเพิ่มใหม่ครับ`);
                 
                 alertBox.innerHTML = `⚠️ รหัสพนักงาน <b>"${id}"</b> มีในระบบแล้ว (${existingGuest.name})`;
                 alertBox.style.color = "#f59e0b";
-                return; // สั่งตัดจบ ไม่ให้บันทึกซ้ำ
+                return;
             }
 
-            // 3. ถ้าไม่ซ้ำ ให้เพิ่มเข้าระบบตามปกติ
             allGuestsList.push({ id: id, name: name, branch: branch, hasMorning: false, hasEvening: false, scanRound: "none" });
 
             fetch(`${scriptUrl}?action=addGuest&id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}&branch=${encodeURIComponent(branch)}`);
@@ -1399,7 +1398,7 @@
                 const qrContainer = document.getElementById("single-qrcode");
                 qrContainer.innerHTML = ""; 
                 
-                // ใช้ Payload ความเร็วสูง CLT| เพื่อความรวดเร็วในการสแกน
+                // Payload สปีดสูง
                 const currentTsSec = Math.floor(Date.now() / 1000);
                 new QRCode(qrContainer, { 
                     text: `CLT|${id}|${currentTsSec}`, 
@@ -1457,7 +1456,6 @@
                     });
             }
 
-            // ล้างช่องกรอกเพื่อความสะดวก
             document.getElementById("s_empId").value = "";
             document.getElementById("s_empName").value = "";
             document.getElementById("s_empBranch").value = "";
@@ -1595,6 +1593,7 @@
             document.getElementById('searchInput').focus();
         }
 
+        /* ---------- ค้นหารายชื่อและปุ่ม Admin Override เช็คอินคนมาสาย ---------- */
         function searchAttendee() {
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
             const list = document.getElementById('searchResults');
@@ -1625,26 +1624,75 @@
                 li.style.borderRadius = '8px';
                 li.style.borderLeft = '4px solid #ffd700';
                 
+                // ปุ่มแยกสำหรับแอดมิน: เช็คอินรอบเช้า (แม้จะเลยเวลา), เช็คอินรอบเย็น, และปลดล็อกเครื่อง
                 let btnHtml = `
-                    <div style="display: flex; gap: 6px;">
-                        <button class="action-btn" style="width: auto; padding: 7px 14px; font-size: 13px; margin: 0; background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); color: white;" onclick="manualCheckIn('${emp.id}', '${emp.name}', '${emp.branch}')">
-                            ✓ เข้างาน
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button class="action-btn" style="width: auto; padding: 6px 10px; font-size: 11.5px; margin: 0; background: ${emp.hasMorning ? '#475569' : '#eab308'}; color: ${emp.hasMorning ? '#94a3b8' : '#000'}; font-weight: bold;" 
+                            ${emp.hasMorning ? 'disabled' : ''} 
+                            onclick="manualCheckInWithRound('${emp.id}', '${emp.name}', '${emp.branch}', 'รอบเช้า')">
+                            ${emp.hasMorning ? '✓ เช้าแล้ว' : '☀️ เช้า (สาย)'}
                         </button>
-                        <button class="action-btn" style="width: auto; padding: 7px 12px; font-size: 13px; margin: 0; background: #f97316; color: white;" onclick="adminResetDevice('${emp.id}', '${emp.name}')">
-                            🔓 ปลดล็อกเครื่อง
+
+                        <button class="action-btn" style="width: auto; padding: 6px 10px; font-size: 11.5px; margin: 0; background: ${emp.hasEvening ? '#475569' : '#06b6d4'}; color: #fff; font-weight: bold;" 
+                            ${emp.hasEvening ? 'disabled' : ''} 
+                            onclick="manualCheckInWithRound('${emp.id}', '${emp.name}', '${emp.branch}', 'รอบเย็น')">
+                            ${emp.hasEvening ? '✓ เย็นแล้ว' : '🌙 เย็น'}
+                        </button>
+
+                        <button class="action-btn" style="width: auto; padding: 6px 9px; font-size: 11.5px; margin: 0; background: #f97316; color: white;" 
+                            onclick="adminResetDevice('${emp.id}', '${emp.name}')" title="ปลดล็อกเครื่องกรณีพนักงานกรอกผิด">
+                            🔓 ปลดล็อก
                         </button>
                     </div>
                 `;
 
                 li.innerHTML = `
-                    <div style="line-height: 1.4;">
-                        <b style="color:#ffd700;">${emp.name}</b> <span style="color:#aaa; font-size:14px;">(${emp.branch})</span><br>
+                    <div style="line-height: 1.4; text-align: left;">
+                        <b style="color:#ffd700;">${emp.name}</b> <span style="color:#aaa; font-size:12.5px;">(${emp.branch})</span><br>
                         <small style="color:#888;">รหัส: ${emp.id}</small>
                     </div>
                     <div>${btnHtml}</div>
                 `;
                 list.appendChild(li);
             });
+        }
+
+        /* ---------- ฟังก์ชันส่งคำสั่งเช็คอินแบบระบุรอบ (Admin Override) ---------- */
+        function manualCheckInWithRound(empId, empName, empBranch, targetRound) {
+            if (isProcessing) return;
+            empId = empId.trim();
+            
+            const alertBox = document.getElementById('search-alert');
+            alertBox.innerHTML = `⏳ กำลังบันทึก (${targetRound}): <span style="color:#ffd700">${empName}</span>...`;
+            isProcessing = true;
+
+            // ส่ง forceRound ไปยัง Apps Script เพื่อข้ามการตรวจเวลา
+            const fetchUrl = `${scriptUrl}?id=${encodeURIComponent(empId)}&name=${encodeURIComponent(empName)}&branch=${encodeURIComponent(empBranch)}&forceRound=${encodeURIComponent(targetRound)}`;
+
+            fetch(fetchUrl)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        scannedGuests.add(empId); 
+                        alertBox.innerHTML = `✅ บันทึก <span style="color:#00C851">${empName}</span> (${targetRound}) สำเร็จ!`;
+                        fastSync(false).then(() => searchAttendee());
+                    } 
+                    else if (data.status === "duplicate") { 
+                        scannedGuests.add(empId); 
+                        alertBox.innerHTML = `⚠️ <span style="color:#ff5252">${empName}</span> ได้ลงทะเบียนใน ${targetRound} ไปแล้ว`;
+                        searchAttendee(); 
+                    }
+                    else if (data.status === "out_of_time") {
+                        alertBox.innerHTML = `❌ <b>อยู่นอกเวลาสแกน!</b> <small>${data.message}</small>`;
+                    }
+                })
+                .catch(() => {
+                    alertBox.innerHTML = "❌ การเชื่อมต่อล้มเหลว กรุณาลองใหม่";
+                })
+                .finally(() => {
+                    setTimeout(() => { isProcessing = false; alertBox.innerHTML = ""; }, 3000); 
+                });
+        
         }
 
         function adminResetDevice(empId, empName) {
@@ -1728,66 +1776,81 @@
             }
         }
 
-        /* ---------- ระบบถอดรหัสความเร็วสูง รองรับทุกเครื่องยิงและแก้ปัญหาแป้นพิมพ์ ---------- */
-        function processQRCode(decodedText) {
-            if (isProcessing || !decodedText) return;
+        /* ---------- ฟังก์ชันแปลงแป้นพิมพ์ไทยเป็นอังกฤษอัตโนมัติ ---------- */
+        function convertThaiKeyboardToEnglish(input) {
+            if (!input) return "";
+            const keyMap = {
+                'ๅ':'1', '/':'2', '-':'3', 'ภ':'4', 'ถ':'5', 'ุ':'6', 'ึ':'7', 'ค':'8', 'ต':'9', 'จ':'0',
+                '+':'!', '๑':'@', '๒':'#', '๓':'$', '๔':'%', 'ู':'^', '฿':'&', '๕':'*', '๖':'(', '๗':')',
+                'ๆ':'q', 'ไ':'w', 'ำ':'e', 'พ':'r', 'ะ':'t', 'ั':'y', 'ี':'u', 'ร':'i', 'น':'o', 'ย':'p', 'บ':'[', 'ล':']',
+                'ฟ':'a', 'ห':'s', 'ก':'d', 'ด':'f', 'เ':'g', '้':'h', '่':'j', 'า':'k', 'ส':'l', 'ว':';', 'ง':'\'',
+                'ผ':'z', 'ป':'x', 'แ':'c', 'อ':'v', 'พ':'b', 'ิ':'n', 'ื':'m', 'ท':',', 'ม':'.', 'ใ':'/',
+                '๐':'Q', '\"':'W', 'ฎ':'E', 'ฑ':'R', 'ธ':'T', 'ํ':'Y', '๊':'U', 'ณ':'I', 'ฯ':'O', 'ญ':'P', 'ฐ':'{', ',':'}',
+                'ฤ':'A', 'ฆ':'S', 'ฏ':'D', 'โ':'F', 'ฌ':'G', '็':'H', '๋':'J', 'ษ':'K', 'ศ':'L', 'ซ':':', 'ศ':'"',
+                '(':'Z', ')':'X', 'ฉ':'C', 'ฮ':'V', 'ฺ':'B', '์':'N', 'ื':'M', '?':'<', 'ฒ':'>', 'ฬ':'?'
+            };
+            return input.split('').map(char => keyMap[char] || char).join('');
+        }
 
-            decodedText = decodedText.replace(/\uFFFD/g, '').trim();
+        /* ---------- ระบบถอดรหัสความเร็วสูง รองรับแป้นพิมพ์ทุกภาษา 100% ---------- */
+        function processQRCode(rawText) {
+            if (isProcessing || !rawText) return;
+
+            // 1. ล้างอักขระขยะ และแปลงภาษาไทยกลับเป็นอังกฤษ/ตัวเลขทันที
+            let text = rawText.replace(/\uFFFD/g, '').trim();
+            let decodedText = convertThaiKeyboardToEnglish(text);
+
             const resultDiv = document.getElementById('result');
-
             let empId = "";
             let empName = "";
             let empBranch = "";
             let timestamp = null;
             let isLiveMobile = false;
 
-            // 1. ตรวจจับ Dynamic QR แบบใหม่ (CLT|... หรือรูปแบบที่มีคำว่า CLT)
+            // 2. ดึงข้อมูลกรณีเป็น Dynamic QR สปีดสูง (มี CLT หรือรูปแบบ CLT|ID|Timestamp)
             if (decodedText.toUpperCase().includes("CLT")) {
-                // แยกข้อความด้วยเครื่องหมาย |, ,, :, หรือช่องว่าง เพื่อกันปัญหาคีย์บอร์ดแปลงเครื่องหมายเพี้ยน
-                const cleanText = decodedText.replace(/[\/\\,;:_]/g, '|');
+                const cleanText = decodedText.replace(/[\/\\,;:_ \t]/g, '|');
                 const parts = cleanText.split("|").filter(p => p.trim() !== "");
                 
-                // ค้นหาส่วนที่เป็น CLT และตัวเลขรหัสพนักงาน
                 const cltIndex = parts.findIndex(p => p.toUpperCase().includes("CLT"));
                 if (cltIndex !== -1 && parts[cltIndex + 1]) {
-                    empId = parts[cltIndex + 1].trim();
-                    const tsSec = parts[cltIndex + 2] ? parseInt(parts[cltIndex + 2].trim(), 10) : null;
+                    empId = parts[cltIndex + 1].replace(/\D/g, '').trim();
+                    const tsSec = parts[cltIndex + 2] ? parseInt(parts[cltIndex + 2].replace(/\D/g, '').trim(), 10) : null;
                     timestamp = tsSec ? tsSec * 1000 : null;
                     isLiveMobile = true;
                 }
             }
-            // 2. ตรวจจับ QR แบบเดิม (VIPPARTY_LIVE| หรือ VIPPARTY|)
-            else if (decodedText.startsWith("VIPPARTY_LIVE|") || decodedText.startsWith("VIPPARTY|")) {
+            // 3. รองรับรูปแบบบัตรกระดาษเดิม (VIPPARTY_LIVE| หรือ VIPPARTY|)
+            else if (decodedText.startsWith("VIPPARTY_LIVE|") || decodedText.startsWith("VIPPARTY|") || text.startsWith("VIPPARTY")) {
                 isLiveMobile = decodedText.startsWith("VIPPARTY_LIVE|");
                 const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|")[1];
                 const decodedString = decodeBase64ToThai(base64Data);
 
-                if (!decodedString) {
-                    showError("❌ ไม่สามารถอ่านคิวอาร์โค้ดได้<br><small>กรุณาสร้างคิวอาร์โค้ดใหม่</small>");
-                    return;
+                if (decodedString) {
+                    const dataParts = decodedString.split("|");
+                    empId = dataParts[0] ? dataParts[0].trim() : "-";
+                    empName = dataParts[1] ? dataParts[1].trim() : "-";
+                    empBranch = dataParts[2] ? dataParts[2].trim() : "-";
+                    timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
                 }
-
-                const dataParts = decodedString.split("|");
-                empId = dataParts[0] ? dataParts[0].trim() : "-";
-                empName = dataParts[1] ? dataParts[1].trim() : "-";
-                empBranch = dataParts[2] ? dataParts[2].trim() : "-";
-                timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
             } 
-            // 3. กรณีเครื่องยิงส่งมาเฉพาะตัวเลขรหัสพนักงานล้วนๆ (Fallback)
-            else if (/^\d{4,8}$/.test(decodedText)) {
-                empId = decodedText.trim();
-                isLiveMobile = false;
-            } else {
-                showError("❌ ข้อมูลไม่ถูกต้อง<br><small>ค่าที่อ่านได้: [" + decodedText + "]</small>");
-                return;
-            }
-
+            
+            // 4. Fallback: ถ้าหาไม่เจอ ให้ดึงตัวเลข 4-8 หลักที่พบในข้อความมาเป็นรหัสพนักงานทันที
             if (!empId) {
-                showError("❌ ไม่พบรหัสพนักงานในคิวอาร์โค้ด");
+                const matchNumber = decodedText.match(/\d{4,8}/);
+                if (matchNumber) {
+                    empId = matchNumber[0];
+                    isLiveMobile = false;
+                }
+            }
+
+            // ถ้าพยายามแปลงแล้วยังไม่เจอรหัสพนักงานเลย
+            if (!empId) {
+                showError("❌ ไม่สามารถอ่านรหัสได้<br><small>ข้อความที่ได้รับ: [" + text + "]</small>");
                 return;
             }
 
-            // ค้นหาข้อมูลชื่อ-สาขาจากแคชเครื่องทันที
+            // ค้นหาข้อมูลชื่อและสาขาจากแคชเครื่อง
             const cachedGuest = allGuestsList.find(g => g.id.toLowerCase() === empId.toLowerCase());
             if (cachedGuest) {
                 empName = cachedGuest.name;
@@ -1818,7 +1881,7 @@
             fetch(fetchUrl)
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === "success") {
+                    if (data.status === "success") {
                         scannedGuests.add(empId); 
                         resultDiv.innerHTML = `✅ ยินดีต้อนรับ!<br><span style="font-size:28px;">${empName}</span><br><span style="color:#000; font-size:16px; background:#ffd700; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:5px;">(ลงทะเบียน<b>${data.round}</b>สำเร็จ)</span><br><small>${empBranch} (${empId})</small>`;
                         resultDiv.style.backgroundColor = "#00C851"; 
@@ -1842,7 +1905,6 @@
                 .finally(() => {
                     setTimeout(() => { isProcessing = false; restoreFocus(); }, 1200); 
                 });
-        
         }
 
         function initCameraScanner() {
@@ -1887,7 +1949,6 @@
         let scannerTimer;
         const hwInput = document.getElementById('hardwareInput');
         
-        // รับค่าปุ่ม Enter จากเครื่องยิงทันที
         hwInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault(); 
@@ -1898,7 +1959,6 @@
             }
         });
         
-        // ปรับลด Debounce Delay เหลือ 80ms เพื่อสปีดสูงสุด
         hwInput.addEventListener('input', function (e) {
             clearTimeout(scannerTimer);
             scannerTimer = setTimeout(() => {
