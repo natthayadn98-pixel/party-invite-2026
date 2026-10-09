@@ -220,12 +220,13 @@
 </head>
 <body>
 
-    <!-- แท็กเล่นเพลงวนซ้ำ (loop) -->
-    <audio id="bgmAudio" loop preload="auto">
+    <!-- แท็กเล่นเพลงวนซ้ำ: ใช้ %20 แทนการเว้นวรรคในชื่อไฟล์ -->
+    <audio id="bgmAudio" loop preload="auto" playsinline>
+        <source src="music/2%20soon.mp3" type="audio/mpeg">
         <source src="music/2 soon.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- ปุ่มเปิด-ปิดเสียง (ไอคอน 🎵 / 🔇) -->
+    <!-- ปุ่มเปิด-ปิดเสียง (เริ่มต้นเป็น 🔇 หรือ 🎵) -->
     <button id="musicControlBtn" onclick="toggleAudio(event)" title="เปิด/ปิดเสียงเพลง" aria-label="ควบคุมเสียงเพลง">
         <span id="musicIcon">🔇</span>
     </button>
