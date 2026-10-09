@@ -624,91 +624,105 @@
         });
 
         /* ---------- ตรวจสอบสถานะและปิด QR Code หลังสแกนแล้ว ---------- */
-        function checkDeviceLockInLine() {
+       function checkDeviceLockInLine() {
             const boundEmpId = localStorage.getItem("clt_line_empid");
             const boundEmpName = localStorage.getItem("clt_line_name");
-
-            if (!boundEmpId) {
-                return;
-            }
-
             const btn = document.getElementById('btnOpenPinModal');
             const label = document.getElementById('inputLabelText');
             const session = checkCurrentSession();
 
+            // 1. เครื่องยังไม่ได้ผูกรหัสพนักงาน
+            if (!boundEmpId) {
+                if (session.isPastMorning) {
+                    label.innerHTML = `
+                        <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:10px; padding:10px; text-align:center;">
+                            <div style="color:#c2410c; font-weight:bold; font-size:13.5px;">⏰ หมดเวลาลงทะเบียนรอบเช้า (09:30 น.)</div>
+                            <div style="color:#ea580c; font-size:12px; margin-top:4px; line-height:1.4;">
+                                👉 กรุณาติดต่อ <b>โต๊ะ Admin</b> เพื่อลงทะเบียนรอบเช้าครับ
+                            </div>
+                        </div>`;
+                    btn.innerText = "⏳ ติดต่อ Admin เพื่อลงทะเบียนรอบเช้า";
+                    btn.classList.add("locked");
+                    btn.disabled = true;
+                } else if (session.active) {
+                    label.innerHTML = `แตะปุ่มด้านล่างเพื่อ <b>กรอกรหัสพนักงาน 6 หลัก</b> แสดงบัตรเข้างาน (${session.round})`;
+                    btn.innerText = "🔢 กรอกรหัสพนักงาน (PIN 6 หลัก)";
+                    btn.classList.remove("locked");
+                    btn.disabled = false;
+                } else {
+                    label.innerHTML = `<span style="color:#64748b;">${session.msg.replace(/\n/g, '<br>')}</span>`;
+                    btn.innerText = "🔒 ระบบยังไม่เปิดให้ลงทะเบียน";
+                    btn.classList.add("locked");
+                    btn.disabled = true;
+                }
+                return;
+            }
+
+            // 2. เครื่องเคยผูกรหัสแล้ว ตรวจเช็คสถานะ
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
-                    if (res.isReset === true) {
-                        localStorage.removeItem("clt_line_empid");
-                        localStorage.removeItem("clt_line_name");
-                        alert("🔔 เจ้าหน้าที่แอดมินได้ทำการปลดล็อกเครื่องให้คุณแล้ว กรุณากรอกรหัสพนักงานใหม่อีกครั้งครับ");
-                        const cleanUrl = window.location.href.split('?')[0];
-                        window.location.replace(cleanUrl + "?t=" + Date.now());
-                        return;
-                    }
-
-                    morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
-                    eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
-
+                    morningChecked = (res.morningChecked === true);
+                    eveningChecked = (res.eveningChecked === true);
                     const empDisplayName = res.name || boundEmpName || boundEmpId;
+                    const mTime = res.morningTime || "";
+                    const isLate = res.morningLate === true;
 
-                    // 1. กรณีลงทะเบียนครบทั้ง 2 รอบแล้ว (ปิดถาวร)
+                    // กรณีที่ 1: เช็คอินครบทั้ง 2 รอบแล้ว -> ล็อกถาวร
                     if (morningChecked && eveningChecked) {
                         label.innerHTML = `
-                            <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                            <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; text-align:center;">
                                 <div style="color:#15803d; font-weight:bold; font-size:14px;">✨ ลงทะเบียนครบทั้ง 2 รอบแล้ว</div>
-                                <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
-                                <div style="color:#64748b; font-size:11.5px; margin-top:4px;">ขอให้มีความสุขและสนุกกับงานเลี้ยงนะคะ 🎉</div>
-                            </div>
-                        `;
+                                <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${boundEmpId}</b> (${empDisplayName})</div>
+                            </div>`;
                         btn.innerText = "🔒 ลงทะเบียนครบทุกรอบแล้ว";
                         btn.classList.add("locked");
+                        btn.disabled = true;
                     }
-                    // 2. กรณีสแกนรอบเช้าไปแล้ว
-                    else if (morningChecked) {
-                        // ถ้ายังไม่ถึงรอบเย็น ให้ปิด QR และบอกให้รอเปิด 14:00 น.
+                    // กรณีที่ 2: เช็คอินรอบเช้าแล้ว
+                    else if (morningChecked && !eveningChecked) {
                         if (session.round === "รอบเช้า" || !session.active) {
                             label.innerHTML = `
-                                <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                                <div style="background:#f8fafc; border:1.5px solid #22c55e; border-radius:10px; padding:10px; text-align:center;">
                                     <div style="color:#15803d; font-weight:bold; font-size:13.5px;">✅ ลงทะเบียนรอบเช้าเรียบร้อยแล้ว</div>
-                                    <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
-                                    <div style="color:#0284c7; font-size:11.5px; margin-top:4px; font-weight:bold;">⏳ รอเปิดแสดงบัตรอีกครั้งในรอบเย็น (14:00 น.)</div>
-                                </div>
-                            `;
-                            btn.innerText = "✅ ลงทะเบียนรอบเช้าเรียบร้อยแล้ว";
+                                    <div style="color:#1e293b; font-size:12.5px; margin-top:2px;"><b>${boundEmpId}</b> (${empDisplayName})</div>
+                                    <div style="color:#0284c7; font-size:11px; margin-top:4px; font-weight:bold;">⏳ รอเปิดแสดงบัตรอีกครั้งในรอบเย็น (14:00 น.)</div>
+                                </div>`;
+                            btn.innerText = "🔒 เช็คอินรอบเช้าเรียบร้อยแล้ว";
                             btn.classList.add("locked");
-                        } 
-                        // ถ้าเข้าสู่รอบเย็นแล้ว และยังไม่สแกนรอบเย็น ให้เปิดให้แสดง QR รอบเย็นได้
-                        else if (session.round === "รอบเย็น" && !eveningChecked) {
+                            btn.disabled = true;
+                        } else if (session.round === "รอบเย็น") {
                             label.innerHTML = `
-                                <div style="background:#fefce8; border:1.5px solid #eab308; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                                <div style="background:#fefce8; border:1.5px solid #eab308; border-radius:10px; padding:10px; text-align:center;">
                                     <div style="color:#854d0e; font-weight:bold; font-size:13.5px;">🌙 พร้อมลงทะเบียนรอบเย็น</div>
-                                    <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
-                                    <div style="color:#15803d; font-size:11.5px; margin-top:3px;">(รอบเช้า: สแกนผ่านแล้ว ✅)</div>
-                                </div>
-                            `;
+                                    <div style="color:#1e293b; font-size:12.5px; margin-top:2px;"><b>${boundEmpId}</b> (${empDisplayName})</div>
+                                </div>`;
                             btn.innerText = "🎟️ แสดง QR Code (รอบเย็น)";
                             btn.classList.remove("locked");
+                            btn.disabled = false;
                         }
                     }
-                    // 3. กรณีสแกนรอบเย็นไปแล้ว
-                    else if (eveningChecked) {
+                    // กรณีที่ 3: รอบเช้ายังไม่ได้ลง และเลย 09:30 น. แล้ว (เคสมาสาย) -> ล็อกปุ่ม บังคับติดต่อ Admin
+                    else if (!morningChecked && session.isPastMorning) {
                         label.innerHTML = `
-                            <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; margin:-4px 0 4px;">
-                                <div style="color:#15803d; font-weight:bold; font-size:13.5px;">✅ ลงทะเบียนรอบเย็นเรียบร้อยแล้ว</div>
-                                <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
-                            </div>
-                        `;
-                        btn.innerText = "✅ ลงทะเบียนรอบเย็นเรียบร้อยแล้ว";
+                            <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:10px; padding:10px; text-align:center;">
+                                <div style="color:#c2410c; font-weight:bold; font-size:13px;">⏰ เลยเวลาลงทะเบียนรอบเช้า (09:30 น.)</div>
+                                <div style="color:#1e293b; font-size:12.5px; margin-top:2px;"><b>${boundEmpId}</b> (${empDisplayName})</div>
+                                <div style="color:#ea580c; font-size:11.5px; margin-top:4px; line-height:1.4;">
+                                    👉 กรุณานำหน้าจอนี้ติดต่อ <b>โต๊ะ Admin</b> เพื่อลงทะเบียนรอบเช้าครับ
+                                </div>
+                            </div>`;
+                        btn.innerText = "⏳ ติดต่อ Admin เพื่อลงทะเบียนรอบเช้า";
                         btn.classList.add("locked");
+                        btn.disabled = true;
                     }
-                    // 4. ยังไม่ได้สแกนในรอบปัจจุบัน
+                    // กรณีที่ 4: ยังไม่เคยลงทะเบียน และอยู่ในเวลาปกติ
                     else {
                         const roundTitle = session.active ? session.round : "บัตรเข้างาน";
                         label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${empDisplayName})<br><span style="color:#0284c7; font-size:11.5px; font-weight:bold;">🎟️ พร้อมแสดงบัตรเข้างาน (${roundTitle})</span>`;
                         btn.innerText = `🎟️ แสดง QR Code (${roundTitle})`;
                         btn.classList.remove("locked");
+                        btn.disabled = false;
                     }
                 })
                 .catch(() => {});
@@ -723,12 +737,18 @@
         }
 
         /* ---------- ระบบ PIN PAD 6 หลัก ---------- */
-        function openPinModal(event) {
+       function openPinModal(event) {
             if (event) event.stopPropagation();
+
+            const btn = document.getElementById('btnOpenPinModal');
+            // 🛑 ถ้าปุ่มมีคลาส locked หรือถูก disabled ห้ามเปิดหน้าต่างใดๆ เด็ดขาด
+            if (btn && (btn.classList.contains('locked') || btn.disabled)) {
+                return;
+            }
 
             const session = checkCurrentSession();
             if (!session.active) {
-                alert(session.msg);
+                if (session.msg) alert(session.msg);
                 return;
             }
 
@@ -1003,11 +1023,19 @@ function generateSingleDynamicQR(guest) {
         }
 
         /* ---------- ดักจับเมื่อสแกนสำเร็จ -> ปิด QR Code และเปลี่ยนสถานะทันที ---------- */
-        function startListeningForCheckIn(empId, currentCheckingRound) {
-            if (pollingTimer) clearInterval(pollingTimer);
+        let isSuccessModalShown = false; // ตัวแปรป้องกันการเด้งป๊อปอัปซ้ำซ้อน
 
-            // ปรับจาก 1500ms -> 800ms ให้ตรวจจับการยิงติดได้ไวขึ้นเกือบเท่าตัว
+        function startListeningForCheckIn(empId, currentCheckingRound) {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
+            }
+            isSuccessModalShown = false; // รีเซ็ตสถานะเมื่อเริ่มเปิด QR ใหม่
+
             pollingTimer = setInterval(() => {
+                // หากกำลังแสดงหน้าต่างสำเร็จอยู่แล้ว ให้หยุดตรวจทันที
+                if (isSuccessModalShown) return;
+
                 fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${Date.now()}`)
                     .then(res => res.json())
                     .then(res => {
@@ -1017,7 +1045,12 @@ function generateSingleDynamicQR(guest) {
                         if ((currentCheckingRound === "รอบเช้า" && isNowMorning) || 
                             (currentCheckingRound === "รอบเย็น" && isNowEvening)) {
                             
+                            // 🛑 1. ตัดการวนลูปทิ้งทันทีเป็นอันดับแรก
                             clearInterval(pollingTimer);
+                            pollingTimer = null;
+                            isSuccessModalShown = true;
+
+                            // 🛑 2. ปิดหน้า QR Code
                             closeModal();
 
                             if ("vibrate" in navigator) navigator.vibrate([150, 60, 150]);
@@ -1027,6 +1060,7 @@ function generateSingleDynamicQR(guest) {
                             
                             checkDeviceLockInLine();
 
+                            // 🛑 3. แสดงหน้าต่างสำเร็จเพียงครั้งเดียว
                             document.getElementById('res-guest-name').innerText = res.name || empId;
                             document.getElementById('res-guest-branch').innerText = res.branch || "-";
                             document.getElementById('res-guest-round').innerText = currentCheckingRound;
@@ -1046,7 +1080,17 @@ function generateSingleDynamicQR(guest) {
         }
 
         function closeSuccessModal() {
-            document.getElementById("checkin-success-modal").style.display = "none";
+            // ปิดหน้าต่างสำเร็จ
+            document.getElementById('checkin-success-modal').style.display = 'none';
+            isSuccessModalShown = false;
+            
+            // ล้างตัวจับเวลาทั้งหมดให้สะอาด ไม่ให้มีตกค้าง
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
+            }
+
+            // อัปเดตหน้าการ์ดหลักและล็อกปุ่มทันที
             checkDeviceLockInLine();
         }
     </script>
