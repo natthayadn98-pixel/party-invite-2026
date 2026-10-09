@@ -1728,7 +1728,7 @@
             }
         }
 
-        /* ---------- ระบบถอดรหัสความเร็วสูง รองรับทั้งแบบย่อ CLT| และแบบเดิม ---------- */
+        /* ---------- ระบบถอดรหัสความเร็วสูง รองรับทุกเครื่องยิงและแก้ปัญหาแป้นพิมพ์ ---------- */
         function processQRCode(decodedText) {
             if (isProcessing || !decodedText) return;
 
@@ -1741,25 +1741,22 @@
             let timestamp = null;
             let isLiveMobile = false;
 
-            // รูปแบบที่ 1: Dynamic QR ความเร็วสูงพิเศษ (CLT|รหัส|timestampวินาที)
-            if (decodedText.startsWith("CLT|")) {
-                const parts = decodedText.split("|");
-                empId = parts[1] ? parts[1].trim() : "";
-                const tsSec = parts[2] ? parseInt(parts[2], 10) : null;
-                timestamp = tsSec ? tsSec * 1000 : null; // แปลงเป็น ms
-                isLiveMobile = true;
-
-                // ดึงชื่อและสาขาจาก Local Memory ทันทีใน 0.001 วิ
-                const cachedGuest = allGuestsList.find(g => g.id.toLowerCase() === empId.toLowerCase());
-                if (cachedGuest) {
-                    empName = cachedGuest.name;
-                    empBranch = cachedGuest.branch;
-                } else {
-                    empName = empId;
-                    empBranch = "-";
+            // 1. ตรวจจับ Dynamic QR แบบใหม่ (CLT|... หรือรูปแบบที่มีคำว่า CLT)
+            if (decodedText.toUpperCase().includes("CLT")) {
+                // แยกข้อความด้วยเครื่องหมาย |, ,, :, หรือช่องว่าง เพื่อกันปัญหาคีย์บอร์ดแปลงเครื่องหมายเพี้ยน
+                const cleanText = decodedText.replace(/[\/\\,;:_]/g, '|');
+                const parts = cleanText.split("|").filter(p => p.trim() !== "");
+                
+                // ค้นหาส่วนที่เป็น CLT และตัวเลขรหัสพนักงาน
+                const cltIndex = parts.findIndex(p => p.toUpperCase().includes("CLT"));
+                if (cltIndex !== -1 && parts[cltIndex + 1]) {
+                    empId = parts[cltIndex + 1].trim();
+                    const tsSec = parts[cltIndex + 2] ? parseInt(parts[cltIndex + 2].trim(), 10) : null;
+                    timestamp = tsSec ? tsSec * 1000 : null;
+                    isLiveMobile = true;
                 }
             }
-            // รูปแบบที่ 2: บัตรกระดาษ หรือ รูปแบบเดิม VIPPARTY_LIVE| / VIPPARTY|
+            // 2. ตรวจจับ QR แบบเดิม (VIPPARTY_LIVE| หรือ VIPPARTY|)
             else if (decodedText.startsWith("VIPPARTY_LIVE|") || decodedText.startsWith("VIPPARTY|")) {
                 isLiveMobile = decodedText.startsWith("VIPPARTY_LIVE|");
                 const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|")[1];
@@ -1775,18 +1772,33 @@
                 empName = dataParts[1] ? dataParts[1].trim() : "-";
                 empBranch = dataParts[2] ? dataParts[2].trim() : "-";
                 timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
+            } 
+            // 3. กรณีเครื่องยิงส่งมาเฉพาะตัวเลขรหัสพนักงานล้วนๆ (Fallback)
+            else if (/^\d{4,8}$/.test(decodedText)) {
+                empId = decodedText.trim();
+                isLiveMobile = false;
             } else {
-                showError("❌ ข้อมูลไม่ถูกต้อง<br><small>(ไม่ใช่ QR ของระบบนี้ หรือแป้นพิมพ์ไม่ได้เป็นภาษาอังกฤษ)</small>");
+                showError("❌ ข้อมูลไม่ถูกต้อง<br><small>ค่าที่อ่านได้: [" + decodedText + "]</small>");
                 return;
             }
 
-            // ตรวจสอบเวลา Dynamic QR บนมือถือ (ป้องกันการแคปจอ)
-            if (isLiveMobile) {
-                if (!timestamp) {
-                    showError("❌ <b>ข้อมูล QR ไม่สมบูรณ์</b><br><small>กรุณาเปิดจากหน้าจอแอปตัวจริง</small>");
-                    return;
-                }
+            if (!empId) {
+                showError("❌ ไม่พบรหัสพนักงานในคิวอาร์โค้ด");
+                return;
+            }
 
+            // ค้นหาข้อมูลชื่อ-สาขาจากแคชเครื่องทันที
+            const cachedGuest = allGuestsList.find(g => g.id.toLowerCase() === empId.toLowerCase());
+            if (cachedGuest) {
+                empName = cachedGuest.name;
+                empBranch = cachedGuest.branch;
+            } else if (!empName) {
+                empName = empId;
+                empBranch = "-";
+            }
+
+            // ตรวจสอบเวลา Dynamic QR บนมือถือ (ป้องกันการแคปจอ)
+            if (isLiveMobile && timestamp) {
                 const now = Date.now();
                 const diffSeconds = (now - timestamp) / 1000;
                 
@@ -1830,6 +1842,7 @@
                 .finally(() => {
                     setTimeout(() => { isProcessing = false; restoreFocus(); }, 1200); 
                 });
+        
         }
 
         function initCameraScanner() {
