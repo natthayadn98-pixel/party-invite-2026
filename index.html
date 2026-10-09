@@ -290,6 +290,19 @@
             padding: 18px 16px 16px; text-align: center; width: 100%; max-width: 320px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.12); animation: zoomIn 0.3s ease;
         }
+        #personal-qrcode {
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            margin: 0 auto; 
+            position: relative; 
+            width: 230px; 
+            height: 230px;
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
         @keyframes zoomIn {
             from { transform: scale(0.85); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
@@ -489,7 +502,7 @@
             
             <div id="current-round-badge" class="round-badge">📍 ลงทะเบียนรอบเช้า</div>
 
-            <div id="personal-qrcode" style="display: flex; justify-content: center; margin: 0 auto; position: relative; width: 210px; height: 210px;"></div>
+            <div id="personal-qrcode"></div>
             
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; margin-top: 8px;">
                 <span>🔄 อัปเดตใน: <b id="qr-countdown-text" style="color:#059669;">45s</b></span>
@@ -944,51 +957,56 @@
             document.getElementById('qr-progress-bar').style.width = percent + "%";
             document.getElementById('qr-countdown-text').innerText = remainingSeconds + "s";
         }
-
-        function generateSingleDynamicQR(guest) {
+function generateSingleDynamicQR(guest) {
             const qrContainer = document.getElementById("personal-qrcode");
             qrContainer.innerHTML = "";
 
-            // Payload กระชับระดับ Supermarket Speed (เม็ด QR ใหญ่ ยิงติดใน 0.1 วินาที)
             const currentTsSec = Math.floor(Date.now() / 1000);
             const highSpeedPayload = `CLT|${guest.id}|${currentTsSec}`;
 
+            // ปรับ CorrectLevel เป็น L เพื่อให้ช่องตารางใหญ่ คอนทราสต์ชัด สแกนติดไวที่สุด
             new QRCode(qrContainer, { 
                 text: highSpeedPayload, 
-                width: 210, height: 210, 
-                correctLevel : QRCode.CorrectLevel.M 
+                width: 220, 
+                height: 220, 
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.L 
             });
 
+            // ลดขนาดโลโก้ลงเหลือ 32px เพื่อไม่ให้ทับพื้นที่ข้อมูลและตำแหน่งมุมทั้ง 3
             setTimeout(() => {
                 const logoWrapper = document.createElement("div");
                 logoWrapper.style.position = "absolute";
                 logoWrapper.style.top = "50%";
                 logoWrapper.style.left = "50%";
                 logoWrapper.style.transform = "translate(-50%, -50%)";
-                logoWrapper.style.width = "46px";
-                logoWrapper.style.height = "46px";
+                logoWrapper.style.width = "32px";
+                logoWrapper.style.height = "32px";
                 logoWrapper.style.backgroundColor = "white";
                 logoWrapper.style.borderRadius = "50%";
                 logoWrapper.style.display = "flex";
                 logoWrapper.style.justifyContent = "center";
                 logoWrapper.style.alignItems = "center";
-                logoWrapper.style.boxShadow = "0 0 6px rgba(0,0,0,0.25)";
+                logoWrapper.style.boxShadow = "0 0 4px rgba(0,0,0,0.2)";
+                logoWrapper.style.pointerEvents = "none";
 
                 const logoImg = document.createElement("img");
                 logoImg.src = "logo CLT (1)-01.png";
-                logoImg.style.width = "32px";
-                logoImg.style.height = "32px";
+                logoImg.style.width = "22px";
+                logoImg.style.height = "22px";
                 logoImg.style.objectFit = "contain";
                 
                 logoWrapper.appendChild(logoImg);
                 qrContainer.appendChild(logoWrapper);
-            }, 70);
+            }, 30);
         }
 
         /* ---------- ดักจับเมื่อสแกนสำเร็จ -> ปิด QR Code และเปลี่ยนสถานะทันที ---------- */
         function startListeningForCheckIn(empId, currentCheckingRound) {
             if (pollingTimer) clearInterval(pollingTimer);
 
+            // ปรับจาก 1500ms -> 800ms ให้ตรวจจับการยิงติดได้ไวขึ้นเกือบเท่าตัว
             pollingTimer = setInterval(() => {
                 fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(empId)}&t=${Date.now()}`)
                     .then(res => res.json())
@@ -1000,24 +1018,23 @@
                             (currentCheckingRound === "รอบเย็น" && isNowEvening)) {
                             
                             clearInterval(pollingTimer);
-                            closeModal(); // ปิดหน้าต่าง QR Code ทันที!
+                            closeModal();
 
-                            if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
+                            if ("vibrate" in navigator) navigator.vibrate([150, 60, 150]);
 
                             morningChecked = isNowMorning;
                             eveningChecked = isNowEvening;
                             
-                            // อัปเดตการ์ดให้แสดงป้ายสถานะและล็อกปุ่มทันที
                             checkDeviceLockInLine();
 
-                            document.getElementById('res-guest-name').innerText = res.name;
-                            document.getElementById('res-guest-branch').innerText = res.branch;
+                            document.getElementById('res-guest-name').innerText = res.name || empId;
+                            document.getElementById('res-guest-branch').innerText = res.branch || "-";
                             document.getElementById('res-guest-round').innerText = currentCheckingRound;
                             document.getElementById('checkin-success-modal').style.display = 'flex';
                         }
                     })
                     .catch(() => {});
-            }, 1500);
+            }, 800);
         }
 
         function closeModal() {
