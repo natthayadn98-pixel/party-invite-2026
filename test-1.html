@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>การ์ดเชิญงานเลี้ยงสังสรรค์ 2569 (Test Sound)</title>
+    <title>การ์ดเชิญงานเลี้ยงสังสรรค์ 2569 (Test Sound & Countdown)</title>
     <link rel="icon" type="image/png" href="calendar.png">
     <link href="https://fonts.googleapis.com/css2?family=Anakotmai:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -79,7 +79,7 @@
             50% { transform: scale(1.18); }
         }
 
-        /* แถบสไลด์ปรับระดับเสียง */
+        /* แถบสไลด์ปรับระดับเสียง (แก้ไข Appearance ให้มาตรฐาน) */
         .volume-slider-wrapper {
             display: flex;
             align-items: center;
@@ -97,6 +97,7 @@
         }
         #volumeRange::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             width: 14px;
             height: 14px;
             border-radius: 50%;
@@ -121,6 +122,58 @@
             min-width: 28px;
             text-align: right;
             font-family: monospace;
+        }
+
+        /* สไตล์กล่องนับถอยหลังกดบัตรคอนเสิร์ต */
+        .countdown-concert-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            border: 1.5px solid #818cf8;
+            border-radius: 14px;
+            padding: 10px 8px;
+            margin: 4px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+        }
+        .countdown-title {
+            color: #c7d2fe;
+            font-size: 11.5px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .countdown-timer-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+        .countdown-slot {
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 8px;
+            padding: 4px 5px;
+            min-width: 42px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+        }
+        .countdown-num {
+            font-size: 19px;
+            font-weight: 700;
+            color: #ffd700;
+            font-family: monospace;
+            line-height: 1.1;
+        }
+        .countdown-unit {
+            font-size: 9px;
+            color: #94a3b8;
+        }
+        .countdown-colon {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            animation: blinkColon 1s infinite;
+        }
+        @keyframes blinkColon {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         /* หน้าจอบล็อกเมื่อไม่เปิดผ่าน LINE */
@@ -283,7 +336,7 @@
 </head>
 <body>
 
-    <!-- แท็กเล่นเพลงวนซ้ำ: ชี้ตรงไปยัง music/2soon.mp3 -->
+    <!-- แท็กเล่นเพลงวนซ้ำ (ชี้ตรงไปยัง music/2soon.mp3) -->
     <audio id="bgmAudio" loop preload="auto" playsinline webkit-playsinline src="music/2soon.mp3"></audio>
 
     <!-- แผงควบคุมเสียงมุมขวาบน (ปุ่มบอกสถานะ เปิด/ปิด + ตัวเลื่อนปรับความดัง) -->
@@ -337,7 +390,7 @@
                         <p style="margin: 2px 0;"><span>📍 สถานที่:</span> รอยัล ฮิลล์ กอล์ฟ รีสอร์ท แอนด์ สปา</p>
                     </div>
 
-                    <!-- กล่องแสดงสถานะการลงทะเบียน -->
+                    <!-- กล่องแสดงสถานะการลงทะเบียน / ตัวนับถอยหลัง -->
                     <div id="deviceStatusBox" style="background: rgba(255,255,255,0.95); padding: 12px 14px; border-radius: 10px; border: 1.5px dashed #b8a68e; margin-bottom: 6px; text-align: center;">
                         <span id="inputLabelText" style="font-size: 12.5px; color: #444;">
                             แตะปุ่มด้านล่างเพื่อ <b>กรอกรหัสพนักงาน 6 หลัก</b> แสดงบัตรเข้างาน
@@ -439,12 +492,12 @@
         
         let morningChecked = false;
         let eveningChecked = false;
+        let sessionCountdownTimer = null;
 
         const QR_REFRESH_SECONDS = 45;
         let remainingSeconds = QR_REFRESH_SECONDS;
 
-    
-/* ---------- ระบบเล่นเพลงวนซ้ำ ปลอดภัยจาก Error 100% ---------- */
+        /* ---------- ระบบควบคุมเสียงด้วย Web Audio API (ปรับระดับเสียงได้จริงทุกมือถือ) ---------- */
         const bgAudio = document.getElementById('bgmAudio');
         const musicBtn = document.getElementById('musicControlBtn');
         const musicIcon = document.getElementById('musicIcon');
@@ -452,86 +505,149 @@
         const volumeRange = document.getElementById('volumeRange');
         const volumeValueText = document.getElementById('volumeValueText');
 
-        if (bgAudio) {
-            bgAudio.volume = 1.0;
+        let audioCtx = null;
+        let gainNode = null;
+        let sourceNode = null;
+        let isAudioPlaying = false;
+        let currentGainValue = 1.0;
+
+        function initWebAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                    gainNode = audioCtx.createGain();
+                    sourceNode = audioCtx.createMediaElementSource(bgAudio);
+                    sourceNode.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    gainNode.gain.value = currentGainValue;
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
-        let isAudioPlaying = false;
-        let isAudioBusy = false; // ป้องกันคำสั่ง play/pause ชนกัน
-
-        async function playMusicSafe() {
-            if (!bgAudio || isAudioBusy) return;
-            isAudioBusy = true;
-
+        async function playMusic() {
+            initWebAudio();
             try {
-                if (bgAudio.volume === 0) {
-                    changeVolume(100);
-                }
                 await bgAudio.play();
                 isAudioPlaying = true;
                 if (musicBtn) musicBtn.classList.add('playing');
                 if (musicIcon) musicIcon.innerText = "🔊";
                 if (musicStateText) musicStateText.innerText = "เปิดเสียง";
             } catch (err) {
-                // เบราว์เซอร์บล็อกก่อนแตะหน้าจอ หรือไฟล์ยังโหลดไม่เสร็จ ให้ข้ามเงียบๆ ไม่โยน Error แดง
-                isAudioPlaying = false;
-                if (musicBtn) musicBtn.classList.remove('playing');
-                if (musicIcon) musicIcon.innerText = "🔇";
-                if (musicStateText) musicStateText.innerText = "ปิดเสียง";
-            } finally {
-                isAudioBusy = false;
+                console.log("Audio waiting for user gesture:", err);
             }
         }
 
-        function pauseMusicSafe() {
-            if (!bgAudio) return;
-            try {
-                bgAudio.pause();
-                isAudioPlaying = false;
-                if (musicBtn) musicBtn.classList.remove('playing');
-                if (musicIcon) musicIcon.innerText = "🔇";
-                if (musicStateText) musicStateText.innerText = "ปิดเสียง";
-            } catch (e) {}
+        function pauseMusic() {
+            bgAudio.pause();
+            isAudioPlaying = false;
+            if (musicBtn) musicBtn.classList.remove('playing');
+            if (musicIcon) musicIcon.innerText = "🔇";
+            if (musicStateText) musicStateText.innerText = "ปิดเสียง";
         }
 
         function toggleAudio(e) {
             if (e && typeof e.stopPropagation === 'function') {
                 e.stopPropagation();
             }
+            initWebAudio();
             if (isAudioPlaying) {
-                pauseMusicSafe();
+                pauseMusic();
             } else {
-                playMusicSafe();
+                if (currentGainValue === 0) {
+                    changeVolume(100);
+                }
+                playMusic();
             }
         }
 
         function changeVolume(val) {
-            if (!bgAudio) return;
+            initWebAudio();
             const parsedVal = Number(val) || 0;
-            const vol = Math.min(Math.max(parsedVal / 100, 0), 1);
-            bgAudio.volume = vol;
-            
+            currentGainValue = Math.min(Math.max(parsedVal / 100, 0), 1);
+
+            if (gainNode) {
+                gainNode.gain.setValueAtTime(currentGainValue, audioCtx.currentTime);
+            } else {
+                bgAudio.volume = currentGainValue;
+            }
+
             if (volumeRange) volumeRange.value = parsedVal;
             if (volumeValueText) volumeValueText.innerText = parsedVal + "%";
 
-            if (vol === 0) {
-                pauseMusicSafe();
-            } else if (!isAudioPlaying) {
-                playMusicSafe();
+            if (currentGainValue === 0) {
+                if (musicBtn) musicBtn.classList.remove('playing');
+                if (musicIcon) musicIcon.innerText = "🔇";
+                if (musicStateText) musicStateText.innerText = "ปิดเสียง";
+            } else {
+                if (!isAudioPlaying) {
+                    playMusic();
+                } else {
+                    if (musicBtn) musicBtn.classList.add('playing');
+                    if (musicIcon) musicIcon.innerText = "🔊";
+                    if (musicStateText) musicStateText.innerText = "เปิดเสียง";
+                }
             }
         }
 
-        // ปลดล็อกเสียงอัตโนมัติเมื่อแตะหน้าจอครั้งแรก
         function enableAudioOnFirstTouch() {
-            const unlockHandler = () => {
+            const unlock = () => {
+                initWebAudio();
                 if (!isAudioPlaying && bgAudio && bgAudio.paused) {
-                    playMusicSafe();
+                    playMusic();
                 }
-                window.removeEventListener('click', unlockHandler, true);
-                window.removeEventListener('touchstart', unlockHandler, true);
+                window.removeEventListener('click', unlock, true);
+                window.removeEventListener('touchstart', unlock, true);
             };
-            window.addEventListener('click', unlockHandler, true);
-            window.addEventListener('touchstart', unlockHandler, true);
+            window.addEventListener('click', unlock, true);
+            window.addEventListener('touchstart', unlock, true);
+        }
+
+        /* ---------- ระบบนับถอยหลังกดบัตรคอนเสิร์ต (Countdown) ---------- */
+        function startConcertCountdown(targetHour, targetMinute, roundTitle) {
+            if (sessionCountdownTimer) clearInterval(sessionCountdownTimer);
+
+            const label = document.getElementById('inputLabelText');
+            const btn = document.getElementById('btnOpenPinModal');
+
+            function updateTime() {
+                const now = new Date();
+                const targetTime = new Date(now);
+                targetTime.setHours(targetHour, targetMinute, 0, 0);
+
+                const diffSec = Math.floor((targetTime - now) / 1000);
+
+                if (diffSec <= 0) {
+                    clearInterval(sessionCountdownTimer);
+                    sessionCountdownTimer = null;
+                    checkDeviceLockInLine();
+                    return;
+                }
+
+                const hrs = String(Math.floor(diffSec / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0');
+                const secs = String(diffSec % 60).padStart(2, '0');
+
+                label.innerHTML = `
+                    <div class="countdown-concert-box">
+                        <div class="countdown-title">🎟️ รอเปิดระบบลงทะเบียน (${roundTitle})</div>
+                        <div class="countdown-timer-grid">
+                            <div class="countdown-slot"><div class="countdown-num">${hrs}</div><div class="countdown-unit">ชั่วโมง</div></div>
+                            <div class="countdown-colon">:</div>
+                            <div class="countdown-slot"><div class="countdown-num">${mins}</div><div class="countdown-unit">นาที</div></div>
+                            <div class="countdown-colon">:</div>
+                            <div class="countdown-slot"><div class="countdown-num">${secs}</div><div class="countdown-unit">วินาที</div></div>
+                        </div>
+                    </div>`;
+                btn.innerText = `⏳ รอเปิดระบบ (${roundTitle})`;
+                btn.classList.add('locked');
+            }
+
+            updateTime();
+            sessionCountdownTimer = setInterval(updateTime, 1000);
         }
 
         /* ---------- ตรวจสอบการเปิดผ่านแอป LINE ---------- */
@@ -548,7 +664,7 @@
             return true;
         }
 
-        /* ---------- ตรวจสอบช่วงเวลา ---------- */
+        /* ---------- ตรวจสอบช่วงเวลา (เปิดตั้งแต่ 07:00 น.) ---------- */
         function checkCurrentSession() {
             const now = new Date();
             const minutesNow = now.getHours() * 60 + now.getMinutes();
@@ -598,8 +714,25 @@
             const boundEmpName = localStorage.getItem("clt_line_name");
             const btn = document.getElementById('btnOpenPinModal');
             const label = document.getElementById('inputLabelText');
+            
+            const now = new Date();
+            const minutesNow = now.getHours() * 60 + now.getMinutes();
+            const morningStart = 7 * 60; // 07:00 น.
+
+            // 1. ก่อน 07:00 น. -> สั่งรันนับถอยหลังสู่ 07:00 น.
+            if (minutesNow < morningStart) {
+                startConcertCountdown(7, 0, "รอบเช้า");
+                return;
+            }
+
+            if (sessionCountdownTimer) {
+                clearInterval(sessionCountdownTimer);
+                sessionCountdownTimer = null;
+            }
+
             const session = checkCurrentSession();
 
+            // 2. เครื่องยังไม่ได้ผูกรหัสพนักงาน
             if (!boundEmpId) {
                 if (session.isPastMorning) {
                     label.innerHTML = `
@@ -626,6 +759,7 @@
                 return;
             }
 
+            // 3. เครื่องเคยผูกรหัสพนักงานแล้ว
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
@@ -927,7 +1061,8 @@
                 logoWrapper.style.transform = "translate(-50%, -50%)";
                 logoWrapper.style.width = "46px"; logoWrapper.style.height = "46px";
                 logoWrapper.style.backgroundColor = "white"; logoWrapper.style.borderRadius = "50%";
-                logoWrapper.style.display = "flex"; logoWrapper.style.justifyContent = "center"; logoWrapper.style.alignItems = "center";
+                logoWrapper.style.display = "flex"; logoWrapper.style.justifyContent = "center";
+                logoWrapper.style.alignItems = "center";
                 logoWrapper.style.boxShadow = "0 0 6px rgba(0,0,0,0.25)";
 
                 const logoImg = document.createElement("img");
