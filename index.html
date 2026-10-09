@@ -145,7 +145,7 @@
             box-shadow: 0 4px 12px rgba(107, 7, 15, 0.45); font-family: 'Anakotmai', sans-serif;
         }
         .btn-action.locked {
-            background: #334155 !important; 
+            background: #475569 !important; 
             color: #cbd5e1 !important; 
             cursor: not-allowed !important; 
             box-shadow: none !important;
@@ -256,7 +256,7 @@
 
         /* ---------- ป๊อปอัปตรวจสอบและยืนยันข้อมูลพนักงาน ---------- */
         #confirm-identity-modal {
-            display: none; position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
+            display: none; position: fixed; inset: 0; width: 100vw; height: 100dvh;
             background: rgba(0, 0, 0, 0.85);
             z-index: 99999; justify-content: center; align-items: center; 
             padding: 20px; box-sizing: border-box; backdrop-filter: blur(8px);
@@ -397,7 +397,8 @@
                         <p style="margin: 2px 0;"><span>👕 การแต่งกาย:</span> ชุดกีฬา</p>
                     </div>
 
-                    <div id="deviceStatusBox" style="background: rgba(255,255,255,0.85); padding: 12px 14px; border-radius: 8px; border: 1.5px dashed #b8a68e; margin-bottom: 6px; text-align: center;">
+                    <!-- กล่องแสดงสถานะการลงทะเบียนของพนักงาน -->
+                    <div id="deviceStatusBox" style="background: rgba(255,255,255,0.9); padding: 12px 14px; border-radius: 10px; border: 1.5px dashed #b8a68e; margin-bottom: 6px; text-align: center;">
                         <span id="inputLabelText" style="font-size: 12.5px; color: #444;">
                             แตะปุ่มด้านล่างเพื่อ <b>กรอกรหัสพนักงาน 6 หลัก</b> แสดงบัตรเข้างาน
                         </span>
@@ -498,6 +499,7 @@
                 <div class="qr-progress-bar-fill" id="qr-progress-bar"></div>
             </div>
 
+            <!-- แสดงชื่อ-นามสกุล และสาขา ชัดเจนบนหน้าจอ -->
             <div id="personal-info" style="font-size: 13.5px; color: #222; margin: 4px 0 12px; line-height: 1.4; font-weight: bold;"></div>
             
             <button onclick="closeModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 24px; border-radius: 20px; font-weight: bold; font-family: 'Anakotmai', sans-serif; cursor: pointer; font-size: 13px; width: 100%;">
@@ -536,7 +538,7 @@
         let clockTimer = null;
         let wakeLock = null;
         let currentPin = "";
-        let pendingGuestData = null; // เก็บข้อมูลรอการตรวจสอบและกดยืนยัน
+        let pendingGuestData = null;
         
         let morningChecked = false;
         let eveningChecked = false;
@@ -608,6 +610,7 @@
             }, 100);
         });
 
+        /* ---------- ตรวจสอบสถานะและปิด QR Code หลังสแกนแล้ว ---------- */
         function checkDeviceLockInLine() {
             const boundEmpId = localStorage.getItem("clt_line_empid");
             const boundEmpName = localStorage.getItem("clt_line_name");
@@ -623,7 +626,6 @@
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(res => {
-                    // หากแอดมินกดสั่งปลดล็อกให้จากหน้า user.html
                     if (res.isReset === true) {
                         localStorage.removeItem("clt_line_empid");
                         localStorage.removeItem("clt_line_name");
@@ -636,21 +638,62 @@
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
                     eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
 
+                    const empDisplayName = res.name || boundEmpName || boundEmpId;
+
+                    // 1. กรณีลงทะเบียนครบทั้ง 2 รอบแล้ว (ปิดถาวร)
                     if (morningChecked && eveningChecked) {
-                        label.innerHTML = `🔒 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#e11d48; font-size:11.5px; font-weight:bold;">✨ เช็คอินครบทั้งรอบเช้าและรอบเย็นแล้ว</span>`;
-                        btn.innerText = "🔒 เช็คอินครบทุกรอบแล้ว";
+                        label.innerHTML = `
+                            <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                                <div style="color:#15803d; font-weight:bold; font-size:14px;">✨ ลงทะเบียนครบทั้ง 2 รอบแล้ว</div>
+                                <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
+                                <div style="color:#64748b; font-size:11.5px; margin-top:4px;">ขอให้มีความสุขและสนุกกับงานเลี้ยงนะคะ 🎉</div>
+                            </div>
+                        `;
+                        btn.innerText = "🔒 ลงทะเบียนครบทุกรอบแล้ว";
                         btn.classList.add("locked");
-                    } else if (session.active && session.round === "รอบเช้า" && morningChecked) {
-                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✅ เช็คอินรอบเช้าแล้ว (รอเปิดรอบเย็น 14:00 น.)</span>`;
-                        btn.innerText = "✅ เช็คอินรอบเช้าเรียบร้อยแล้ว";
+                    }
+                    // 2. กรณีสแกนรอบเช้าไปแล้ว
+                    else if (morningChecked) {
+                        // ถ้ายังไม่ถึงรอบเย็น ให้ปิด QR และบอกให้รอเปิด 14:00 น.
+                        if (session.round === "รอบเช้า" || !session.active) {
+                            label.innerHTML = `
+                                <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                                    <div style="color:#15803d; font-weight:bold; font-size:13.5px;">✅ ลงทะเบียนรอบเช้าเรียบร้อยแล้ว</div>
+                                    <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
+                                    <div style="color:#0284c7; font-size:11.5px; margin-top:4px; font-weight:bold;">⏳ รอเปิดแสดงบัตรอีกครั้งในรอบเย็น (14:00 น.)</div>
+                                </div>
+                            `;
+                            btn.innerText = "✅ ลงทะเบียนรอบเช้าเรียบร้อยแล้ว";
+                            btn.classList.add("locked");
+                        } 
+                        // ถ้าเข้าสู่รอบเย็นแล้ว และยังไม่สแกนรอบเย็น ให้เปิดให้แสดง QR รอบเย็นได้
+                        else if (session.round === "รอบเย็น" && !eveningChecked) {
+                            label.innerHTML = `
+                                <div style="background:#fefce8; border:1.5px solid #eab308; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                                    <div style="color:#854d0e; font-weight:bold; font-size:13.5px;">🌙 พร้อมลงทะเบียนรอบเย็น</div>
+                                    <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
+                                    <div style="color:#15803d; font-size:11.5px; margin-top:3px;">(รอบเช้า: สแกนผ่านแล้ว ✅)</div>
+                                </div>
+                            `;
+                            btn.innerText = "🎟️ แสดง QR Code (รอบเย็น)";
+                            btn.classList.remove("locked");
+                        }
+                    }
+                    // 3. กรณีสแกนรอบเย็นไปแล้ว
+                    else if (eveningChecked) {
+                        label.innerHTML = `
+                            <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; margin:-4px 0 4px;">
+                                <div style="color:#15803d; font-weight:bold; font-size:13.5px;">✅ ลงทะเบียนรอบเย็นเรียบร้อยแล้ว</div>
+                                <div style="color:#1e293b; font-size:13px; margin-top:2px;"><b>${empDisplayName}</b> (${boundEmpId})</div>
+                            </div>
+                        `;
+                        btn.innerText = "✅ ลงทะเบียนรอบเย็นเรียบร้อยแล้ว";
                         btn.classList.add("locked");
-                    } else if (session.active && session.round === "รอบเย็น" && eveningChecked) {
-                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#059669; font-size:11.5px; font-weight:bold;">✅ เช็คอินรอบเย็นเรียบร้อยแล้ว</span>`;
-                        btn.innerText = "✅ เช็คอินรอบเย็นเรียบร้อยแล้ว";
-                        btn.classList.add("locked");
-                    } else {
+                    }
+                    // 4. ยังไม่ได้สแกนในรอบปัจจุบัน
+                    else {
                         const roundTitle = session.active ? session.round : "บัตรเข้างาน";
-                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${boundEmpName})<br><span style="color:#0284c7; font-size:11.5px; font-weight:bold;">🎟️ พร้อมแสดงบัตรเข้างาน (${roundTitle})</span>`;
+                        label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${empDisplayName})<br><span style="color:#0284c7; font-size:11.5px; font-weight:bold;">🎟️ พร้อมแสดงบัตรเข้างาน (${roundTitle})</span>`;
                         btn.innerText = `🎟️ แสดง QR Code (${roundTitle})`;
                         btn.classList.remove("locked");
                     }
@@ -677,23 +720,56 @@
             }
 
             const boundEmpId = localStorage.getItem("clt_line_empid");
+            const boundEmpName = localStorage.getItem("clt_line_name");
 
-            if (morningChecked && eveningChecked) {
-                alert("❌ เครื่องนี้ได้ทำการเช็คอินครบทั้งรอบเช้าและรอบเย็นแล้วครับ");
-                return;
-            }
-
-            if ((session.round === "รอบเช้า" && morningChecked) || (session.round === "รอบเย็น" && eveningChecked)) {
-                alert(`✅ รหัสนี้ได้ทำการเช็คอิน ${session.round} เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำในรอบเดียวกันครับ`);
-                return;
-            }
-
+            // กรณีผูกรหัสกับเครื่องนี้แล้ว ให้ตรวจสอบสถานะสดทันที
             if (boundEmpId) {
-                const guest = cachedGuests.find(g => g.id.toLowerCase() === boundEmpId.toLowerCase());
-                if (guest) startDynamicQRDisplay(guest, session.round);
+                const btn = document.getElementById('btnOpenPinModal');
+                btn.innerText = "⏳ กำลังตรวจสอบสิทธิ์...";
+                btn.disabled = true;
+
+                fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        btn.disabled = false;
+                        morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
+                        eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+
+                        const empDisplayName = res.name || boundEmpName || boundEmpId;
+
+                        // ถ้าเช็คอินครบทุกรอบแล้ว ให้ล็อกและไม่แสดง QR
+                        if (morningChecked && eveningChecked) {
+                            alert(`✨ คุณ (${empDisplayName} - ${boundEmpId})\nได้ทำการลงทะเบียนครบทั้งรอบเช้าและรอบเย็นเรียบร้อยแล้วครับ!`);
+                            checkDeviceLockInLine();
+                            return;
+                        }
+
+                        // ถ้าเช็คอินในรอบปัจจุบันไปแล้ว ให้ล็อกและไม่แสดง QR
+                        if ((session.round === "รอบเช้า" && morningChecked) || (session.round === "รอบเย็น" && eveningChecked)) {
+                            alert(`✅ คุณ (${empDisplayName} - ${boundEmpId})\nได้ทำการลงทะเบียน "${session.round}" เรียบร้อยแล้วครับ!\n(ระบบปิดการแสดง QR Code ในรอบนี้เพื่อป้องกันการสแกนซ้ำ)`);
+                            checkDeviceLockInLine();
+                            return;
+                        }
+
+                        // ยังไม่ได้สแกนในรอบนี้ จึงจะเปิด QR Code
+                        btn.innerText = `🎟️ แสดง QR Code (${session.round})`;
+                        const guest = cachedGuests.find(g => g.id.toLowerCase() === boundEmpId.toLowerCase()) || {
+                            id: boundEmpId,
+                            name: boundEmpName,
+                            branch: res.branch || "-"
+                        };
+                        startDynamicQRDisplay(guest, session.round);
+                    })
+                    .catch(() => {
+                        btn.disabled = false;
+                        btn.innerText = `🎟️ แสดง QR Code (${session.round})`;
+                        const guest = cachedGuests.find(g => g.id.toLowerCase() === boundEmpId.toLowerCase());
+                        if (guest) startDynamicQRDisplay(guest, session.round);
+                    });
                 return;
             }
 
+            // ถ้ายังไม่เคยผูกรหัส ให้เปิดแป้นตัวเลข
             currentPin = "";
             updatePinDots();
             document.getElementById('pin-modal').style.display = 'flex';
@@ -762,12 +838,10 @@
                 activeRound: activeRound
             };
 
-            // แสดงข้อมูลในกล่องตรวจสอบตัวตน
             document.getElementById("conf-emp-id").innerText = guest.id;
             document.getElementById("conf-emp-name").innerText = guest.name;
             document.getElementById("conf-emp-branch").innerText = guest.branch;
 
-            // แสดงหน้าต่างยืนยันกลางจอ
             document.getElementById("confirm-identity-modal").style.display = "flex";
         }
 
@@ -787,18 +861,19 @@
                 .then(res => res.json())
                 .then(res => {
                     btn.disabled = false;
-                    btn.innerText = `🎟️ แสดง QR Code (${activeRound})`;
-
                     morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
                     eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
 
+                    // เช็คว่าเช็คอินไปแล้วหรือไม่ แจ้งเตือนพร้อมระบุชื่อและรหัสชัดเจน
                     if ((activeRound === "รอบเช้า" && morningChecked) || (activeRound === "รอบเย็น" && eveningChecked)) {
-                        alert(`❌ รหัสพนักงานนี้ (${guest.name}) ได้ทำการเช็คอิน "${activeRound}" เรียบร้อยแล้ว!\nไม่อนุญาตให้เปิด QR Code ซ้ำในรอบเดียวกัน`);
+                        alert(`✅ คุณ (${guest.name} - ${guest.id})\nได้ทำการลงทะเบียน "${activeRound}" เรียบร้อยแล้วครับ!\n(ระบบปิดการแสดง QR Code ในรอบนี้เพื่อป้องกันการสแกนซ้ำ)`);
+                        localStorage.setItem("clt_line_empid", guest.id);
+                        localStorage.setItem("clt_line_name", guest.name);
                         checkDeviceLockInLine();
                         return;
                     }
 
-                    // ผูกรหัสเข้ากับเครื่องหลังจากที่กดยืนยันแล้วเท่านั้น (แอดมินเป็นผู้ปลดล็อกเท่านั้น)
+                    // บันทึกผูกรหัสเข้ากับเครื่อง
                     localStorage.setItem("clt_line_empid", guest.id);
                     localStorage.setItem("clt_line_name", guest.name);
                     checkDeviceLockInLine();
@@ -819,7 +894,7 @@
             pendingGuestData = null;
             currentPin = "";
             updatePinDots();
-            openPinModal(); // เปิดแป้นตัวเลขให้กรอกใหม่ทันที
+            openPinModal();
         }
 
         async function requestWakeLock() {
@@ -832,10 +907,12 @@
             if (wakeLock !== null) wakeLock.release().then(() => { wakeLock = null; });
         }
 
-        /* ---------- Dynamic QR Code: รีเฟรชทุก 45 วิ + นาฬิกาวินาทีสด ---------- */
+        /* ---------- Dynamic QR Code: ความเร็วสูง (Supermarket Speed) ---------- */
         function startDynamicQRDisplay(guest, activeRound) {
             document.getElementById("qr-modal").style.display = "flex";
             document.getElementById("current-round-badge").innerText = `📍 ลงทะเบียน${activeRound}`;
+            
+            // บนหน้าจอยังคงแสดงผล ชื่อ-สกุล และสาขา ครบถ้วนชัดเจน
             document.getElementById("personal-info").innerHTML = `รหัส: ${guest.id}<br>${guest.name}<br><span style="color:#64748b; font-size:12px;">${guest.branch}</span>`;
             
             requestWakeLock();
@@ -872,14 +949,14 @@
             const qrContainer = document.getElementById("personal-qrcode");
             qrContainer.innerHTML = "";
 
-            const currentTs = Date.now();
-            const rawData = `${guest.id}|${guest.name}|${guest.branch}|${currentTs}`;
-            const encodedData = btoa(unescape(encodeURIComponent(rawData)));
+            // Payload กระชับระดับ Supermarket Speed (เม็ด QR ใหญ่ ยิงติดใน 0.1 วินาที)
+            const currentTsSec = Math.floor(Date.now() / 1000);
+            const highSpeedPayload = `CLT|${guest.id}|${currentTsSec}`;
 
             new QRCode(qrContainer, { 
-                text: `VIPPARTY_LIVE|${encodedData}`, 
+                text: highSpeedPayload, 
                 width: 210, height: 210, 
-                correctLevel : QRCode.CorrectLevel.H 
+                correctLevel : QRCode.CorrectLevel.M 
             });
 
             setTimeout(() => {
@@ -908,6 +985,7 @@
             }, 70);
         }
 
+        /* ---------- ดักจับเมื่อสแกนสำเร็จ -> ปิด QR Code และเปลี่ยนสถานะทันที ---------- */
         function startListeningForCheckIn(empId, currentCheckingRound) {
             if (pollingTimer) clearInterval(pollingTimer);
 
@@ -922,12 +1000,14 @@
                             (currentCheckingRound === "รอบเย็น" && isNowEvening)) {
                             
                             clearInterval(pollingTimer);
-                            closeModal();
+                            closeModal(); // ปิดหน้าต่าง QR Code ทันที!
 
                             if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
 
                             morningChecked = isNowMorning;
                             eveningChecked = isNowEvening;
+                            
+                            // อัปเดตการ์ดให้แสดงป้ายสถานะและล็อกปุ่มทันที
                             checkDeviceLockInLine();
 
                             document.getElementById('res-guest-name').innerText = res.name;
@@ -950,6 +1030,7 @@
 
         function closeSuccessModal() {
             document.getElementById("checkin-success-modal").style.display = "none";
+            checkDeviceLockInLine();
         }
     </script>
 </body>

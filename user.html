@@ -313,7 +313,7 @@
             width: 6px; height: 6px; background-color: #00e676; border-radius: 50%; display: inline-block;
             box-shadow: 0 0 6px #00e676; animation: pulseDot 1.8s infinite;
         }
-        @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+        @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
         @media (min-width: 600px) {
             .header h1 { font-size: 30px; }
@@ -434,15 +434,6 @@
             border-radius: 12px;
             border: 1px solid rgba(255,215,0,0.3);
             font-weight: bold;
-        }
-        .branch-stat-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13.5px;
-            color: #ccc;
-            gap: 8px;
-            flex-wrap: wrap;
         }
 
         .branch-btn-group {
@@ -749,7 +740,7 @@
                     <p style="color: #ddd; margin-top: 0;">เสียบเครื่องยิงคิวอาร์โค้ด แล้วยิงลงในช่องนี้<br><small style="color:#ff6b6b;">(ห้ามลืมเปลี่ยนคีย์บอร์ดคอมพิวเตอร์เป็น <b>ภาษาอังกฤษ</b>)</small></p>
                     
                     <div style="background: rgba(255, 215, 0, 0.15); border: 1px dashed #ffd700; padding: 8px; border-radius: 6px; font-size: 12px; color: #ffeb3b; margin: 10px 0;">
-                        💡 <b>คำแนะนำสำหรับเครื่องยิง:</b> หากสแกนหน้าจอมือถือไม่ติด ให้<b>ขยับมือถือเข้าหรือออกห่าง</b>จากเครื่องยิง (ระยะที่เหมาะสมประมาณ 15-20 ซม.)
+                        ⚡ <b>โหมดสแกนความเร็วสูง:</b> รองรับการยิงต่อเนื่องแบบ Supermarket Speed (ระยะโฟกัสที่แนะนำ: 15-20 ซม.)
                     </div>
 
                     <input type="text" id="hardwareInput" placeholder="[ สแกนคิวอาร์โค้ดที่นี่ ]" autocomplete="off">
@@ -1393,7 +1384,7 @@
                 const encodedData = encodeThaiToBase64(id, name, branch);
                 new QRCode(qrContainer, { 
                     text: `VIPPARTY|${encodedData}`, 
-                    width: 250, height: 250,
+                    width: 250, height: 250, 
                     correctLevel : QRCode.CorrectLevel.H 
                 });
 
@@ -1496,7 +1487,7 @@
                     new QRCode(qrDiv, { 
                         text: `VIPPARTY|${encodedData}`, 
                         width: 150, 
-                        height: 150,
+                        height: 150, 
                         correctLevel : QRCode.CorrectLevel.H 
                     });
 
@@ -1713,53 +1704,75 @@
             } else if (mode === 'hardware') {
                 document.getElementById('hardware-section').style.display = 'block';
                 document.getElementById('hardwareInput').focus();
-                resetResult("🟢 เครื่องยิงพร้อมทำงาน...");
+                resetResult("🟢 เครื่องยิงพร้อมทำงาน (Supermarket Speed)...");
             }
         }
 
-        /* ---------- ตรวจสอบ Dynamic QR หรือ Static บัตรกระดาษ (ตัดปัญหาแคปจอแล้วซ้ำ) ---------- */
+        /* ---------- ระบบถอดรหัสความเร็วสูง รองรับทั้งแบบย่อ CLT| และแบบเดิม ---------- */
         function processQRCode(decodedText) {
             if (isProcessing || !decodedText) return;
 
             decodedText = decodedText.replace(/\uFFFD/g, '').trim();
             const resultDiv = document.getElementById('result');
 
-            const isLiveMobile = decodedText.startsWith("VIPPARTY_LIVE|");
-            const isStaticTicket = decodedText.startsWith("VIPPARTY|");
+            let empId = "";
+            let empName = "";
+            let empBranch = "";
+            let timestamp = null;
+            let isLiveMobile = false;
 
-            if (!isLiveMobile && !isStaticTicket) {
+            // รูปแบบที่ 1: Dynamic QR ความเร็วสูงพิเศษ (CLT|รหัส|timestampวินาที)
+            if (decodedText.startsWith("CLT|")) {
+                const parts = decodedText.split("|");
+                empId = parts[1] ? parts[1].trim() : "";
+                const tsSec = parts[2] ? parseInt(parts[2], 10) : null;
+                timestamp = tsSec ? tsSec * 1000 : null; // แปลงเป็น ms
+                isLiveMobile = true;
+
+                // ดึงชื่อและสาขาจาก Local Memory ทันทีใน 0.001 วิ
+                const cachedGuest = allGuestsList.find(g => g.id.toLowerCase() === empId.toLowerCase());
+                if (cachedGuest) {
+                    empName = cachedGuest.name;
+                    empBranch = cachedGuest.branch;
+                } else {
+                    empName = empId;
+                    empBranch = "-";
+                }
+            }
+            // รูปแบบที่ 2: บัตรกระดาษ หรือ รูปแบบเดิม VIPPARTY_LIVE| / VIPPARTY|
+            else if (decodedText.startsWith("VIPPARTY_LIVE|") || decodedText.startsWith("VIPPARTY|")) {
+                isLiveMobile = decodedText.startsWith("VIPPARTY_LIVE|");
+                const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|")[1];
+                const decodedString = decodeBase64ToThai(base64Data);
+
+                if (!decodedString) {
+                    showError("❌ ไม่สามารถอ่านคิวอาร์โค้ดได้<br><small>กรุณาสร้างคิวอาร์โค้ดใหม่</small>");
+                    return;
+                }
+
+                const dataParts = decodedString.split("|");
+                empId = dataParts[0] ? dataParts[0].trim() : "-";
+                empName = dataParts[1] ? dataParts[1].trim() : "-";
+                empBranch = dataParts[2] ? dataParts[2].trim() : "-";
+                timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
+            } else {
                 showError("❌ ข้อมูลไม่ถูกต้อง<br><small>(ไม่ใช่ QR ของระบบนี้ หรือแป้นพิมพ์ไม่ได้เป็นภาษาอังกฤษ)</small>");
                 return;
             }
 
-            const base64Data = isLiveMobile ? decodedText.split("VIPPARTY_LIVE|")[1] : decodedText.split("VIPPARTY|");
-            const decodedString = decodeBase64ToThai(base64Data);
-
-            if (!decodedString) {
-                showError("❌ ไม่สามารถอ่านคิวอาร์โค้ดได้<br><small>กรุณาสร้างคิวอาร์โค้ดใหม่</small>");
-                return;
-            }
-
-            const dataParts = decodedString.split("|");
-            const empId = dataParts[0] ? dataParts[0].trim() : "-";
-            const empName = dataParts[1] ? dataParts[1].trim() : "-";
-            const empBranch = dataParts[2] ? dataParts[2].trim() : "-";
-            const timestamp = dataParts[3] ? parseInt(dataParts[3], 10) : null;
-
-            // ตรวจสอบเวลาถ้าเป็น Dynamic QR จากมือถือ
+            // ตรวจสอบเวลา Dynamic QR บนมือถือ (ป้องกันการแคปจอ)
             if (isLiveMobile) {
                 if (!timestamp) {
                     showError("❌ <b>ข้อมูล QR ไม่สมบูรณ์</b><br><small>กรุณาเปิดจากหน้าจอแอปตัวจริง</small>");
-                    return; // ตัดการทำงานทันที ไม่ส่งคำสั่งลงชีต
+                    return;
                 }
 
                 const now = Date.now();
                 const diffSeconds = (now - timestamp) / 1000;
                 
-                // ถ้ารหัสเกิน 60 วินาที หรือเวลาเครื่องเพี้ยน ให้แจ้งเตือนและหยุดทันที
                 if (diffSeconds > 60 || diffSeconds < -30) {
                     showError("❌ <b>QR Code หมดอายุแล้ว!</b><br><span style='font-size:14px; color:#ffd700;'>(ตรวจพบว่าเป็นภาพแคปหน้าจอ ไม่อนุญาตให้ลงทะเบียน)</span>");
-                    return; // หยุดทันที ห้ามรัน fetch ด้านล่าง
+                    return;
                 }
             }
 
@@ -1795,7 +1808,7 @@
                     showError("❌ การเชื่อมต่อล้มเหลว กรุณาสแกนใหม่");
                 })
                 .finally(() => {
-                    setTimeout(() => { isProcessing = false; restoreFocus(); }, 1800); 
+                    setTimeout(() => { isProcessing = false; restoreFocus(); }, 1200); 
                 });
         }
 
@@ -1807,7 +1820,7 @@
             html5QrCode.start(
                 { facingMode: "environment" }, 
                 { 
-                    fps: 35, 
+                    fps: 40, 
                     qrbox: { width: 220, height: 220 },
                     aspectRatio: 1.0
                 },
@@ -1835,40 +1848,57 @@
             resultDiv.style.backgroundColor = "#ff5252"; 
             resultDiv.style.color = "white";
             isProcessing = true;
-            setTimeout(() => { isProcessing = false; restoreFocus(); }, 2500); 
+            setTimeout(() => { isProcessing = false; restoreFocus(); }, 2200); 
         }
 
         let scannerTimer;
         const hwInput = document.getElementById('hardwareInput');
+        
+        // รับค่าปุ่ม Enter จากเครื่องยิงทันที
         hwInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                e.preventDefault(); clearTimeout(scannerTimer);
-                const text = this.value.trim(); this.value = ''; processQRCode(text);
+                e.preventDefault(); 
+                clearTimeout(scannerTimer);
+                const text = this.value.trim(); 
+                this.value = ''; 
+                processQRCode(text);
             }
         });
+        
+        // ปรับลด Debounce Delay เหลือ 80ms เพื่อสปีดสูงสุด
         hwInput.addEventListener('input', function (e) {
             clearTimeout(scannerTimer);
             scannerTimer = setTimeout(() => {
                 const text = this.value.trim();
-                if (text.length > 5) { this.value = ''; processQRCode(text); }
-            }, 300); 
+                if (text.length > 5) { 
+                    this.value = ''; 
+                    processQRCode(text); 
+                }
+            }, 80); 
         });
 
         function restoreFocus() {
-            if (document.getElementById('camera-section').style.display === 'block') { resetResult("🟢 ระบบกล้องพร้อมสแกน..."); } 
+            if (document.getElementById('camera-section').style.display === 'block') { 
+                resetResult("🟢 ระบบกล้องพร้อมสแกน..."); 
+            } 
             else if (document.getElementById('hardware-section').style.display === 'block') {
-                resetResult("🟢 เครื่องยิงพร้อมทำงาน..."); document.getElementById('hardwareInput').focus();
+                resetResult("🟢 เครื่องยิงพร้อมทำงาน (Supermarket Speed)..."); 
+                document.getElementById('hardwareInput').focus();
             }
         }
 
         function resetResult(msg = "🟢 ระบบพร้อมสแกน (คิวต่อไป)...") {
-            const resultDiv = document.getElementById('result'); resultDiv.innerText = msg;
-            resultDiv.style.backgroundColor = "#1a1528"; resultDiv.style.color = "#ffd700";
+            const resultDiv = document.getElementById('result'); 
+            resultDiv.innerText = msg;
+            resultDiv.style.backgroundColor = "#1a1528"; 
+            resultDiv.style.color = "#ffd700";
             resultDiv.style.border = "1px solid rgba(255,215,0,0.3)";
         }
 
         document.addEventListener('click', function() {
-            if (document.getElementById('hardware-section').style.display === 'block') { document.getElementById('hardwareInput').focus(); }
+            if (document.getElementById('hardware-section').style.display === 'block') { 
+                document.getElementById('hardwareInput').focus(); 
+            }
         });
     </script>
 </body>
