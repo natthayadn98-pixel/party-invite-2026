@@ -1362,17 +1362,35 @@
             document.getElementById("single-qr-output").style.display = "none";
         }
 
-        function processNewGuest(mode) {
-            const id = (document.getElementById("s_empId").value || "-").trim();
+            function processNewGuest(mode) {
+            const id = (document.getElementById("s_empId").value || "").trim();
             const name = document.getElementById("s_empName").value.trim();
             const branch = (document.getElementById("s_empBranch").value || "-").trim();
             const alertBox = document.getElementById("single-status-alert");
             
+            // 1. ตรวจสอบว่ากรอกข้อมูลจำเป็นครบไหม
+            if (!id || id === "-") {
+                alert("⚠️ กรุณากรอกรหัสพนักงานครับ");
+                document.getElementById("s_empId").focus();
+                return;
+            }
             if (!name) { 
-                alert("กรุณากรอกชื่อ-นามสกุลพนักงานครับ"); 
+                alert("⚠️ กรุณากรอกชื่อ-นามสกุลพนักงานครับ"); 
+                document.getElementById("s_empName").focus();
                 return; 
             }
 
+            // ⭐ 2. ตรวจสอบรหัสพนักงานซ้ำในระบบ (ตรวจจากแคชในเครื่องทันที 0.001 วิ)
+            const existingGuest = allGuestsList.find(g => g.id.toLowerCase() === id.toLowerCase());
+            if (existingGuest) {
+                alert(`❌ รหัสพนักงาน "${id}" มีอยู่ในระบบแล้ว!\n\n👤 ชื่อ: ${existingGuest.name}\n🏢 สาขา: ${existingGuest.branch}\n\n👉 กรุณาใช้แท็บ "🔍 ค้นหา (ไม่มี QR)" เพื่อเช็คอินแทนการเพิ่มใหม่ครับ`);
+                
+                alertBox.innerHTML = `⚠️ รหัสพนักงาน <b>"${id}"</b> มีในระบบแล้ว (${existingGuest.name})`;
+                alertBox.style.color = "#f59e0b";
+                return; // สั่งตัดจบ ไม่ให้บันทึกซ้ำ
+            }
+
+            // 3. ถ้าไม่ซ้ำ ให้เพิ่มเข้าระบบตามปกติ
             allGuestsList.push({ id: id, name: name, branch: branch, hasMorning: false, hasEvening: false, scanRound: "none" });
 
             fetch(`${scriptUrl}?action=addGuest&id=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}&branch=${encodeURIComponent(branch)}`);
@@ -1381,11 +1399,12 @@
                 const qrContainer = document.getElementById("single-qrcode");
                 qrContainer.innerHTML = ""; 
                 
-                const encodedData = encodeThaiToBase64(id, name, branch);
+                // ใช้ Payload ความเร็วสูง CLT| เพื่อความรวดเร็วในการสแกน
+                const currentTsSec = Math.floor(Date.now() / 1000);
                 new QRCode(qrContainer, { 
-                    text: `VIPPARTY|${encodedData}`, 
-                    width: 250, height: 250, 
-                    correctLevel : QRCode.CorrectLevel.H 
+                    text: `CLT|${id}|${currentTsSec}`, 
+                    width: 250, height: 250,
+                    correctLevel : QRCode.CorrectLevel.M 
                 });
 
                 setTimeout(() => {
@@ -1438,6 +1457,7 @@
                     });
             }
 
+            // ล้างช่องกรอกเพื่อความสะดวก
             document.getElementById("s_empId").value = "";
             document.getElementById("s_empName").value = "";
             document.getElementById("s_empBranch").value = "";
