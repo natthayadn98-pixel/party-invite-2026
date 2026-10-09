@@ -393,7 +393,10 @@
                         <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:10px; padding:10px; text-align:center;">
                             <div style="color:#c2410c; font-weight:bold; font-size:13.5px;">⏰ หมดเวลาลงทะเบียนรอบเช้า (09:30&nbsp;น.)</div>
                             <div style="color:#ea580c; font-size:12px; margin-top:4px; line-height:1.4;">
-                                👉 กรุณาติดต่อ <b>โต๊ะ Admin</b> เพื่อลงทะเบียนรอบเช้าครับ
+                                👉 กรุณานำหน้าจอนี้ติดต่อ <b>โต๊ะ Admin</b> เพื่อลงทะเบียนรอบเช้าครับ
+                            </div>
+                            <div style="color:#64748b; font-size:11px; margin-top:4px;">
+                                (ระบบจะเปิดให้ลงทะเบียนรอบเย็นในเวลา 14:00&nbsp;น.)
                             </div>
                         </div>`;
                     btn.innerText = "⏳ ติดต่อ Admin เพื่อลงทะเบียนรอบเช้า";
@@ -410,7 +413,7 @@
                 return;
             }
 
-            // 2. ถ้าผูกรหัสพนักงานแล้ว ตรวจสอบสถานะจริงจากเซิร์ฟเวอร์
+            // 2. มีรหัสพนักงานแล้ว -> ยิงตรวจเช็คสถานะสดจาก Sheet
             btn.innerText = "⏳ กำลังตรวจสอบสิทธิ์...";
             
             fetch(`${scriptUrl}?action=checkGuestStatus&id=${encodeURIComponent(boundEmpId)}&t=${Date.now()}`)
@@ -424,15 +427,15 @@
                         return;
                     }
 
-                    morningChecked = res.morningChecked || (res.checkedIn && res.round === "รอบเช้า");
-                    eveningChecked = res.eveningChecked || (res.checkedIn && res.round === "รอบเย็น");
+                    morningChecked = (res.morningChecked === true);
+                    eveningChecked = (res.eveningChecked === true);
 
                     const empDisplayName = res.name || boundEmpName || boundEmpId;
                     const mTime = res.morningTime || "";
                     const eTime = res.eveningTime || "";
                     const isLate = res.morningLate === true;
 
-                    // กรณีที่ 1: เช็คอินครบทั้ง 2 รอบแล้ว -> ล็อกถาวร
+                    // CASE 1: ลงทะเบียนครบ 2 รอบแล้ว
                     if (morningChecked && eveningChecked) {
                         label.innerHTML = `
                             <div style="background:#f0fdf4; border:1.5px solid #22c55e; border-radius:10px; padding:10px; text-align:center;">
@@ -446,13 +449,13 @@
                         btn.innerText = "🔒 ลงทะเบียนครบทุกรอบแล้ว";
                         btn.classList.add("locked");
                     }
-                    // กรณีที่ 2: เช็คอินรอบเช้าเรียบร้อยแล้ว
+                    // CASE 2: ลงรอบเช้าเรียบร้อยแล้ว
                     else if (morningChecked && !eveningChecked) {
                         let morningTag = isLate 
                             ? `<div style="color:#ea580c; font-weight:bold; font-size:13px;">⚠️ ลงทะเบียนรอบเช้า (สาย/Admin)</div>`
                             : `<div style="color:#15803d; font-weight:bold; font-size:13.5px;">✅ ลงทะเบียนรอบเช้าเรียบร้อยแล้ว</div>`;
 
-                        // หากยังอยู่ในช่วงรอบเช้า หรือยังไม่ถึง 14:00 น. -> ล็อกปุ่ม
+                        // หากเวลานี้ยังเป็นรอบเช้า หรือเป็นช่วงพักระหว่างวัน (ก่อน 14:00 น.) -> ล็อกปุ่ม
                         if (session.round === "รอบเช้า" || !session.active) {
                             label.innerHTML = `
                                 <div style="background:#f8fafc; border:1.5px solid ${isLate ? '#f97316' : '#22c55e'}; border-radius:10px; padding:10px; text-align:center;">
@@ -462,9 +465,9 @@
                                     <div style="color:#0284c7; font-size:11px; margin-top:5px; font-weight:bold;">⏳ รอเปิดแสดงบัตรอีกครั้งรอบเย็น (14:00&nbsp;น.)</div>
                                 </div>`;
                             btn.innerText = "🔒 เช็คอินรอบเช้าเรียบร้อยแล้ว";
-                            btn.classList.add("locked");
+                            btn.classList.add("locked"); // ล็อกปุ่มเป็นสีเทา กดไม่ได้
                         } 
-                        // ถึงเวลา 14:00 น. แล้ว -> ปลดล็อกปุ่มให้กดเปิด QR รอบเย็นได้
+                        // ถึงเวลา 14:00 น. แล้ว -> ปลดล็อกให้แสดง QR รอบเย็น
                         else if (session.round === "รอบเย็น") {
                             label.innerHTML = `
                                 <div style="background:#fefce8; border:1.5px solid #eab308; border-radius:10px; padding:10px; text-align:center;">
@@ -476,7 +479,7 @@
                             btn.classList.remove("locked");
                         }
                     }
-                    // กรณีที่ 3: รอบเช้าไม่ได้เช็ค และเลย 09:30 น. แล้ว -> ล็อกให้ติดต่อ Admin
+                    // CASE 3: ยังไม่ได้ลงรอบเช้า และเลยเวลา 09:30 น. แล้ว
                     else if (!morningChecked && session.isPastMorning) {
                         label.innerHTML = `
                             <div style="background:#fff7ed; border:1.5px solid #f97316; border-radius:10px; padding:10px; text-align:center;">
@@ -489,7 +492,7 @@
                         btn.innerText = "⏳ ติดต่อ Admin เพื่อลงทะเบียนรอบเช้า";
                         btn.classList.add("locked");
                     }
-                    // กรณีที่ 4: ยังไม่เคยเช็คอินรอบที่กำลังเปิดอยู่ -> ปลดล็อกให้กดแสดง QR Code
+                    // CASE 4: ยังไม่เคยลงทะเบียน และอยู่ในรอบเวลาปกติ
                     else {
                         const roundTitle = session.active ? session.round : "บัตรเข้างาน";
                         label.innerHTML = `👤 <b>ผูกกับ:</b> ${boundEmpId} (${empDisplayName})<br><span style="color:#0284c7; font-size:11.5px; font-weight:bold;">🎟️ พร้อมแสดงบัตรเข้างาน (${roundTitle})</span>`;
@@ -497,12 +500,13 @@
                         btn.classList.remove("locked");
                     }
                 })
-                .catch(() => {
+                .catch(err => {
+                    console.error("Fetch error:", err);
                     btn.innerText = "🔢 กรอกรหัสพนักงาน (PIN 6 หลัก)";
                     btn.classList.remove("locked");
                 });
         }
-        
+
         function toggleEnvelope() {
             document.getElementById('envelopeWrapper').classList.toggle('open');
         }
